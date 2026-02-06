@@ -1,9 +1,0 @@
-export { Header } from "./header";
-export { Hero } from "./hero";
-export { HowItWorks } from "./how-it-works";
-export { LegalAreasSection } from "./legal-areas";
-export { Benefits } from "./benefits";
-export { Pricing } from "./pricing";
-export { FAQ } from "./faq";
-export { CTA } from "./cta";
-export { Footer } from "./footer";
