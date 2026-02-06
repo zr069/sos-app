@@ -1,0 +1,300 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id               String      @id @default(cuid())
+  email            String      @unique
+  emailVerified    DateTime?
+  name             String?
+  phone            String?
+  image            String?
+  role             UserRole    @default(USER)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  accounts         Account[]
+  adminNotes       AdminNote[]
+  assignedCases    Case[]      @relation("LawyerCases")
+  cases            Case[]      @relation("UserCases")
+  documents        Document[]
+  invoices         Invoice[]
+  receivedMessages Message[]   @relation("ReceivedMessages")
+  sentMessages     Message[]   @relation("SentMessages")
+  sessions         Session[]
+}
+
+model Case {
+  id                String       @id @default(cuid())
+  caseNumber        String       @unique @default(cuid())
+  userId            String?
+  legalArea         LegalArea
+  subCategory       String
+  status            CaseStatus   @default(EINGEREICHT)
+  priority          CasePriority @default(NORMAL)
+  assignedLawyerId  String?
+  initialAssessment String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  adminNotes        AdminNote[]
+  assignedLawyer    User?        @relation("LawyerCases", fields: [assignedLawyerId], references: [id])
+  user              User?        @relation("UserCases", fields: [userId], references: [id])
+  details           CaseDetail[]
+  contactInfo       ContactInfo?
+  deadlines         Deadline[]
+  documents         Document[]
+  invoices          Invoice[]
+  messages          Message[]
+
+  @@index([userId])
+  @@index([assignedLawyerId])
+  @@index([status])
+  @@index([legalArea])
+  @@index([createdAt])
+}
+
+model CaseDetail {
+  id          String   @id @default(cuid())
+  caseId      String
+  questionKey String
+  answer      String
+  createdAt   DateTime @default(now())
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([questionKey])
+}
+
+model ContactInfo {
+  id        String   @id @default(cuid())
+  caseId    String   @unique
+  email     String
+  name      String
+  phone     String?
+  address   String?
+  city      String?
+  zipCode   String?
+  createdAt DateTime @default(now())
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  caseId     String
+  userId     String?
+  fileName   String
+  fileUrl    String
+  fileType   String
+  fileSize   Int
+  category   String?
+  uploadedAt DateTime @default(now())
+  case       Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@index([caseId])
+  @@index([userId])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  caseId     String
+  senderId   String
+  receiverId String?
+  content    String
+  isRead     Boolean  @default(false)
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  case       Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  receiver   User?    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([caseId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
+
+model Invoice {
+  id               String        @id @default(cuid())
+  invoiceNumber    String        @unique @default(cuid())
+  caseId           String
+  userId           String
+  amount           Int
+  currency         String        @default("EUR")
+  status           InvoiceStatus @default(AUSSTEHEND)
+  pricingTier      PricingTier
+  description      String?
+  stripePaymentId  String?
+  stripeInvoiceUrl String?
+  paidAt           DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  case             Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user             User          @relation(fields: [userId], references: [id])
+
+  @@index([caseId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Deadline {
+  id           String    @id @default(cuid())
+  caseId       String
+  description  String
+  dueDate      DateTime
+  isCompleted  Boolean   @default(false)
+  remindAt     DateTime?
+  reminderSent Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  case         Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([dueDate])
+  @@index([isCompleted])
+}
+
+model AdminNote {
+  id        String   @id @default(cuid())
+  caseId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  author    User     @relation(fields: [authorId], references: [id])
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([authorId])
+}
+
+model LegalAreaConfig {
+  id            String        @id @default(cuid())
+  area          LegalArea     @unique
+  name          String
+  description   String
+  icon          String
+  isActive      Boolean       @default(true)
+  sortOrder     Int           @default(0)
+  subCategories SubCategory[]
+}
+
+model SubCategory {
+  id          String           @id @default(cuid())
+  legalAreaId String
+  key         String
+  name        String
+  description String?
+  isActive    Boolean          @default(true)
+  sortOrder   Int              @default(0)
+  legalArea   LegalAreaConfig  @relation(fields: [legalAreaId], references: [id], onDelete: Cascade)
+  questions   WizardQuestion[]
+
+  @@unique([legalAreaId, key])
+  @@index([legalAreaId])
+}
+
+model WizardQuestion {
+  id            String      @id @default(cuid())
+  subCategoryId String
+  questionKey   String
+  questionText  String
+  helpText      String?
+  inputType     String
+  options       Json?
+  isRequired    Boolean     @default(true)
+  validation    Json?
+  sortOrder     Int         @default(0)
+  condition     Json?
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+
+  @@index([subCategoryId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  LAWYER
+}
+
+enum LegalArea {
+  ARBEITSRECHT
+  MIETRECHT
+  DATENSCHUTZ
+  VERKEHRSRECHT
+  DIGITALES
+  VERBRAUCHERRECHT
+  BEHOERDEN
+  FINANZEN
+  ERBRECHT
+  ALLTAG
+}
+
+enum CaseStatus {
+  EINGEREICHT
+  IN_PRUEFUNG
+  ERSTEINSCHAETZUNG
+  IN_BEARBEITUNG
+  WARTEN_AUF_ZAHLUNG
+  ANWALT_BEAUFTRAGT
+  ABGESCHLOSSEN
+  ABGEBROCHEN
+}
+
+enum CasePriority {
+  NIEDRIG
+  NORMAL
+  HOCH
+  DRINGEND
+}
+
+enum InvoiceStatus {
+  AUSSTEHEND
+  BEZAHLT
+  STORNIERT
+  ERSTATTET
+}
+
+enum PricingTier {
+  BASIS
+  DURCHSETZEN
+  KOMPLETT
+}

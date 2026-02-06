@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+/* Custom Theme Variables */
+:root {
+  /* Primary Colors - Warme Erdtöne */
+  --color-ink: #0a0f1a;
+  --color-paper: #f4f1eb;
+  --color-accent: #c8432b;
+  --color-accent-hover: #a83823;
+  --color-gold: #d4a843;
+  --color-sage: #3a6b5c;
+
+  /* Semantic Colors */
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-muted: #6b7280;
+  --color-muted-foreground: #9ca3af;
+  --color-border: #e5e1d8;
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-ink);
+
+  /* Status Colors */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-paper: var(--color-paper);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-gold: var(--color-gold);
+  --color-sage: var(--color-sage);
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-border: var(--color-border);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  --font-serif: "DM Serif Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+/* Base Styles */
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* Focus Styles */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink);
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+
+/* Intersection Observer Animation Classes */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card Hover Effects */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(10, 15, 26, 0.12);
+}
+
+/* Button Base Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--color-ink);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #1a1f2e;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--color-ink);
+  color: var(--color-ink);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-ink);
+  color: white;
+}
+
+/* Form Styles */
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(200, 67, 43, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--color-muted);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.form-error {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-error);
+}
+
+/* Progress Bar */
+.progress-bar {
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.badge-success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-neutral {
+  background-color: #f3f4f6;
+  color: #374151;
+}
