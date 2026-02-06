@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const plans = [
@@ -82,14 +82,14 @@ export function Pricing() {
   }, []);
 
   return (
-    <section id="preise" ref={sectionRef} className="bg-white py-20 md:py-28">
+    <section id="preise" ref={sectionRef} className="section bg-[var(--color-surface)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="reveal text-center">
-          <h2 className="font-serif text-3xl text-[var(--color-ink)] md:text-4xl lg:text-5xl">
+          <h2 className="font-serif text-3xl text-[var(--color-text-primary)] md:text-4xl lg:text-5xl">
             Transparente Preise
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-muted)]">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-text-secondary)]">
             Wählen Sie das passende Paket für Ihren Fall. Keine versteckten
             Kosten, keine Überraschungen.
           </p>
@@ -100,47 +100,51 @@ export function Pricing() {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative flex flex-col rounded-2xl border p-8 transition-all duration-300 ${
+              className={`relative flex flex-col rounded-2xl p-8 transition-all duration-200 ${
                 plan.popular
-                  ? "border-[var(--color-accent)] bg-white shadow-xl"
-                  : "border-[var(--color-border)] bg-[var(--color-paper)] hover:border-[var(--color-accent)]/50 hover:shadow-lg"
+                  ? "bg-white shadow-[var(--shadow-xl)] ring-2 ring-[var(--color-primary)] scale-[1.02]"
+                  : "bg-white shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)]"
               }`}
             >
               {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--color-accent)] px-4 py-1.5 text-sm font-semibold text-white">
-                  <Sparkles className="h-4 w-4" />
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--color-primary)] px-4 py-1 text-xs font-semibold text-white">
                   Beliebteste Wahl
                 </div>
               )}
 
               {/* Plan Header */}
               <div className="text-center">
-                <h3 className="font-serif text-2xl text-[var(--color-ink)]">
+                <h3 className="font-serif text-2xl text-[var(--color-text-primary)]">
                   {plan.name}
                 </h3>
                 <div className="mt-4 flex items-baseline justify-center gap-1">
-                  <span className="font-serif text-5xl text-[var(--color-ink)]">
+                  <span className="font-serif text-5xl text-[var(--color-text-primary)]">
                     {plan.price}
                   </span>
-                  <span className="text-lg text-[var(--color-muted)]">
+                  <span className="text-lg text-[var(--color-text-muted)]">
                     {plan.price !== "nach RVG" && "€"}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-[var(--color-muted)]">
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
                   {plan.priceNote}
                 </p>
-                <p className="mt-4 text-[var(--color-muted)]">
+                <p className="mt-4 text-[var(--color-text-secondary)]">
                   {plan.description}
                 </p>
               </div>
 
+              {/* Divider */}
+              <div className="my-6 h-px bg-[var(--color-border-subtle)]" />
+
               {/* Features */}
-              <ul className="mt-8 flex-1 space-y-4">
+              <ul className="flex-1 space-y-4">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start gap-3">
-                    <Check className="h-5 w-5 shrink-0 text-[var(--color-sage)]" />
-                    <span className="text-sm text-[var(--color-ink)]">
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-light)]">
+                      <Check className="h-3 w-3 text-[var(--color-primary)]" />
+                    </div>
+                    <span className="text-sm text-[var(--color-text-primary)]">
                       {feature}
                     </span>
                   </li>
@@ -164,7 +168,7 @@ export function Pricing() {
         </div>
 
         {/* Note */}
-        <p className="reveal mt-12 text-center text-sm text-[var(--color-muted)]">
+        <p className="reveal mt-12 text-center text-sm text-[var(--color-text-muted)]">
           Die genauen Kosten hängen von Ihrem Rechtsgebiet und der Komplexität
           des Falls ab. Sie erhalten nach der Erstprüfung ein individuelles
           Angebot.

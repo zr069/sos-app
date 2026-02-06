@@ -23,25 +23,23 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--color-border)] bg-[var(--color-paper)]">
+    <footer className="bg-[var(--color-dark)]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link
               href="/"
-              className="flex items-center gap-2 text-[var(--color-ink)]"
+              className="flex items-center gap-2.5 text-[var(--color-dark-text)]"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-accent)]">
-                <span className="font-serif text-lg font-bold text-white">
-                  A
-                </span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-primary)]">
+                <span className="font-serif text-lg text-white">A</span>
               </div>
-              <span className="font-serif text-xl font-normal">
-                Anspruch<span className="text-[var(--color-accent)]">123</span>
+              <span className="font-serif text-xl">
+                Anspruch<span className="text-[var(--color-primary-light)]">123</span>
               </span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-[var(--color-muted)]">
+            <p className="mt-4 max-w-xs text-sm text-[var(--color-dark-muted)] leading-relaxed">
               Ihr Recht. Online durchgesetzt. Die moderne Art, Rechtsprobleme zu
               lösen.
             </p>
@@ -49,7 +47,7 @@ export function Footer() {
 
           {/* Rechtsgebiete */}
           <div>
-            <h3 className="font-serif text-sm font-medium text-[var(--color-ink)]">
+            <h3 className="text-sm font-semibold text-[var(--color-dark-text)] uppercase tracking-wider">
               Rechtsgebiete
             </h3>
             <ul className="mt-4 space-y-3">
@@ -57,7 +55,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-ink)]"
+                    className="text-sm text-[var(--color-dark-muted)] transition-colors duration-200 hover:text-[var(--color-dark-text)]"
                   >
                     {link.name}
                   </Link>
@@ -66,7 +64,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/fall-pruefen"
-                  className="text-sm font-medium text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
+                  className="text-sm font-medium text-[var(--color-primary-light)] transition-colors duration-200 hover:text-white"
                 >
                   Alle anzeigen
                 </Link>
@@ -76,7 +74,7 @@ export function Footer() {
 
           {/* Unternehmen */}
           <div>
-            <h3 className="font-serif text-sm font-medium text-[var(--color-ink)]">
+            <h3 className="text-sm font-semibold text-[var(--color-dark-text)] uppercase tracking-wider">
               Unternehmen
             </h3>
             <ul className="mt-4 space-y-3">
@@ -84,7 +82,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-ink)]"
+                    className="text-sm text-[var(--color-dark-muted)] transition-colors duration-200 hover:text-[var(--color-dark-text)]"
                   >
                     {link.name}
                   </Link>
@@ -95,7 +93,7 @@ export function Footer() {
 
           {/* Rechtliches */}
           <div>
-            <h3 className="font-serif text-sm font-medium text-[var(--color-ink)]">
+            <h3 className="text-sm font-semibold text-[var(--color-dark-text)] uppercase tracking-wider">
               Rechtliches
             </h3>
             <ul className="mt-4 space-y-3">
@@ -103,7 +101,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-ink)]"
+                    className="text-sm text-[var(--color-dark-muted)] transition-colors duration-200 hover:text-[var(--color-dark-text)]"
                   >
                     {link.name}
                   </Link>
@@ -113,13 +111,16 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="mt-12 h-px bg-white/10" />
+
         {/* Bottom */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[var(--color-border)] pt-8 md:flex-row">
-          <p className="text-sm text-[var(--color-muted)]">
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
+          <p className="text-sm text-[var(--color-dark-muted)]">
             &copy; {new Date().getFullYear()} Anspruch123. Alle Rechte
             vorbehalten.
           </p>
-          <p className="text-xs text-[var(--color-muted)]">
+          <p className="text-xs text-[var(--color-dark-muted)]">
             Anspruch123 ist eine Online-Kanzlei. Ihre Fälle werden durch unsere
             Anwälte oder spezialisierte Partneranwälte bearbeitet.
           </p>

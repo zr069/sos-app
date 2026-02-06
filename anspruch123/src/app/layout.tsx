@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { Instrument_Serif, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const dmSerifDisplay = DM_Serif_Display({
+const instrumentSerif = Instrument_Serif({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -95,9 +96,9 @@ export default function RootLayout({
   return (
     <html
       lang="de"
-      className={`${dmSerifDisplay.variable} ${plusJakartaSans.variable}`}
+      className={`${instrumentSerif.variable} ${dmSans.variable}`}
     >
-      <body className="min-h-screen bg-[var(--color-paper)] font-sans antialiased">
+      <body className="min-h-screen bg-[var(--color-background)] font-sans antialiased">
         {children}
       </body>
     </html>

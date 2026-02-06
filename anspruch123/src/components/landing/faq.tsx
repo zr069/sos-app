@@ -59,31 +59,33 @@ function FaqItem({
   onClick: () => void;
 }) {
   return (
-    <div className="border-b border-[var(--color-border)]">
+    <div className="border-b border-[var(--color-border-subtle)]">
       <button
         type="button"
-        className="flex w-full items-center justify-between py-6 text-left"
+        className="flex w-full items-center justify-between py-5 text-left transition-colors hover:text-[var(--color-primary)]"
         onClick={onClick}
         aria-expanded={isOpen}
       >
-        <span className="font-serif text-lg text-[var(--color-ink)]">
+        <span className="font-medium text-[var(--color-text-primary)] pr-4">
           {question}
         </span>
         <ChevronDown
           className={cn(
-            "h-5 w-5 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
-            isOpen && "rotate-180"
+            "h-5 w-5 shrink-0 text-[var(--color-text-muted)] transition-transform duration-300",
+            isOpen && "rotate-180 text-[var(--color-primary)]"
           )}
         />
       </button>
       <div
         className={cn(
-          "grid transition-all duration-200",
-          isOpen ? "grid-rows-[1fr] pb-6" : "grid-rows-[0fr]"
+          "accordion-content",
+          isOpen && "open"
         )}
       >
-        <div className="overflow-hidden">
-          <p className="text-[var(--color-muted)]">{answer}</p>
+        <div className="accordion-inner">
+          <p className="pb-5 text-[var(--color-text-secondary)] leading-relaxed">
+            {answer}
+          </p>
         </div>
       </div>
     </div>
@@ -113,20 +115,20 @@ export function FAQ() {
   }, []);
 
   return (
-    <section id="faq" ref={sectionRef} className="py-20 md:py-28">
+    <section id="faq" ref={sectionRef} className="section">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="reveal text-center">
-          <h2 className="font-serif text-3xl text-[var(--color-ink)] md:text-4xl lg:text-5xl">
+          <h2 className="font-serif text-3xl text-[var(--color-text-primary)] md:text-4xl lg:text-5xl">
             Häufige Fragen
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-muted)]">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-text-secondary)]">
             Finden Sie Antworten auf die häufigsten Fragen zu Anspruch123.
           </p>
         </div>
 
         {/* FAQ Items */}
-        <div className="reveal mt-12">
+        <div className="reveal mt-12 rounded-2xl bg-white p-6 shadow-[var(--shadow-md)] md:p-8">
           {faqs.map((faq, index) => (
             <FaqItem
               key={index}
@@ -139,14 +141,16 @@ export function FAQ() {
         </div>
 
         {/* Contact CTA */}
-        <div className="reveal mt-12 rounded-2xl bg-[var(--color-ink)] p-8 text-center text-white">
-          <h3 className="font-serif text-2xl">Noch Fragen?</h3>
-          <p className="mt-2 text-white/80">
+        <div className="reveal mt-12 rounded-2xl bg-[var(--color-dark)] p-8 text-center">
+          <h3 className="font-serif text-2xl text-[var(--color-dark-text)]">
+            Noch Fragen?
+          </h3>
+          <p className="mt-2 text-[var(--color-dark-muted)]">
             Unser Team hilft Ihnen gerne weiter.
           </p>
           <a
             href="mailto:kontakt@anspruch123.de"
-            className="mt-4 inline-flex items-center text-[var(--color-gold)] hover:underline"
+            className="mt-4 inline-flex items-center text-[var(--color-primary-light)] transition-colors hover:text-white hover:underline"
           >
             kontakt@anspruch123.de
           </a>

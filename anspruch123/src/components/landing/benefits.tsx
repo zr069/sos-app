@@ -71,37 +71,35 @@ export function Benefits() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-20 md:py-28">
+    <section ref={sectionRef} className="section bg-[var(--color-surface)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="reveal text-center">
-          <h2 className="font-serif text-3xl text-[var(--color-ink)] md:text-4xl lg:text-5xl">
+          <h2 className="font-serif text-3xl text-[var(--color-text-primary)] md:text-4xl lg:text-5xl">
             Warum Anspruch123?
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-muted)]">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-text-secondary)]">
             Rechtsdurchsetzung muss nicht kompliziert sein. Wir machen es Ihnen
             so einfach wie möglich.
           </p>
         </div>
 
         {/* Benefits Grid */}
-        <div className="reveal mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="reveal mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className="group flex gap-4 rounded-xl p-6 transition-colors hover:bg-white hover:shadow-sm"
+              className="group card card-stripe p-6 pl-8"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--color-gold)]/10 text-[var(--color-gold)] transition-colors group-hover:bg-[var(--color-gold)] group-hover:text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-primary-light)] text-[var(--color-primary)] transition-all duration-200 group-hover:bg-[var(--color-primary)] group-hover:text-white">
                 <benefit.icon className="h-6 w-6" />
               </div>
-              <div>
-                <h3 className="font-serif text-lg text-[var(--color-ink)]">
-                  {benefit.title}
-                </h3>
-                <p className="mt-2 text-sm text-[var(--color-muted)]">
-                  {benefit.description}
-                </p>
-              </div>
+              <h3 className="mt-5 font-serif text-xl text-[var(--color-text-primary)]">
+                {benefit.title}
+              </h3>
+              <p className="mt-2 text-[var(--color-text-secondary)] leading-relaxed">
+                {benefit.description}
+              </p>
             </div>
           ))}
         </div>

@@ -31,7 +31,7 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? "bg-white/95 backdrop-blur-md shadow-sm"
+          ? "glass border-b border-[var(--color-border-subtle)] shadow-[var(--shadow-sm)]"
           : "bg-transparent"
       )}
     >
@@ -40,13 +40,13 @@ export function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-[var(--color-ink)]"
+            className="flex items-center gap-2.5 text-[var(--color-text-primary)] transition-opacity hover:opacity-80"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-accent)]">
-              <span className="font-serif text-lg font-bold text-white">A</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-primary)]">
+              <span className="font-serif text-lg font-normal text-white">A</span>
             </div>
-            <span className="font-serif text-xl font-normal">
-              Anspruch<span className="text-[var(--color-accent)]">123</span>
+            <span className="font-serif text-xl">
+              Anspruch<span className="text-[var(--color-primary)]">123</span>
             </span>
           </Link>
 
@@ -56,7 +56,7 @@ export function Header() {
               <a
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)]"
+                className="text-sm font-medium text-[var(--color-text-secondary)] transition-colors duration-200 hover:text-[var(--color-primary)]"
               >
                 {item.name}
               </a>
@@ -64,7 +64,7 @@ export function Header() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden items-center gap-4 md:flex">
+          <div className="hidden items-center gap-3 md:flex">
             <Link href="/login">
               <Button variant="ghost" size="sm">
                 Anmelden
@@ -78,7 +78,7 @@ export function Header() {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg p-2 text-[var(--color-ink)] md:hidden"
+            className="inline-flex items-center justify-center rounded-lg p-2 text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface)] md:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Menü öffnen"
           >
@@ -91,20 +91,27 @@ export function Header() {
         </div>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="absolute left-0 right-0 top-full bg-white shadow-lg md:hidden">
+        <div
+          className={cn(
+            "absolute left-0 right-0 top-full overflow-hidden transition-all duration-300 md:hidden",
+            isMobileMenuOpen
+              ? "max-h-[400px] opacity-100"
+              : "max-h-0 opacity-0"
+          )}
+        >
+          <div className="glass border-t border-[var(--color-border-subtle)] shadow-[var(--shadow-lg)]">
             <div className="space-y-1 px-4 py-4">
               {navigation.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
-                  className="block rounded-lg px-4 py-3 text-base font-medium text-[var(--color-ink)] hover:bg-[var(--color-paper)]"
+                  className="block rounded-lg px-4 py-3 text-base font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface)]"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
                 </a>
               ))}
-              <div className="mt-4 flex flex-col gap-2 px-4">
+              <div className="mt-4 flex flex-col gap-2 px-4 pt-4 border-t border-[var(--color-border-subtle)]">
                 <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
                     Anmelden
@@ -119,7 +126,7 @@ export function Header() {
               </div>
             </div>
           </div>
-        )}
+        </div>
       </nav>
     </header>
   );

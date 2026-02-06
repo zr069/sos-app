@@ -27,33 +27,33 @@ export function CTA() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-white py-20 md:py-28">
+    <section ref={sectionRef} className="section">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="reveal relative overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--color-ink)] to-[#1a2235] px-8 py-16 text-center text-white md:px-16 md:py-20">
-          {/* Background decoration */}
+        <div className="reveal relative overflow-hidden rounded-3xl bg-[var(--color-dark)] px-8 py-16 text-center md:px-16 md:py-20">
+          {/* Subtle gradient overlay */}
           <div className="absolute inset-0 -z-10">
-            <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full bg-[var(--color-accent)]/20 blur-3xl" />
-            <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-[var(--color-gold)]/20 blur-3xl" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--color-primary)]/10 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[var(--color-accent)]/10 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3" />
           </div>
 
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl">
+          <h2 className="font-serif text-3xl text-[var(--color-dark-text)] md:text-4xl lg:text-5xl">
             Bereit, Ihr Recht durchzusetzen?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
+          <p className="mx-auto mt-4 max-w-xl text-lg text-[var(--color-dark-muted)]">
             Starten Sie jetzt mit der kostenlosen Erstprüfung und erfahren Sie,
             welche Chancen Sie haben.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/fall-pruefen">
-              <Button size="xl" variant="gold" className="group">
+              <Button size="xl" className="group bg-white text-[var(--color-dark)] hover:bg-[var(--color-primary-light)] hover:text-[var(--color-primary)]">
                 Jetzt Fall prüfen
-                <ArrowRight className="transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
           </div>
 
-          <p className="mt-6 text-sm text-white/60">
+          <p className="mt-6 text-sm text-[var(--color-dark-muted)]">
             Kostenlos und unverbindlich. Keine Registrierung erforderlich.
           </p>
         </div>
