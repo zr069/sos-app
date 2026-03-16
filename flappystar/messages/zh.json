@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "title": "FlappyStar - 玩Flappy Bird赢取€10,000",
+    "description": "只需€0.50即可参加锦标赛。玩Flappy Bird，获得高分，赢取€10,000。免费模式可用。"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "retry": "重试",
+    "close": "关闭",
+    "submit": "提交",
+    "cancel": "取消",
+    "back": "返回",
+    "next": "下一步",
+    "save": "保存",
+    "share": "分享",
+    "or": "或"
+  },
+  "nav": {
+    "home": "首页",
+    "play": "开始游戏",
+    "leaderboard": "排行榜",
+    "admin": "管理"
+  },
+  "landing": {
+    "hero": {
+      "title": "游戏。胜利。",
+      "prize": "€10,000",
+      "subtitle": "参加终极Flappy Bird锦标赛。简单游戏。巨额奖金。",
+      "ctaEnter": "参加锦标赛 — €0.50",
+      "ctaFree": "免费试玩"
+    },
+    "countdown": {
+      "title": "锦标赛倒计时",
+      "days": "天",
+      "hours": "小时",
+      "minutes": "分钟",
+      "seconds": "秒",
+      "ended": "锦标赛已结束"
+    },
+    "howItWorks": {
+      "title": "如何参与",
+      "step1": {
+        "title": "支付€0.50",
+        "description": "通过Stripe安全支付。一次入场，一次赢取机会。"
+      },
+      "step2": {
+        "title": "玩Flappy Star",
+        "description": "穿越障碍物。尽可能获得高分。"
+      },
+      "step3": {
+        "title": "赢取€10,000",
+        "description": "锦标赛结束时最高分获得大奖。"
+      }
+    },
+    "stats": {
+      "entries": "总参赛人数",
+      "daysLeft": "剩余天数",
+      "prize": "奖金池",
+      "countries": "参赛国家"
+    },
+    "leaderboard": {
+      "title": "实时排行榜",
+      "rank": "排名",
+      "player": "玩家",
+      "score": "分数",
+      "viewAll": "查看完整排行榜"
+    },
+    "faq": {
+      "title": "常见问题",
+      "q1": {
+        "question": "如何参加锦标赛？",
+        "answer": "点击「参加锦标赛」，通过Stripe支付€0.50，然后您将被带到游戏页面。完成一次游戏并提交您的分数和联系方式。"
+      },
+      "q2": {
+        "question": "我可以多次游戏吗？",
+        "answer": "每次€0.50的入场费可以玩一次游戏。您可以多次参加，但只有您的最高分数会计入排行榜。"
+      },
+      "q3": {
+        "question": "如何确定获胜者？",
+        "answer": "锦标赛结束时验证分数最高的玩家将赢得€10,000大奖。"
+      },
+      "q4": {
+        "question": "免费模式与锦标赛模式有什么区别？",
+        "answer": "免费模式让您无限练习，但您的分数不会被记录，您也不会有资格获得奖金。"
+      },
+      "q5": {
+        "question": "我如何领取奖金？",
+        "answer": "获胜者将在锦标赛结束后48小时内通过电子邮件联系，安排奖金支付。"
+      }
+    }
+  },
+  "game": {
+    "tapToStart": "点击或按空格键开始",
+    "score": "分数",
+    "gameOver": "游戏结束",
+    "yourScore": "您的分数",
+    "bestScore": "最高分",
+    "playAgain": "再玩一次",
+    "submitScore": "提交分数",
+    "freePlayBanner": "娱乐模式 — 不参与奖金竞争",
+    "tournamentMode": "锦标赛模式"
+  },
+  "scoreForm": {
+    "title": "提交您的分数",
+    "subtitle": "输入您的信息以在排行榜上占据一席之地",
+    "fullName": "全名",
+    "fullNamePlaceholder": "输入您的全名",
+    "email": "电子邮件地址",
+    "emailPlaceholder": "your@email.com",
+    "nickname": "昵称（公开显示）",
+    "nicknamePlaceholder": "您的显示名称",
+    "country": "国家",
+    "countryPlaceholder": "选择您的国家",
+    "submit": "提交分数",
+    "submitting": "提交中...",
+    "success": {
+      "title": "分数已提交！",
+      "rank": "您的排名",
+      "score": "您的分数",
+      "shareMessage": "我在FlappyStar获得了{score}分！你能超过我吗？",
+      "shareButton": "分享您的分数",
+      "viewLeaderboard": "查看排行榜"
+    },
+    "errors": {
+      "fullNameRequired": "请填写全名",
+      "emailRequired": "请填写电子邮件",
+      "emailInvalid": "请输入有效的电子邮件",
+      "nicknameRequired": "请填写昵称",
+      "nicknameTooShort": "昵称至少需要2个字符",
+      "countryRequired": "请选择您的国家",
+      "submitFailed": "提交失败。请重试。"
+    }
+  },
+  "leaderboard": {
+    "title": "排行榜",
+    "subtitle": "顶尖玩家竞争€10,000大奖",
+    "rank": "排名",
+    "player": "玩家",
+    "country": "国家",
+    "score": "分数",
+    "date": "日期",
+    "empty": "暂无参赛者。成为第一个！",
+    "search": "按昵称搜索",
+    "page": "第{current}页，共{total}页",
+    "previous": "上一页",
+    "next": "下一页"
+  },
+  "payment": {
+    "success": {
+      "title": "支付成功！",
+      "subtitle": "您已加入锦标赛。准备开始游戏！",
+      "redirecting": "正在跳转到游戏..."
+    },
+    "cancel": {
+      "title": "支付已取消",
+      "subtitle": "您的支付已取消。未产生任何费用。",
+      "tryAgain": "重试",
+      "playFree": "改为免费游戏"
+    }
+  },
+  "errors": {
+    "sessionInvalid": "会话无效。请重新参加锦标赛。",
+    "sessionUsed": "此会话已被使用。",
+    "paymentNotCompleted": "支付未完成。",
+    "rateLimited": "请求过多。请稍后重试。",
+    "serverError": "服务器错误。请重试。"
+  },
+  "footer": {
+    "impressum": "法律声明",
+    "datenschutz": "隐私政策",
+    "agb": "条款与条件",
+    "kontakt": "联系我们",
+    "copyright": "© {year} FlappyStar. 保留所有权利。"
+  },
+  "legal": {
+    "placeholder": "[待添加：法律文本]"
+  },
+  "admin": {
+    "title": "管理面板",
+    "stats": {
+      "title": "锦标赛统计",
+      "totalEntries": "总参赛人数",
+      "uniqueCountries": "参赛国家数",
+      "highestScore": "最高分",
+      "totalRevenue": "总收入"
+    },
+    "settings": {
+      "title": "锦标赛设置",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "prizeAmount": "奖金金额 (€)",
+      "isActive": "锦标赛进行中",
+      "maxEntries": "最大参赛人数",
+      "save": "保存设置"
+    },
+    "entries": {
+      "title": "所有参赛记录",
+      "export": "导出CSV",
+      "columns": {
+        "rank": "排名",
+        "name": "姓名",
+        "email": "电子邮件",
+        "nickname": "昵称",
+        "country": "国家",
+        "score": "分数",
+        "date": "日期"
+      }
+    },
+    "actions": {
+      "declareWinner": "宣布获胜者",
+      "flushCache": "清除缓存",
+      "confirmWinner": "您确定要宣布获胜者吗？此操作无法撤销。"
+    }
+  }
+}

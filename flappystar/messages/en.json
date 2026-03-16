@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "title": "FlappyStar - Win €10,000 Playing Flappy Bird",
+    "description": "Enter the tournament for just €0.50. Play Flappy Bird, score high, win €10,000. Free play available."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try Again",
+    "close": "Close",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "save": "Save",
+    "share": "Share",
+    "or": "or"
+  },
+  "nav": {
+    "home": "Home",
+    "play": "Play",
+    "leaderboard": "Leaderboard",
+    "admin": "Admin"
+  },
+  "landing": {
+    "hero": {
+      "title": "Play. Win.",
+      "prize": "€10,000",
+      "subtitle": "Enter the ultimate Flappy Bird tournament. One simple game. One massive prize.",
+      "ctaEnter": "Enter Tournament — €0.50",
+      "ctaFree": "Play Free"
+    },
+    "countdown": {
+      "title": "Tournament Ends In",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "ended": "Tournament Ended"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "step1": {
+        "title": "Pay €0.50",
+        "description": "Secure payment via Stripe. One entry, one chance to win."
+      },
+      "step2": {
+        "title": "Play Flappy Star",
+        "description": "Navigate through obstacles. Score as high as you can."
+      },
+      "step3": {
+        "title": "Win €10,000",
+        "description": "Highest score at tournament end wins the grand prize."
+      }
+    },
+    "stats": {
+      "entries": "Total Entries",
+      "daysLeft": "Days Remaining",
+      "prize": "Prize Pool",
+      "countries": "Countries"
+    },
+    "leaderboard": {
+      "title": "Live Leaderboard",
+      "rank": "Rank",
+      "player": "Player",
+      "score": "Score",
+      "viewAll": "View Full Leaderboard"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": {
+        "question": "How do I enter the tournament?",
+        "answer": "Click 'Enter Tournament', pay €0.50 via Stripe, and you'll be taken to the game. Play once, submit your score with your contact details."
+      },
+      "q2": {
+        "question": "Can I play multiple times?",
+        "answer": "Each €0.50 entry gives you one game. You can enter multiple times, but only your highest score counts toward the leaderboard."
+      },
+      "q3": {
+        "question": "How is the winner determined?",
+        "answer": "The player with the highest verified score when the tournament ends wins the €10,000 prize."
+      },
+      "q4": {
+        "question": "Is free play different from tournament play?",
+        "answer": "Free play lets you practice unlimited times, but your scores won't be recorded and you won't be eligible for the prize."
+      },
+      "q5": {
+        "question": "How will I receive my prize?",
+        "answer": "The winner will be contacted via email within 48 hours of the tournament ending to arrange prize payment."
+      }
+    }
+  },
+  "game": {
+    "tapToStart": "Tap or Press Space to Start",
+    "score": "Score",
+    "gameOver": "Game Over",
+    "yourScore": "Your Score",
+    "bestScore": "Best Score",
+    "playAgain": "Play Again",
+    "submitScore": "Submit Score",
+    "freePlayBanner": "Playing for fun — not eligible for prize",
+    "tournamentMode": "Tournament Mode"
+  },
+  "scoreForm": {
+    "title": "Submit Your Score",
+    "subtitle": "Enter your details to claim your spot on the leaderboard",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "email": "Email Address",
+    "emailPlaceholder": "your@email.com",
+    "nickname": "Nickname (public)",
+    "nicknamePlaceholder": "Your display name",
+    "country": "Country",
+    "countryPlaceholder": "Select your country",
+    "submit": "Submit Score",
+    "submitting": "Submitting...",
+    "success": {
+      "title": "Score Submitted!",
+      "rank": "Your Rank",
+      "score": "Your Score",
+      "shareMessage": "I scored {score} points in FlappyStar! Can you beat me?",
+      "shareButton": "Share Your Score",
+      "viewLeaderboard": "View Leaderboard"
+    },
+    "errors": {
+      "fullNameRequired": "Full name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "nicknameRequired": "Nickname is required",
+      "nicknameTooShort": "Nickname must be at least 2 characters",
+      "countryRequired": "Please select your country",
+      "submitFailed": "Failed to submit score. Please try again."
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "Top players competing for €10,000",
+    "rank": "Rank",
+    "player": "Player",
+    "country": "Country",
+    "score": "Score",
+    "date": "Date",
+    "empty": "No entries yet. Be the first!",
+    "search": "Search by nickname",
+    "page": "Page {current} of {total}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "payment": {
+    "success": {
+      "title": "Payment Successful!",
+      "subtitle": "You're in the tournament. Get ready to play!",
+      "redirecting": "Redirecting to game..."
+    },
+    "cancel": {
+      "title": "Payment Cancelled",
+      "subtitle": "Your payment was cancelled. No charges were made.",
+      "tryAgain": "Try Again",
+      "playFree": "Play Free Instead"
+    }
+  },
+  "errors": {
+    "sessionInvalid": "Invalid session. Please enter the tournament again.",
+    "sessionUsed": "This session has already been used.",
+    "paymentNotCompleted": "Payment was not completed.",
+    "rateLimited": "Too many requests. Please try again later.",
+    "serverError": "Server error. Please try again."
+  },
+  "footer": {
+    "impressum": "Legal Notice",
+    "datenschutz": "Privacy Policy",
+    "agb": "Terms & Conditions",
+    "kontakt": "Contact",
+    "copyright": "© {year} FlappyStar. All rights reserved."
+  },
+  "legal": {
+    "placeholder": "[TODO: Legal text to be added]"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "stats": {
+      "title": "Tournament Statistics",
+      "totalEntries": "Total Entries",
+      "uniqueCountries": "Unique Countries",
+      "highestScore": "Highest Score",
+      "totalRevenue": "Total Revenue"
+    },
+    "settings": {
+      "title": "Tournament Settings",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "prizeAmount": "Prize Amount (€)",
+      "isActive": "Tournament Active",
+      "maxEntries": "Max Entries",
+      "save": "Save Settings"
+    },
+    "entries": {
+      "title": "All Entries",
+      "export": "Export CSV",
+      "columns": {
+        "rank": "Rank",
+        "name": "Name",
+        "email": "Email",
+        "nickname": "Nickname",
+        "country": "Country",
+        "score": "Score",
+        "date": "Date"
+      }
+    },
+    "actions": {
+      "declareWinner": "Declare Winner",
+      "flushCache": "Flush Cache",
+      "confirmWinner": "Are you sure you want to declare the winner? This action cannot be undone."
+    }
+  }
+}

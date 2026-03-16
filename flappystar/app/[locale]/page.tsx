@@ -1,0 +1,219 @@
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
+import CountdownTimer from '@/components/ui/CountdownTimer';
+import LiveWidget from '@/components/leaderboard/LiveWidget';
+import Accordion from '@/components/ui/Accordion';
+import EnterTournamentButton from './EnterTournamentButton';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations('landing');
+  const tFaq = await getTranslations('landing.faq');
+
+  const tournamentEndDate = process.env.TOURNAMENT_END_DATE || '2025-06-30T23:59:59Z';
+
+  // FAQ items
+  const faqItems = [
+    { question: tFaq('q1.question'), answer: tFaq('q1.answer') },
+    { question: tFaq('q2.question'), answer: tFaq('q2.answer') },
+    { question: tFaq('q3.question'), answer: tFaq('q3.answer') },
+    { question: tFaq('q4.question'), answer: tFaq('q4.answer') },
+    { question: tFaq('q5.question'), answer: tFaq('q5.answer') },
+  ];
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-16">
+      {/* Hero Section */}
+      <section className="text-center mb-16 sm:mb-24">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold text-white mb-4">
+          {t('hero.title')}
+          <br />
+          <span className="gold-shimmer text-5xl sm:text-7xl lg:text-8xl">
+            {t('hero.prize')}
+          </span>
+        </h1>
+
+        <p className="text-lg sm:text-xl text-text-muted max-w-2xl mx-auto mb-8">
+          {t('hero.subtitle')}
+        </p>
+
+        {/* Countdown */}
+        <div className="mb-10">
+          <CountdownTimer targetDate={tournamentEndDate} />
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <EnterTournamentButton locale={locale}>
+            {t('hero.ctaEnter')}
+          </EnterTournamentButton>
+
+          <Link href="/play?mode=free" className="btn-secondary">
+            {t('hero.ctaFree')}
+          </Link>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="mb-16 sm:mb-24">
+        <h2 className="text-2xl sm:text-3xl font-display font-bold text-white text-center mb-10">
+          {t('howItWorks.title')}
+        </h2>
+
+        <div className="grid sm:grid-cols-3 gap-6">
+          {['step1', 'step2', 'step3'].map((step, index) => (
+            <div
+              key={step}
+              className="glass-card rounded-2xl p-6 text-center relative overflow-hidden group"
+            >
+              <div className="absolute -top-4 -right-4 text-8xl font-display font-bold text-primary/5 group-hover:text-primary/10 transition-colors">
+                {index + 1}
+              </div>
+              <div className="relative">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  {index === 0 && (
+                    <svg
+                      className="w-8 h-8 text-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                      />
+                    </svg>
+                  )}
+                  {index === 1 && (
+                    <svg
+                      className="w-8 h-8 text-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  )}
+                  {index === 2 && (
+                    <svg
+                      className="w-8 h-8 text-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <h3 className="text-lg font-display font-bold text-white mb-2">
+                  {t(`howItWorks.${step}.title`)}
+                </h3>
+                <p className="text-text-muted text-sm">
+                  {t(`howItWorks.${step}.description`)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Live Leaderboard + Stats */}
+      <section className="grid lg:grid-cols-2 gap-6 mb-16 sm:mb-24">
+        <LiveWidget />
+
+        <div className="glass-card rounded-2xl p-6">
+          <h3 className="text-xl font-display font-bold text-white mb-6">
+            Tournament Stats
+          </h3>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
+              <div className="text-2xl sm:text-3xl font-display font-bold text-primary mb-1">
+                1,234
+              </div>
+              <div className="text-xs text-text-muted uppercase tracking-wider">
+                {t('stats.entries')}
+              </div>
+            </div>
+
+            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
+              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">
+                45
+              </div>
+              <div className="text-xs text-text-muted uppercase tracking-wider">
+                {t('stats.daysLeft')}
+              </div>
+            </div>
+
+            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
+              <div className="text-2xl sm:text-3xl font-display font-bold gold-shimmer mb-1">
+                €10,000
+              </div>
+              <div className="text-xs text-text-muted uppercase tracking-wider">
+                {t('stats.prize')}
+              </div>
+            </div>
+
+            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
+              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">
+                42
+              </div>
+              <div className="text-xs text-text-muted uppercase tracking-wider">
+                {t('stats.countries')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="mb-16 sm:mb-24">
+        <h2 className="text-2xl sm:text-3xl font-display font-bold text-white text-center mb-10">
+          {tFaq('title')}
+        </h2>
+
+        <div className="max-w-3xl mx-auto">
+          <Accordion items={faqItems} />
+        </div>
+      </section>
+    </div>
+  );
+}

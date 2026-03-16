@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "title": "FlappyStar - Gewinne €10.000 beim Flappy Bird spielen",
+    "description": "Nimm für nur €0,50 am Turnier teil. Spiele Flappy Bird, erziele Highscores, gewinne €10.000. Kostenloses Spielen verfügbar."
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Ein Fehler ist aufgetreten",
+    "retry": "Erneut versuchen",
+    "close": "Schließen",
+    "submit": "Absenden",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "save": "Speichern",
+    "share": "Teilen",
+    "or": "oder"
+  },
+  "nav": {
+    "home": "Startseite",
+    "play": "Spielen",
+    "leaderboard": "Rangliste",
+    "admin": "Admin"
+  },
+  "landing": {
+    "hero": {
+      "title": "Spielen. Gewinnen.",
+      "prize": "€10.000",
+      "subtitle": "Nimm am ultimativen Flappy Bird Turnier teil. Ein einfaches Spiel. Ein riesiger Preis.",
+      "ctaEnter": "Am Turnier teilnehmen — €0,50",
+      "ctaFree": "Kostenlos spielen"
+    },
+    "countdown": {
+      "title": "Turnier endet in",
+      "days": "Tage",
+      "hours": "Stunden",
+      "minutes": "Minuten",
+      "seconds": "Sekunden",
+      "ended": "Turnier beendet"
+    },
+    "howItWorks": {
+      "title": "So funktioniert's",
+      "step1": {
+        "title": "Zahle €0,50",
+        "description": "Sichere Zahlung über Stripe. Ein Eintritt, eine Gewinnchance."
+      },
+      "step2": {
+        "title": "Spiele Flappy Star",
+        "description": "Navigiere durch Hindernisse. Erziele so viele Punkte wie möglich."
+      },
+      "step3": {
+        "title": "Gewinne €10.000",
+        "description": "Der höchste Punktestand am Turnierende gewinnt den Hauptpreis."
+      }
+    },
+    "stats": {
+      "entries": "Teilnehmer gesamt",
+      "daysLeft": "Verbleibende Tage",
+      "prize": "Preispool",
+      "countries": "Länder"
+    },
+    "leaderboard": {
+      "title": "Live-Rangliste",
+      "rank": "Rang",
+      "player": "Spieler",
+      "score": "Punkte",
+      "viewAll": "Vollständige Rangliste"
+    },
+    "faq": {
+      "title": "Häufig gestellte Fragen",
+      "q1": {
+        "question": "Wie nehme ich am Turnier teil?",
+        "answer": "Klicke auf 'Am Turnier teilnehmen', zahle €0,50 über Stripe und du wirst zum Spiel weitergeleitet. Spiele einmal und reiche deine Punktzahl mit deinen Kontaktdaten ein."
+      },
+      "q2": {
+        "question": "Kann ich mehrmals spielen?",
+        "answer": "Jeder €0,50-Eintritt gibt dir ein Spiel. Du kannst mehrmals teilnehmen, aber nur dein höchster Punktestand zählt für die Rangliste."
+      },
+      "q3": {
+        "question": "Wie wird der Gewinner ermittelt?",
+        "answer": "Der Spieler mit dem höchsten verifizierten Punktestand am Turnierende gewinnt den €10.000-Preis."
+      },
+      "q4": {
+        "question": "Unterscheidet sich das kostenlose Spielen vom Turnierspiel?",
+        "answer": "Beim kostenlosen Spielen kannst du unbegrenzt üben, aber deine Punktzahlen werden nicht aufgezeichnet und du bist nicht für den Preis qualifiziert."
+      },
+      "q5": {
+        "question": "Wie erhalte ich meinen Preis?",
+        "answer": "Der Gewinner wird innerhalb von 48 Stunden nach Turnierende per E-Mail kontaktiert, um die Preisauszahlung zu arrangieren."
+      }
+    }
+  },
+  "game": {
+    "tapToStart": "Tippen oder Leertaste zum Starten",
+    "score": "Punkte",
+    "gameOver": "Spiel vorbei",
+    "yourScore": "Deine Punkte",
+    "bestScore": "Bester Punktestand",
+    "playAgain": "Nochmal spielen",
+    "submitScore": "Punktzahl einreichen",
+    "freePlayBanner": "Zum Spaß spielen — nicht preiswürdig",
+    "tournamentMode": "Turniermodus"
+  },
+  "scoreForm": {
+    "title": "Punktzahl einreichen",
+    "subtitle": "Gib deine Daten ein, um deinen Platz in der Rangliste zu sichern",
+    "fullName": "Vollständiger Name",
+    "fullNamePlaceholder": "Gib deinen vollständigen Namen ein",
+    "email": "E-Mail-Adresse",
+    "emailPlaceholder": "deine@email.de",
+    "nickname": "Spitzname (öffentlich)",
+    "nicknamePlaceholder": "Dein Anzeigename",
+    "country": "Land",
+    "countryPlaceholder": "Wähle dein Land",
+    "submit": "Punktzahl einreichen",
+    "submitting": "Wird eingereicht...",
+    "success": {
+      "title": "Punktzahl eingereicht!",
+      "rank": "Dein Rang",
+      "score": "Deine Punkte",
+      "shareMessage": "Ich habe {score} Punkte bei FlappyStar erzielt! Kannst du mich schlagen?",
+      "shareButton": "Punktzahl teilen",
+      "viewLeaderboard": "Rangliste ansehen"
+    },
+    "errors": {
+      "fullNameRequired": "Vollständiger Name erforderlich",
+      "emailRequired": "E-Mail erforderlich",
+      "emailInvalid": "Bitte gib eine gültige E-Mail ein",
+      "nicknameRequired": "Spitzname erforderlich",
+      "nicknameTooShort": "Spitzname muss mindestens 2 Zeichen haben",
+      "countryRequired": "Bitte wähle dein Land",
+      "submitFailed": "Einreichen fehlgeschlagen. Bitte erneut versuchen."
+    }
+  },
+  "leaderboard": {
+    "title": "Rangliste",
+    "subtitle": "Top-Spieler im Kampf um €10.000",
+    "rank": "Rang",
+    "player": "Spieler",
+    "country": "Land",
+    "score": "Punkte",
+    "date": "Datum",
+    "empty": "Noch keine Einträge. Sei der Erste!",
+    "search": "Nach Spitznamen suchen",
+    "page": "Seite {current} von {total}",
+    "previous": "Zurück",
+    "next": "Weiter"
+  },
+  "payment": {
+    "success": {
+      "title": "Zahlung erfolgreich!",
+      "subtitle": "Du bist im Turnier. Mach dich bereit zum Spielen!",
+      "redirecting": "Weiterleitung zum Spiel..."
+    },
+    "cancel": {
+      "title": "Zahlung abgebrochen",
+      "subtitle": "Deine Zahlung wurde abgebrochen. Es wurden keine Kosten erhoben.",
+      "tryAgain": "Erneut versuchen",
+      "playFree": "Stattdessen kostenlos spielen"
+    }
+  },
+  "errors": {
+    "sessionInvalid": "Ungültige Sitzung. Bitte erneut am Turnier teilnehmen.",
+    "sessionUsed": "Diese Sitzung wurde bereits verwendet.",
+    "paymentNotCompleted": "Zahlung wurde nicht abgeschlossen.",
+    "rateLimited": "Zu viele Anfragen. Bitte später erneut versuchen.",
+    "serverError": "Serverfehler. Bitte erneut versuchen."
+  },
+  "footer": {
+    "impressum": "Impressum",
+    "datenschutz": "Datenschutz",
+    "agb": "AGB",
+    "kontakt": "Kontakt",
+    "copyright": "© {year} FlappyStar. Alle Rechte vorbehalten."
+  },
+  "legal": {
+    "placeholder": "[TODO: Rechtstext einfügen]"
+  },
+  "admin": {
+    "title": "Admin-Bereich",
+    "stats": {
+      "title": "Turnierstatistiken",
+      "totalEntries": "Einträge gesamt",
+      "uniqueCountries": "Einzigartige Länder",
+      "highestScore": "Höchster Punktestand",
+      "totalRevenue": "Gesamteinnahmen"
+    },
+    "settings": {
+      "title": "Turniereinstellungen",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "prizeAmount": "Preisbetrag (€)",
+      "isActive": "Turnier aktiv",
+      "maxEntries": "Max. Einträge",
+      "save": "Einstellungen speichern"
+    },
+    "entries": {
+      "title": "Alle Einträge",
+      "export": "CSV exportieren",
+      "columns": {
+        "rank": "Rang",
+        "name": "Name",
+        "email": "E-Mail",
+        "nickname": "Spitzname",
+        "country": "Land",
+        "score": "Punkte",
+        "date": "Datum"
+      }
+    },
+    "actions": {
+      "declareWinner": "Gewinner erklären",
+      "flushCache": "Cache leeren",
+      "confirmWinner": "Bist du sicher, dass du den Gewinner erklären möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  }
+}

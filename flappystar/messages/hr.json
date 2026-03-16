@@ -1,0 +1,216 @@
+{
+  "meta": {
+    "title": "FlappyStar - Osvoji €10.000 igrajući Flappy Bird",
+    "description": "Sudjeluj u turniru za samo €0,50. Igraj Flappy Bird, postižaj visoke rezultate, osvoji €10.000. Besplatno igranje dostupno."
+  },
+  "common": {
+    "loading": "Učitavanje...",
+    "error": "Došlo je do pogreške",
+    "retry": "Pokušaj ponovo",
+    "close": "Zatvori",
+    "submit": "Pošalji",
+    "cancel": "Odustani",
+    "back": "Natrag",
+    "next": "Dalje",
+    "save": "Spremi",
+    "share": "Podijeli",
+    "or": "ili"
+  },
+  "nav": {
+    "home": "Početna",
+    "play": "Igraj",
+    "leaderboard": "Ljestvica",
+    "admin": "Admin"
+  },
+  "landing": {
+    "hero": {
+      "title": "Igraj. Pobijedi.",
+      "prize": "€10.000",
+      "subtitle": "Sudjeluj u najvećem Flappy Bird turniru. Jednostavna igra. Ogromna nagrada.",
+      "ctaEnter": "Pridruži se turniru — €0,50",
+      "ctaFree": "Igraj besplatno"
+    },
+    "countdown": {
+      "title": "Turnir završava za",
+      "days": "Dana",
+      "hours": "Sati",
+      "minutes": "Minuta",
+      "seconds": "Sekundi",
+      "ended": "Turnir je završen"
+    },
+    "howItWorks": {
+      "title": "Kako funkcionira",
+      "step1": {
+        "title": "Plati €0,50",
+        "description": "Sigurno plaćanje putem Stripea. Jedna prijava, jedna šansa za pobjedu."
+      },
+      "step2": {
+        "title": "Igraj Flappy Star",
+        "description": "Izbjegavaj prepreke. Postići što veći rezultat."
+      },
+      "step3": {
+        "title": "Osvoji €10.000",
+        "description": "Najveći rezultat na kraju turnira osvaja glavnu nagradu."
+      }
+    },
+    "stats": {
+      "entries": "Ukupno sudionika",
+      "daysLeft": "Preostalo dana",
+      "prize": "Nagradni fond",
+      "countries": "Zemlje"
+    },
+    "leaderboard": {
+      "title": "Ljestvica uživo",
+      "rank": "Rang",
+      "player": "Igrač",
+      "score": "Rezultat",
+      "viewAll": "Pogledaj cijelu ljestvicu"
+    },
+    "faq": {
+      "title": "Često postavljana pitanja",
+      "q1": {
+        "question": "Kako se prijaviti na turnir?",
+        "answer": "Klikni 'Pridruži se turniru', plati €0,50 putem Stripea i bit ćeš preusmjeren na igru. Odigraj jednom i pošalji svoj rezultat s kontakt podacima."
+      },
+      "q2": {
+        "question": "Mogu li igrati više puta?",
+        "answer": "Svaka prijava od €0,50 daje ti jednu igru. Možeš sudjelovati više puta, ali samo tvoj najveći rezultat računa se za ljestvicu."
+      },
+      "q3": {
+        "question": "Kako se određuje pobjednik?",
+        "answer": "Igrač s najvećim verificiranim rezultatom na kraju turnira osvaja nagradu od €10.000."
+      },
+      "q4": {
+        "question": "Je li besplatno igranje različito od turnirskog?",
+        "answer": "Besplatno igranje ti omogućuje neograničenu vježbu, ali tvoji rezultati neće biti zabilježeni i nećeš biti kvalificiran za nagradu."
+      },
+      "q5": {
+        "question": "Kako ću primiti nagradu?",
+        "answer": "Pobjednik će biti kontaktiran putem emaila unutar 48 sati od završetka turnira radi dogovora o isplati nagrade."
+      }
+    }
+  },
+  "game": {
+    "tapToStart": "Dodirni ili pritisni Space za početak",
+    "score": "Rezultat",
+    "gameOver": "Kraj igre",
+    "yourScore": "Tvoj rezultat",
+    "bestScore": "Najbolji rezultat",
+    "playAgain": "Igraj ponovo",
+    "submitScore": "Pošalji rezultat",
+    "freePlayBanner": "Igraš za zabavu — ne kvalificiraš se za nagradu",
+    "tournamentMode": "Turnirski način"
+  },
+  "scoreForm": {
+    "title": "Pošalji svoj rezultat",
+    "subtitle": "Unesi svoje podatke za mjesto na ljestvici",
+    "fullName": "Puno ime",
+    "fullNamePlaceholder": "Unesi svoje puno ime",
+    "email": "Email adresa",
+    "emailPlaceholder": "tvoj@email.hr",
+    "nickname": "Nadimak (javni)",
+    "nicknamePlaceholder": "Tvoje prikazano ime",
+    "country": "Država",
+    "countryPlaceholder": "Odaberi svoju državu",
+    "submit": "Pošalji rezultat",
+    "submitting": "Slanje...",
+    "success": {
+      "title": "Rezultat poslan!",
+      "rank": "Tvoj rang",
+      "score": "Tvoj rezultat",
+      "shareMessage": "Postigao sam {score} bodova u FlappyStar! Možeš li me pobijediti?",
+      "shareButton": "Podijeli svoj rezultat",
+      "viewLeaderboard": "Pogledaj ljestvicu"
+    },
+    "errors": {
+      "fullNameRequired": "Puno ime je obavezno",
+      "emailRequired": "Email je obavezan",
+      "emailInvalid": "Molimo unesi valjani email",
+      "nicknameRequired": "Nadimak je obavezan",
+      "nicknameTooShort": "Nadimak mora imati najmanje 2 znaka",
+      "countryRequired": "Molimo odaberi svoju državu",
+      "submitFailed": "Slanje nije uspjelo. Pokušaj ponovo."
+    }
+  },
+  "leaderboard": {
+    "title": "Ljestvica",
+    "subtitle": "Najbolji igrači natječu se za €10.000",
+    "rank": "Rang",
+    "player": "Igrač",
+    "country": "Država",
+    "score": "Rezultat",
+    "date": "Datum",
+    "empty": "Još nema unosa. Budi prvi!",
+    "search": "Pretraži po nadimku",
+    "page": "Stranica {current} od {total}",
+    "previous": "Prethodna",
+    "next": "Sljedeća"
+  },
+  "payment": {
+    "success": {
+      "title": "Plaćanje uspješno!",
+      "subtitle": "U turniru si. Pripremi se za igru!",
+      "redirecting": "Preusmjeravanje na igru..."
+    },
+    "cancel": {
+      "title": "Plaćanje otkazano",
+      "subtitle": "Tvoje plaćanje je otkazano. Nije naplaćeno ništa.",
+      "tryAgain": "Pokušaj ponovo",
+      "playFree": "Igraj besplatno umjesto toga"
+    }
+  },
+  "errors": {
+    "sessionInvalid": "Nevažeća sesija. Molimo ponovno se prijavi na turnir.",
+    "sessionUsed": "Ova sesija je već iskorištena.",
+    "paymentNotCompleted": "Plaćanje nije dovršeno.",
+    "rateLimited": "Previše zahtjeva. Pokušaj kasnije.",
+    "serverError": "Greška poslužitelja. Pokušaj ponovo."
+  },
+  "footer": {
+    "impressum": "Pravna napomena",
+    "datenschutz": "Privatnost",
+    "agb": "Uvjeti korištenja",
+    "kontakt": "Kontakt",
+    "copyright": "© {year} FlappyStar. Sva prava pridržana."
+  },
+  "legal": {
+    "placeholder": "[TODO: Pravni tekst za dodati]"
+  },
+  "admin": {
+    "title": "Administratorska ploča",
+    "stats": {
+      "title": "Statistika turnira",
+      "totalEntries": "Ukupno prijava",
+      "uniqueCountries": "Jedinstvene države",
+      "highestScore": "Najveći rezultat",
+      "totalRevenue": "Ukupni prihod"
+    },
+    "settings": {
+      "title": "Postavke turnira",
+      "startDate": "Datum početka",
+      "endDate": "Datum završetka",
+      "prizeAmount": "Iznos nagrade (€)",
+      "isActive": "Turnir aktivan",
+      "maxEntries": "Maks. prijava",
+      "save": "Spremi postavke"
+    },
+    "entries": {
+      "title": "Sve prijave",
+      "export": "Izvezi CSV",
+      "columns": {
+        "rank": "Rang",
+        "name": "Ime",
+        "email": "Email",
+        "nickname": "Nadimak",
+        "country": "Država",
+        "score": "Rezultat",
+        "date": "Datum"
+      }
+    },
+    "actions": {
+      "declareWinner": "Proglasi pobjednika",
+      "flushCache": "Očisti cache",
+      "confirmWinner": "Jesi li siguran da želiš proglasiti pobjednika? Ova radnja se ne može poništiti."
+    }
+  }
+}

@@ -1,0 +1,250 @@
+import { createClient } from '@supabase/supabase-js';
+
+// Types for our database
+export interface TournamentEntry {
+  id: string;
+  created_at: string;
+  stripe_session_id: string;
+  full_name: string;
+  email: string;
+  nickname: string;
+  country: string;
+  score: number;
+  ip_address: string | null;
+  used: boolean;
+}
+
+export interface TournamentSettings {
+  id: number;
+  start_date: string | null;
+  end_date: string | null;
+  prize_amount: number;
+  is_active: boolean;
+  max_entries: number | null;
+}
+
+// Client-side Supabase client (uses anon key, limited access)
+export function createBrowserClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
+
+// Server-side Supabase client with service role (full access)
+// Uses PgBouncer connection pooling for scalability
+export function createServerClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase server environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+    db: {
+      schema: 'public',
+    },
+  });
+}
+
+// Database helper functions
+export async function getLeaderboard(page: number = 1, limit: number = 25) {
+  const supabase = createServerClient();
+  const offset = (page - 1) * limit;
+
+  const { data, error, count } = await supabase
+    .from('tournament_entries')
+    .select('id, nickname, country, score, created_at', { count: 'exact' })
+    .order('score', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) throw error;
+
+  return {
+    entries: data || [],
+    total: count || 0,
+    page,
+    totalPages: Math.ceil((count || 0) / limit),
+  };
+}
+
+export async function getTopLeaderboard(limit: number = 10) {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('tournament_entries')
+    .select('id, nickname, country, score')
+    .order('score', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+export async function submitScore(entry: {
+  stripe_session_id: string;
+  full_name: string;
+  email: string;
+  nickname: string;
+  country: string;
+  score: number;
+  ip_address?: string;
+}) {
+  const supabase = createServerClient();
+
+  // Use INSERT ... ON CONFLICT DO NOTHING for idempotency
+  const { data, error } = await supabase
+    .from('tournament_entries')
+    .insert({
+      ...entry,
+      used: true,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    // Check if it's a duplicate key error
+    if (error.code === '23505') {
+      return { duplicate: true };
+    }
+    throw error;
+  }
+
+  // Get the rank
+  const { count } = await supabase
+    .from('tournament_entries')
+    .select('*', { count: 'exact', head: true })
+    .gt('score', entry.score);
+
+  const rank = (count || 0) + 1;
+
+  return { data, rank, duplicate: false };
+}
+
+export async function isSessionUsed(sessionId: string): Promise<boolean> {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('tournament_entries')
+    .select('id')
+    .eq('stripe_session_id', sessionId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return !!data;
+}
+
+export async function getTournamentSettings(): Promise<TournamentSettings | null> {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('tournament_settings')
+    .select('*')
+    .eq('id', 1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateTournamentSettings(settings: Partial<TournamentSettings>) {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('tournament_settings')
+    .upsert({ id: 1, ...settings })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
+export async function getTournamentStats() {
+  const supabase = createServerClient();
+
+  // Get total entries
+  const { count: totalEntries } = await supabase
+    .from('tournament_entries')
+    .select('*', { count: 'exact', head: true });
+
+  // Get unique countries
+  const { data: countriesData } = await supabase
+    .from('tournament_entries')
+    .select('country');
+
+  const uniqueCountries = new Set(countriesData?.map((e) => e.country)).size;
+
+  // Get highest score
+  const { data: topScore } = await supabase
+    .from('tournament_entries')
+    .select('score')
+    .order('score', { ascending: false })
+    .limit(1)
+    .single();
+
+  return {
+    totalEntries: totalEntries || 0,
+    uniqueCountries,
+    highestScore: topScore?.score || 0,
+    totalRevenue: ((totalEntries || 0) * 0.5).toFixed(2),
+  };
+}
+
+export async function getAllEntries(page: number = 1, limit: number = 50) {
+  const supabase = createServerClient();
+  const offset = (page - 1) * limit;
+
+  const { data, error, count } = await supabase
+    .from('tournament_entries')
+    .select('*', { count: 'exact' })
+    .order('score', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) throw error;
+
+  return {
+    entries: data || [],
+    total: count || 0,
+    page,
+    totalPages: Math.ceil((count || 0) / limit),
+  };
+}
+
+export async function searchLeaderboard(query: string, page: number = 1, limit: number = 25) {
+  const supabase = createServerClient();
+  const offset = (page - 1) * limit;
+
+  const { data, error, count } = await supabase
+    .from('tournament_entries')
+    .select('id, nickname, country, score, created_at', { count: 'exact' })
+    .ilike('nickname', `%${query}%`)
+    .order('score', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) throw error;
+
+  return {
+    entries: data || [],
+    total: count || 0,
+    page,
+    totalPages: Math.ceil((count || 0) / limit),
+  };
+}
