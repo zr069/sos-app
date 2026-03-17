@@ -26,7 +26,15 @@ export async function createCheckoutSession(
   locale: string = 'en'
 ): Promise<Stripe.Checkout.Session> {
   const stripe = getStripe();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+  // Ensure siteUrl has no trailing slash and is a valid URL
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://flappystar.com';
+  const siteUrl = rawSiteUrl.replace(/\/+$/, ''); // Remove trailing slashes
+
+  const successUrl = `${siteUrl}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${siteUrl}/${locale}/payment/cancel`;
+
+  console.log('[Stripe] Creating checkout session with URLs:', { siteUrl, successUrl, cancelUrl });
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
@@ -44,8 +52,8 @@ export async function createCheckoutSession(
         quantity: 1,
       },
     ],
-    success_url: `${siteUrl}/${locale}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${siteUrl}/${locale}/payment/cancel`,
+    success_url: successUrl,
+    cancel_url: cancelUrl,
     metadata: {
       type: 'tournament_entry',
     },
