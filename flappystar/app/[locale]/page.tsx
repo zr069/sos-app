@@ -5,6 +5,7 @@ import LiveWidget from '@/components/leaderboard/LiveWidget';
 import TournamentStats from '@/components/landing/TournamentStats';
 import Accordion from '@/components/ui/Accordion';
 import EnterTournamentButton from './EnterTournamentButton';
+import GamePreview from '@/components/landing/GamePreview';
 
 export async function generateMetadata({
   params,
@@ -45,33 +46,43 @@ export default async function HomePage({
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 sm:py-16">
       {/* Hero Section */}
-      <section className="text-center mb-16 sm:mb-24">
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold text-white mb-4">
-          {t('hero.title')}
-          <br />
-          <span className="gold-shimmer text-5xl sm:text-7xl lg:text-8xl">
-            {t('hero.prize')}
-          </span>
-        </h1>
+      <section className="mb-16 sm:mb-24">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          {/* Left side - Text content */}
+          <div className="text-center lg:text-left order-2 lg:order-1">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white mb-4">
+              {t('hero.title')}
+              <br />
+              <span className="gold-shimmer text-5xl sm:text-6xl lg:text-7xl">
+                {t('hero.prize')}
+              </span>
+            </h1>
 
-        <p className="text-lg sm:text-xl text-text-muted max-w-2xl mx-auto mb-8">
-          {t('hero.subtitle')}
-        </p>
+            <p className="text-lg sm:text-xl text-text-muted max-w-xl mx-auto lg:mx-0 mb-8">
+              {t('hero.subtitle')}
+            </p>
 
-        {/* Countdown */}
-        <div className="mb-10">
-          <CountdownTimer targetDate={tournamentEndDate} />
-        </div>
+            {/* Countdown */}
+            <div className="mb-8">
+              <CountdownTimer targetDate={tournamentEndDate} />
+            </div>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <EnterTournamentButton locale={locale}>
-            {t('hero.ctaEnter')}
-          </EnterTournamentButton>
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4">
+              <EnterTournamentButton locale={locale}>
+                {t('hero.ctaEnter')}
+              </EnterTournamentButton>
 
-          <Link href="/play?mode=free" className="btn-secondary">
-            {t('hero.ctaFree')}
-          </Link>
+              <Link href="/play?mode=free" className="btn-secondary">
+                {t('hero.ctaFree')}
+              </Link>
+            </div>
+          </div>
+
+          {/* Right side - Game Preview */}
+          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+            <GamePreview />
+          </div>
         </div>
       </section>
 
