@@ -9,12 +9,12 @@ import { GAME_CONSTANTS as G, type GameInput } from './gameConstants';
 
 // Level difficulty settings - MUST match client (FlappyBird.tsx)
 const LEVEL_CONFIG = [
-  { minScore: 0,  speed: 1.8, gap: 210 },  // Level 1
-  { minScore: 15, speed: 2.1, gap: 195 },  // Level 2
-  { minScore: 30, speed: 2.4, gap: 180 },  // Level 3
-  { minScore: 45, speed: 2.7, gap: 168 },  // Level 4
-  { minScore: 60, speed: 3.0, gap: 158 },  // Level 5
-  { minScore: 75, speed: 3.3, gap: 150 },  // Level 6+
+  { minScore: 0,  speed: 2.2, gap: 200 },  // Level 1
+  { minScore: 15, speed: 2.5, gap: 188 },  // Level 2
+  { minScore: 30, speed: 2.8, gap: 176 },  // Level 3
+  { minScore: 45, speed: 3.1, gap: 165 },  // Level 4
+  { minScore: 60, speed: 3.4, gap: 156 },  // Level 5
+  { minScore: 75, speed: 3.7, gap: 148 },  // Level 6+
 ];
 
 function getLevelConfig(score: number) {
@@ -60,6 +60,7 @@ export function replayGame(
   }> = [];
 
   let lastPipeTime = 0;
+  let firstPipeSpawned = false;
   let inputIndex = 0;
 
   const totalFrames = Math.ceil(gameDurationMs / G.FRAME_MS);
@@ -87,14 +88,27 @@ export function replayGame(
     const pipeSpeed = levelConfig.speed;
     const pipeGap = levelConfig.gap;
 
-    // Spawn new pipe
-    if (currentTimeMs - lastPipeTime >= G.PIPE_INTERVAL_MS) {
+    // Spawn pipes - first pipe comes faster (FIRST_PIPE_DELAY_MS), then regular interval
+    let shouldSpawnPipe = false;
+    if (!firstPipeSpawned) {
+      if (currentTimeMs >= G.FIRST_PIPE_DELAY_MS) {
+        shouldSpawnPipe = true;
+        firstPipeSpawned = true;
+        lastPipeTime = currentTimeMs;
+      }
+    } else {
+      if (currentTimeMs - lastPipeTime >= G.PIPE_INTERVAL_MS) {
+        shouldSpawnPipe = true;
+        lastPipeTime = currentTimeMs;
+      }
+    }
+
+    if (shouldSpawnPipe) {
       // Use deterministic pipe Y position based on frame count
       // Same algorithm must be used on client side
       const seed = frame * 9301 + 49297;
       const gapY = 100 + (seed % (G.CANVAS_HEIGHT - pipeGap - 200));
       pipes.push({ x: G.PIPE_START_X, gapY, passed: false });
-      lastPipeTime = currentTimeMs;
     }
 
     // Move pipes

@@ -45,14 +45,14 @@ type GameState = 'loading' | 'idle' | 'playing' | 'gameover' | 'validating';
 const BIRD_SIZE = G.BIRD_SIZE * 2;
 const STAR_COUNT = 50;
 
-// Level difficulty settings
+// Level difficulty settings - MUST match server (gameEngine.ts)
 const LEVEL_CONFIG = [
-  { minScore: 0,  speed: 1.8, gap: 210 },  // Level 1
-  { minScore: 15, speed: 2.1, gap: 195 },  // Level 2
-  { minScore: 30, speed: 2.4, gap: 180 },  // Level 3
-  { minScore: 45, speed: 2.7, gap: 168 },  // Level 4
-  { minScore: 60, speed: 3.0, gap: 158 },  // Level 5
-  { minScore: 75, speed: 3.3, gap: 150 },  // Level 6+
+  { minScore: 0,  speed: 2.2, gap: 200 },  // Level 1
+  { minScore: 15, speed: 2.5, gap: 188 },  // Level 2
+  { minScore: 30, speed: 2.8, gap: 176 },  // Level 3
+  { minScore: 45, speed: 3.1, gap: 165 },  // Level 4
+  { minScore: 60, speed: 3.4, gap: 156 },  // Level 5
+  { minScore: 75, speed: 3.7, gap: 148 },  // Level 6+
 ];
 
 function getLevel(score: number): number {
@@ -153,6 +153,8 @@ export default function FlappyBird({
   const lastPipeSpawnRef = useRef(0);
   const difficultyRef = useRef({ speed: G.PIPE_SPEED_START, gapHeight: G.PIPE_GAP_START });
   const frameCountRef = useRef(0); // Frame counter for deterministic pipe generation
+  const firstPipeSpawnedRef = useRef(false); // Track if first pipe has spawned
+  const lastFrameTimeRef = useRef(0); // For delta-time based physics
 
   // Fetch game session token (tournament mode)
   useEffect(() => {
@@ -248,6 +250,8 @@ export default function FlappyBird({
     setShowLevelUp(false);
     lastPipeSpawnRef.current = 0;
     frameCountRef.current = 0;
+    firstPipeSpawnedRef.current = false; // Reset first pipe tracker
+    lastFrameTimeRef.current = 0;
     difficultyRef.current = { speed: LEVEL_CONFIG[0].speed, gapHeight: LEVEL_CONFIG[0].gap };
 
     // Reset input recording
@@ -520,9 +524,15 @@ export default function FlappyBird({
         // Increment frame counter for deterministic pipe generation
         frameCountRef.current++;
 
-        // Update bird physics
-        birdRef.current.velocity += G.GRAVITY;
-        birdRef.current.y += birdRef.current.velocity;
+        // Delta-time based physics for consistent speed across devices
+        // Cap deltaTime to prevent huge jumps on slow frames
+        const cappedDelta = Math.min(deltaTime, 50);
+        // Normalize to 60fps (16.67ms per frame)
+        const dt = cappedDelta / 16.67;
+
+        // Update bird physics with delta-time
+        birdRef.current.velocity += G.GRAVITY * dt;
+        birdRef.current.y += birdRef.current.velocity * dt;
 
         // Calculate current time in ms
         const currentTimeMs = frameCountRef.current * G.FRAME_MS;
@@ -532,8 +542,24 @@ export default function FlappyBird({
         const pipeGap = levelConfig.gap;
         const pipeSpeed = levelConfig.speed;
 
-        // Spawn pipes deterministically (same algorithm as server)
-        if (currentTimeMs - lastPipeSpawnRef.current >= G.PIPE_INTERVAL_MS) {
+        // Spawn pipes - first pipe comes faster (800ms), then regular interval
+        let shouldSpawnPipe = false;
+        if (!firstPipeSpawnedRef.current) {
+          // First pipe spawns after FIRST_PIPE_DELAY_MS (800ms)
+          if (currentTimeMs >= G.FIRST_PIPE_DELAY_MS) {
+            shouldSpawnPipe = true;
+            firstPipeSpawnedRef.current = true;
+            lastPipeSpawnRef.current = currentTimeMs;
+          }
+        } else {
+          // Subsequent pipes spawn at regular interval
+          if (currentTimeMs - lastPipeSpawnRef.current >= G.PIPE_INTERVAL_MS) {
+            shouldSpawnPipe = true;
+            lastPipeSpawnRef.current = currentTimeMs;
+          }
+        }
+
+        if (shouldSpawnPipe) {
           // Use deterministic pipe Y position based on frame count
           // MUST match server algorithm: seed = frame * 9301 + 49297
           const gapY = getPipeGapY(frameCountRef.current, pipeGap);
@@ -543,12 +569,11 @@ export default function FlappyBird({
             gapHeight: pipeGap,
             passed: false,
           });
-          lastPipeSpawnRef.current = currentTimeMs;
         }
 
-        // Update pipes
+        // Update pipes with delta-time
         pipesRef.current = pipesRef.current.filter((pipe) => {
-          pipe.x -= pipeSpeed;
+          pipe.x -= pipeSpeed * dt;
 
           // Score when passing pipe
           if (!pipe.passed && pipe.x + G.PIPE_WIDTH < G.BIRD_X) {

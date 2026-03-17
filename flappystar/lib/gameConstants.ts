@@ -9,9 +9,9 @@
  */
 
 export const GAME_CONSTANTS = {
-  // Physics - balanced feel
-  GRAVITY: 0.22 as number,
-  FLAP_FORCE: -5.2 as number,
+  // Physics - balanced for cross-device consistency
+  GRAVITY: 0.28 as number,
+  FLAP_FORCE: -5.8 as number,
   BIRD_X: 80 as number,
   BIRD_SIZE: 20 as number,
   BIRD_COLLISION_FACTOR: 0.72 as number, // Forgiving hitbox
@@ -20,12 +20,13 @@ export const GAME_CONSTANTS = {
 
   // Pipes - level-based difficulty (old per-10 system disabled)
   PIPE_WIDTH: 60 as number,
-  PIPE_GAP_START: 210 as number,
-  PIPE_GAP_MIN: 150 as number,
+  PIPE_GAP_START: 200 as number,
+  PIPE_GAP_MIN: 148 as number,
   PIPE_GAP_DECREASE_PER_10: 0 as number,  // disabled - using level system
-  PIPE_SPEED_START: 1.8 as number,
+  PIPE_SPEED_START: 2.2 as number,
   PIPE_SPEED_INCREASE_PER_10: 0 as number, // disabled - using level system
   PIPE_INTERVAL_MS: 2200 as number,
+  FIRST_PIPE_DELAY_MS: 800 as number, // First pipe spawns faster
   PIPE_START_X: 480 as number,
 
   // Canvas (logical units)
