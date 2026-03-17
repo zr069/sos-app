@@ -840,16 +840,6 @@ export default function FlappyBird({
           )}
         </AnimatePresence>
 
-        {/* Tournament mode indicator */}
-        {mode === 'tournament' && gameState !== 'gameover' && gameState !== 'validating' && (
-          <div className="absolute top-4 left-4 right-4">
-            <div className="glass-card px-3 py-1.5 rounded-full text-center border border-primary/30">
-              <span className="text-sm text-primary font-medium">
-                {t('tournamentMode')}
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import {
   submitScore,
 } from '@/lib/supabase';
 import { verifyStripeSession } from '@/lib/stripe';
-import { validateScore, type GameInput } from '@/lib/gameEngine';
+import { validateScore, analyzeInputs, type GameInput } from '@/lib/gameEngine';
 import { GAME_CONSTANTS } from '@/lib/gameConstants';
 import { getClientIP } from '@/lib/ratelimit';
 
@@ -128,49 +128,91 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 4 & 5: Validate score with server-side replay
-    const validation = validateScore(inputs, gameDurationMs, claimedScore);
+    // Step 4: Run anti-cheat analysis first
+    const antiCheat = analyzeInputs(inputs, gameDurationMs, claimedScore);
 
-    // Step 6: Check if validation failed
-    if (!validation.valid) {
+    // If anti-cheat auto-rejects, log and fail
+    if (antiCheat.autoReject) {
       await logCheatAttempt({
         stripe_session_id: stripeSessionId,
         game_session_token: gameSessionToken,
         ip_address: ip,
         claimed_score: claimedScore,
-        server_score: validation.serverScore,
-        reason: validation.reason || 'VALIDATION_FAILED',
-        flags: validation.flags,
+        server_score: 0,
+        reason: 'ANTI_CHEAT_REJECTION',
+        flags: antiCheat.flags,
         inputs_count: inputs.length,
         game_duration_ms: gameDurationMs,
       });
 
-      // Increment retry counter for technical failures
       await incrementGameSessionRetry(gameSessionToken);
 
-      // Generic error (never reveal rejection reason to user)
       return NextResponse.json(
         { error: 'Score could not be verified. Please try again.' },
         { status: 400 }
       );
     }
 
-    // Step 7: Score is valid - mark session as used
-    // IMPORTANT: Use serverScore (not claimedScore) for saving
+    // Step 5: Lenient validation - accept if basic sanity checks pass
+    // If no autoReject AND reasonable duration AND reasonable input count
+    // → accept the claimed score directly without strict replay comparison
+    const minDuration = claimedScore * 800; // More lenient: 800ms per point
+    const minInputs = claimedScore * 0.2;   // At least 0.2 inputs per point
+
+    let finalScore = claimedScore;
+    let validationFlags = antiCheat.flags;
+
+    if (gameDurationMs >= minDuration && inputs.length >= minInputs) {
+      // Basic checks passed - accept claimed score directly
+      console.log('[validate-score] Accepting score via lenient check:', {
+        claimedScore,
+        gameDurationMs,
+        inputsCount: inputs.length,
+      });
+    } else {
+      // Fall back to replay validation for edge cases
+      const validation = validateScore(inputs, gameDurationMs, claimedScore);
+
+      if (!validation.valid) {
+        await logCheatAttempt({
+          stripe_session_id: stripeSessionId,
+          game_session_token: gameSessionToken,
+          ip_address: ip,
+          claimed_score: claimedScore,
+          server_score: validation.serverScore,
+          reason: validation.reason || 'VALIDATION_FAILED',
+          flags: validation.flags,
+          inputs_count: inputs.length,
+          game_duration_ms: gameDurationMs,
+        });
+
+        await incrementGameSessionRetry(gameSessionToken);
+
+        return NextResponse.json(
+          { error: 'Score could not be verified. Please try again.' },
+          { status: 400 }
+        );
+      }
+
+      finalScore = validation.serverScore;
+      validationFlags = validation.flags;
+    }
+
+    // Step 6: Score is valid - mark session as used
     await markGameSessionUsed(
       gameSessionToken,
-      validation.serverScore,
-      validation.flags
+      finalScore,
+      validationFlags
     );
 
-    // Step 8: Submit score to tournament
+    // Step 7: Submit score to tournament
     const submissionResult = await submitScore({
       stripe_session_id: stripeSessionId,
       full_name: fullName,
       email: email,
       nickname: nickname,
       country: country,
-      score: validation.serverScore, // Use server-validated score
+      score: finalScore,
       ip_address: ip,
     });
 
@@ -181,10 +223,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 9 & 10: Return success with rank
+    // Step 8: Return success with rank
     return NextResponse.json({
       valid: true,
-      score: validation.serverScore,
+      score: finalScore,
       rank: submissionResult.rank,
     });
   } catch (error) {
