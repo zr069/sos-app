@@ -519,10 +519,11 @@ export default function FlappyBird({
       ctx.fillText(scoreRef.current.toString(), canvasSize.width / 2, 60);
       ctx.shadowBlur = 0;
 
-      // Idle state: floating animation
+      // Idle state: floating animation (no physics, just gentle bobbing)
       if (gameStateRef.current === 'idle') {
         birdRef.current.x = G.BIRD_X;
-        birdRef.current.y = G.BIRD_START_Y + Math.sin(timestamp * 0.003) * 20;
+        birdRef.current.y = G.BIRD_START_Y + Math.sin(timestamp * 0.002) * 15;
+        birdRef.current.velocity = 0; // Reset velocity so bird doesn't fall on start
       }
 
       frameRef.current = requestAnimationFrame(gameLoop);

@@ -10,8 +10,8 @@
 
 export const GAME_CONSTANTS = {
   // Physics - classic Flappy Bird feel
-  GRAVITY: 0.25 as number,
-  FLAP_FORCE: -6 as number,
+  GRAVITY: 0.3 as number,
+  FLAP_FORCE: -7 as number,
   BIRD_X: 80 as number,
   BIRD_SIZE: 20 as number,
   BIRD_START_Y: 300 as number,
@@ -19,12 +19,12 @@ export const GAME_CONSTANTS = {
 
   // Pipes - comfortable, classic pacing
   PIPE_WIDTH: 60 as number,
-  PIPE_GAP_START: 180 as number,
-  PIPE_GAP_MIN: 140 as number,
-  PIPE_GAP_DECREASE_PER_10: 2 as number,
-  PIPE_SPEED_START: 2.5 as number,
-  PIPE_SPEED_INCREASE_PER_10: 0.1 as number,
-  PIPE_INTERVAL_MS: 2000 as number,
+  PIPE_GAP_START: 200 as number,
+  PIPE_GAP_MIN: 160 as number,
+  PIPE_GAP_DECREASE_PER_10: 1 as number,
+  PIPE_SPEED_START: 2 as number,
+  PIPE_SPEED_INCREASE_PER_10: 0.05 as number,
+  PIPE_INTERVAL_MS: 2200 as number,
   PIPE_START_X: 480 as number,
 
   // Canvas (logical units)
