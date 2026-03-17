@@ -98,19 +98,21 @@ export function replayGame(
     pipes.length = 0;
     pipes.push(...activePipes);
 
-    // Collision detection
+    // Collision detection - use forgiving hitbox (same as client)
+    const collisionRadius = G.BIRD_SIZE * G.BIRD_COLLISION_FACTOR;
+
     // Floor and ceiling
-    if (birdY - G.BIRD_SIZE < 0 || birdY + G.BIRD_SIZE > G.CANVAS_HEIGHT) {
+    if (birdY - collisionRadius < 0 || birdY + collisionRadius > G.CANVAS_HEIGHT) {
       gameOver = true;
       break;
     }
 
     // Pipe collision
     for (const pipe of pipes) {
-      const birdLeft = G.BIRD_X - G.BIRD_SIZE;
-      const birdRight = G.BIRD_X + G.BIRD_SIZE;
-      const birdTop = birdY - G.BIRD_SIZE;
-      const birdBottom = birdY + G.BIRD_SIZE;
+      const birdLeft = G.BIRD_X - collisionRadius;
+      const birdRight = G.BIRD_X + collisionRadius;
+      const birdTop = birdY - collisionRadius;
+      const birdBottom = birdY + collisionRadius;
 
       if (birdRight > pipe.x && birdLeft < pipe.x + G.PIPE_WIDTH) {
         if (birdTop < pipe.gapY || birdBottom > pipe.gapY + pipeGap) {

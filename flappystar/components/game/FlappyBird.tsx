@@ -376,11 +376,12 @@ export default function FlappyBird({
   // Check collision
   const checkCollision = useCallback(
     (bird: typeof birdRef.current, pipes: Pipe[]) => {
-      // Use G.BIRD_SIZE for collision to match server
-      const birdLeft = G.BIRD_X - G.BIRD_SIZE;
-      const birdRight = G.BIRD_X + G.BIRD_SIZE;
-      const birdTop = bird.y - G.BIRD_SIZE;
-      const birdBottom = bird.y + G.BIRD_SIZE;
+      // Use forgiving hitbox (smaller than visual) for better gameplay
+      const collisionRadius = G.BIRD_SIZE * G.BIRD_COLLISION_FACTOR;
+      const birdLeft = G.BIRD_X - collisionRadius;
+      const birdRight = G.BIRD_X + collisionRadius;
+      const birdTop = bird.y - collisionRadius;
+      const birdBottom = bird.y + collisionRadius;
 
       // Floor and ceiling
       if (birdTop < 0 || birdBottom > G.CANVAS_HEIGHT) {
