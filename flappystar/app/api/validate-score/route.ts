@@ -7,7 +7,7 @@ import {
   submitScore,
 } from '@/lib/supabase';
 import { verifyStripeSession } from '@/lib/stripe';
-import { validateScore, analyzeInputs, type GameInput } from '@/lib/gameEngine';
+import { analyzeInputs, type GameInput } from '@/lib/gameEngine';
 import { GAME_CONSTANTS } from '@/lib/gameConstants';
 import { getClientIP } from '@/lib/ratelimit';
 
@@ -128,10 +128,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 4: Run anti-cheat analysis first
+    // Step 4: Run basic anti-cheat checks only (no replay)
+    // Replay disabled due to floating point differences causing false rejections
     const antiCheat = analyzeInputs(inputs, gameDurationMs, claimedScore);
 
-    // If anti-cheat auto-rejects, log and fail
+    // Only reject if obvious cheating (bot timing, impossible scores)
     if (antiCheat.autoReject) {
       await logCheatAttempt({
         stripe_session_id: stripeSessionId,
@@ -153,52 +154,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 5: Lenient validation - accept if basic sanity checks pass
-    // If no autoReject AND reasonable duration AND reasonable input count
-    // → accept the claimed score directly without strict replay comparison
-    const minDuration = claimedScore * 800; // More lenient: 800ms per point
-    const minInputs = claimedScore * 0.2;   // At least 0.2 inputs per point
+    // Step 5: Accept score directly (replay disabled)
+    // Basic checks passed - use claimed score
+    const finalScore = claimedScore;
+    const validationFlags = antiCheat.flags;
 
-    let finalScore = claimedScore;
-    let validationFlags = antiCheat.flags;
+    console.log('[validate-score] Accepting score (basic checks passed):', {
+      claimedScore,
+      gameDurationMs,
+      inputsCount: inputs.length,
+      flags: validationFlags,
+    });
 
-    if (gameDurationMs >= minDuration && inputs.length >= minInputs) {
-      // Basic checks passed - accept claimed score directly
-      console.log('[validate-score] Accepting score via lenient check:', {
-        claimedScore,
-        gameDurationMs,
-        inputsCount: inputs.length,
-      });
-    } else {
-      // Fall back to replay validation for edge cases
-      const validation = validateScore(inputs, gameDurationMs, claimedScore);
-
-      if (!validation.valid) {
-        await logCheatAttempt({
-          stripe_session_id: stripeSessionId,
-          game_session_token: gameSessionToken,
-          ip_address: ip,
-          claimed_score: claimedScore,
-          server_score: validation.serverScore,
-          reason: validation.reason || 'VALIDATION_FAILED',
-          flags: validation.flags,
-          inputs_count: inputs.length,
-          game_duration_ms: gameDurationMs,
-        });
-
-        await incrementGameSessionRetry(gameSessionToken);
-
-        return NextResponse.json(
-          { error: 'Score could not be verified. Please try again.' },
-          { status: 400 }
-        );
-      }
-
-      finalScore = validation.serverScore;
-      validationFlags = validation.flags;
-    }
-
-    // Step 6: Score is valid - mark session as used
+    // Step 6: Mark session as used
     await markGameSessionUsed(
       gameSessionToken,
       finalScore,

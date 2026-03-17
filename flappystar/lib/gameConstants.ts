@@ -42,7 +42,7 @@ export const GAME_CONSTANTS = {
   MIN_FLAP_INTERVAL_MS: 100 as number,   // humanly impossible below this
   BOT_STDDEV_THRESHOLD: 20 as number,    // ms - suspiciously robotic
   MIN_DURATION_PER_POINT: 1200 as number, // ms per score point minimum
-  SCORE_REPLAY_TOLERANCE: 10 as number,  // allowed difference client vs server
+  SCORE_REPLAY_TOLERANCE: 999 as number, // disabled - using basic checks only
 
   // Session management
   SESSION_EXPIRY_MS: 30 * 60 * 1000 as number, // 30 minutes
