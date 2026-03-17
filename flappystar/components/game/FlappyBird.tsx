@@ -184,7 +184,6 @@ export default function FlappyBird({
   const pipesRef = useRef<Pipe[]>([]);
   const starsRef = useRef<Star[]>([]);
   const frameRef = useRef<number>(0);
-  const lastPipeSpawnRef = useRef(0);
   const difficultyRef = useRef({ speed: G.PIPE_SPEED_START, gapHeight: G.PIPE_GAP_START });
   const frameCountRef = useRef(0); // Frame counter for deterministic pipe generation
   const firstPipeSpawnedRef = useRef(false); // Track if first pipe has spawned
@@ -300,7 +299,6 @@ export default function FlappyBird({
     levelRef.current = 1;
     setScore(0);
     setShowLevelUp(false);
-    lastPipeSpawnRef.current = 0;
     frameCountRef.current = 0;
     firstPipeSpawnedRef.current = false; // Reset first pipe tracker
     lastFrameTimeRef.current = 0;
@@ -597,6 +595,11 @@ export default function FlappyBird({
         // Normalize to 60fps (16.67ms per frame)
         const dt = cappedDelta / 16.67;
 
+        // Get level-based difficulty (needed for bot logic and physics)
+        const levelConfig = getLevelConfig(scoreRef.current);
+        const pipeGap = levelConfig.gap;
+        const pipeSpeed = levelConfig.speed;
+
         // BOT LOGIC (demo mode only)
         if (mode === 'demo') {
           // Find the next pipe that hasn't been passed
@@ -623,28 +626,33 @@ export default function FlappyBird({
         birdRef.current.velocity += G.GRAVITY * dt;
         birdRef.current.y += birdRef.current.velocity * dt;
 
-        // Calculate current time in ms
-        const currentTimeMs = frameCountRef.current * G.FRAME_MS;
+        // Distance-based pipe spawning (fixes desktop vs mobile spacing)
+        // Minimum distance between pipes = 75% of canvas width
+        const MIN_PIPE_DISTANCE = canvasSize.width * 0.75;
+        // First pipe delay = bird travels 40% of canvas width worth of time
+        const FIRST_PIPE_DISTANCE = canvasSize.width * 0.4;
 
-        // Get level-based difficulty
-        const levelConfig = getLevelConfig(scoreRef.current);
-        const pipeGap = levelConfig.gap;
-        const pipeSpeed = levelConfig.speed;
+        // Get last pipe position (or far left if no pipes)
+        const lastPipe = pipesRef.current[pipesRef.current.length - 1];
+        const lastPipeX = lastPipe ? lastPipe.x : -9999;
 
-        // Spawn pipes - first pipe comes faster (800ms), then regular interval
+        // Pipe spawn position (just off right edge)
+        const PIPE_SPAWN_X = canvasSize.width + G.PIPE_WIDTH;
+
         let shouldSpawnPipe = false;
         if (!firstPipeSpawnedRef.current) {
-          // First pipe spawns after FIRST_PIPE_DELAY_MS (800ms)
-          if (currentTimeMs >= G.FIRST_PIPE_DELAY_MS) {
+          // First pipe: spawn after bird has had time to react
+          // Use frame count * speed as proxy for distance traveled
+          const distanceTraveled = frameCountRef.current * pipeSpeed * 0.5;
+          if (distanceTraveled >= FIRST_PIPE_DISTANCE) {
             shouldSpawnPipe = true;
             firstPipeSpawnedRef.current = true;
-            lastPipeSpawnRef.current = currentTimeMs;
           }
         } else {
-          // Subsequent pipes spawn at regular interval
-          if (currentTimeMs - lastPipeSpawnRef.current >= G.PIPE_INTERVAL_MS) {
+          // Subsequent pipes: spawn when last pipe has moved far enough
+          // Last pipe started at PIPE_SPAWN_X, spawn new when gap is MIN_PIPE_DISTANCE
+          if (lastPipeX <= PIPE_SPAWN_X - MIN_PIPE_DISTANCE) {
             shouldSpawnPipe = true;
-            lastPipeSpawnRef.current = currentTimeMs;
           }
         }
 
@@ -653,7 +661,7 @@ export default function FlappyBird({
           // MUST match server algorithm: seed = frame * 9301 + 49297
           const gapY = getPipeGapY(frameCountRef.current, pipeGap);
           pipesRef.current.push({
-            x: G.PIPE_START_X,
+            x: PIPE_SPAWN_X,
             gapY,
             gapHeight: pipeGap,
             passed: false,
