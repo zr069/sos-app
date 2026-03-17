@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
 
 interface PageProps {
   params: Promise<{ nickname: string }>;
