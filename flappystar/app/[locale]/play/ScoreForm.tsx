@@ -58,6 +58,7 @@ export default function ScoreForm({
     null
   );
   const [showConfetti, setShowConfetti] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
@@ -131,13 +132,16 @@ export default function ScoreForm({
   };
 
   const handleShare = async () => {
-    const shareText = t('success.shareMessage', { score: score });
-    const shareUrl = window.location.origin;
+    if (!result) return;
+
+    const nickname = formData.nickname.trim();
+    const shareUrl = `${window.location.origin}/score/${encodeURIComponent(nickname)}?score=${result.score}&rank=${result.rank}`;
+    const shareText = `Ich bin auf Platz #${result.rank} mit ${result.score} Punkten! Kannst du mich schlagen?`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'FlappyStar',
+          title: `${nickname} - FlappyStar`,
           text: shareText,
           url: shareUrl,
         });
@@ -146,7 +150,13 @@ export default function ScoreForm({
       }
     } else {
       // Fallback: copy to clipboard
-      navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 3000);
+      } catch {
+        // Clipboard failed
+      }
     }
   };
 
@@ -262,22 +272,45 @@ export default function ScoreForm({
 
             <button
               onClick={handleShare}
-              className="btn-secondary w-full flex items-center justify-center gap-2"
+              className={`btn-secondary w-full flex items-center justify-center gap-2 transition-colors ${
+                linkCopied ? 'bg-green-500/20 border-green-500/50' : ''
+              }`}
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                />
-              </svg>
-              Teilen
+              {linkCopied ? (
+                <>
+                  <svg
+                    className="w-5 h-5 text-green-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span className="text-green-400">Link kopiert!</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  Teilen
+                </>
+              )}
             </button>
           </motion.div>
         </div>
