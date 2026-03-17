@@ -92,19 +92,22 @@ function getLevelConfig(score: number) {
   return LEVEL_CONFIG[Math.min(level - 1, LEVEL_CONFIG.length - 1)];
 }
 
-// Shared AudioContext for desktop browser compatibility
-// Desktop browsers require user gesture to unlock AudioContext
+// Shared AudioContext for Safari/Chrome/Firefox compatibility
+// Safari requires AudioContext to be created AND resumed synchronously in user gesture
 let sharedAudioCtx: AudioContext | null = null;
 
 function getAudioContext(): AudioContext | null {
   try {
     if (!sharedAudioCtx) {
-      const AudioCtx = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+      // Safari uses webkitAudioContext
+      const AudioCtx = (window as typeof window & { webkitAudioContext?: typeof AudioContext }).AudioContext ||
+        (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return null;
       sharedAudioCtx = new AudioCtx();
     }
-    // Resume if suspended (desktop requirement after user gesture)
-    if (sharedAudioCtx.state === 'suspended') {
+    // Safari: must call resume() synchronously in user gesture
+    // Check for 'running' state specifically (not just 'suspended')
+    if (sharedAudioCtx.state !== 'running') {
       sharedAudioCtx.resume();
     }
     return sharedAudioCtx;
@@ -113,10 +116,11 @@ function getAudioContext(): AudioContext | null {
   }
 }
 
-// FLAP SOUND - soft whoosh on every tap
+// FLAP SOUND - soft whoosh on every tap (with Safari fallback)
 function playFlapSound() {
   const ctx = getAudioContext();
-  if (!ctx) return;
+  if (!ctx || ctx.state !== 'running') return;
+
   try {
     // Create white noise burst with quick decay
     const bufferSize = Math.floor(ctx.sampleRate * 0.08);
@@ -143,14 +147,31 @@ function playFlapSound() {
     gain.connect(ctx.destination);
     source.start(ctx.currentTime);
   } catch {
-    // Audio not available
+    // Safari fallback: simple soft tone instead of noise buffer
+    try {
+      const ctx2 = getAudioContext();
+      if (!ctx2 || ctx2.state !== 'running') return;
+      const o = ctx2.createOscillator();
+      const g = ctx2.createGain();
+      o.connect(g);
+      g.connect(ctx2.destination);
+      o.type = 'sine';
+      o.frequency.setValueAtTime(300, ctx2.currentTime);
+      o.frequency.exponentialRampToValueAtTime(150, ctx2.currentTime + 0.08);
+      g.gain.setValueAtTime(0.1, ctx2.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 0.08);
+      o.start(ctx2.currentTime);
+      o.stop(ctx2.currentTime + 0.08);
+    } catch {
+      // Audio completely unavailable
+    }
   }
 }
 
 // SCORE SOUND - rises with combo, multiple layers
 function playScoreSound(combo: number = 0) {
   const ctx = getAudioContext();
-  if (!ctx) return;
+  if (!ctx || ctx.state !== 'running') return;
 
   try {
     const pitchMult = 1 + Math.min(combo, 10) * 0.07;
@@ -221,7 +242,7 @@ function playScoreSound(combo: number = 0) {
 // GAME OVER SOUND - dramatic descending tone with impact
 function playGameOverSound() {
   const ctx = getAudioContext();
-  if (!ctx) return;
+  if (!ctx || ctx.state !== 'running') return;
 
   try {
     // Impact thud
@@ -395,6 +416,17 @@ export default function FlappyBird({
     starsRef.current = stars;
   }, [canvasSize]);
 
+  // Safari: Resume AudioContext when page becomes visible again
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && sharedAudioCtx) {
+        sharedAudioCtx.resume();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
   // Record input (tournament mode)
   const recordInput = useCallback(() => {
     if (mode !== 'tournament') return;
@@ -449,10 +481,10 @@ export default function FlappyBird({
 
   // Jump action
   const jump = useCallback(() => {
-    if (disabled) return;
+    // MUST be first line - Safari requires AudioContext unlock synchronously in gesture
+    getAudioContext();
 
-    // Initialize and unlock AudioContext on first user interaction (desktop requirement)
-    getAudioContext()?.resume();
+    if (disabled) return;
 
     if (gameStateRef.current === 'idle') {
       startGame();
@@ -1103,6 +1135,9 @@ export default function FlappyBird({
   }, [jump, mode]);
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent | React.PointerEvent) => {
+    // Safari: unlock audio synchronously in gesture handler
+    getAudioContext();
+
     if (mode === 'demo') return; // No input in demo mode
     e.preventDefault();
     e.stopPropagation();
