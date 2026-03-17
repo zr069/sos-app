@@ -279,7 +279,7 @@ export function validateScore(
     return {
       valid: false,
       serverScore: replay.score,
-      reason: \`Score mismatch: claimed \${claimedScore}, replayed \${replay.score}\`,
+      reason: `Score mismatch: claimed ${claimedScore}, replayed ${replay.score}`,
       flags,
     };
   }
