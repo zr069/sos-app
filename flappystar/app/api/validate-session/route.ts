@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isSessionPaid } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { isSessionUsed } from '@/lib/supabase';
 import { isSessionLocked } from '@/lib/redis';
 import { validateSessionSchema } from '@/lib/validations';
 
+/**
+ * GET /api/validate-session
+ *
+ * Validates a Stripe session for tournament play.
+ * Checks:
+ * 1. Stripe payment is completed
+ * 2. Session hasn't been used to submit a score yet
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -20,31 +28,64 @@ export async function GET(request: NextRequest) {
 
     const sessionId = validation.data.session_id;
 
-    // Check if session is paid in Stripe
-    const isPaid = await isSessionPaid(sessionId);
-    if (!isPaid) {
+    // 1. Validate directly against Stripe API
+    const stripe = getStripe();
+    let stripeSession;
+
+    try {
+      stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
+    } catch (stripeError) {
+      console.error('Stripe API error in validate-session:', stripeError);
+      return NextResponse.json(
+        { valid: false, reason: 'Could not verify payment' },
+        { status: 400 }
+      );
+    }
+
+    // Check payment completed
+    if (stripeSession.payment_status !== 'paid') {
       return NextResponse.json(
         { valid: false, reason: 'Payment not completed' },
         { status: 400 }
       );
     }
 
-    // Check Redis lock (quick check)
-    const isLocked = await isSessionLocked(sessionId);
-    if (isLocked) {
+    // Check it's a tournament entry
+    if (stripeSession.metadata?.type !== 'tournament_entry') {
       return NextResponse.json(
-        { valid: false, reason: 'Session already used' },
+        { valid: false, reason: 'Invalid session type' },
         { status: 400 }
       );
     }
 
-    // Check database (authoritative check)
-    const isUsed = await isSessionUsed(sessionId);
-    if (isUsed) {
-      return NextResponse.json(
-        { valid: false, reason: 'Session already used' },
-        { status: 400 }
-      );
+    // 2. Check Redis lock (quick check for already used)
+    try {
+      const isLocked = await isSessionLocked(sessionId);
+      if (isLocked) {
+        return NextResponse.json(
+          { valid: false, reason: 'Session already used' },
+          { status: 400 }
+        );
+      }
+    } catch (redisError) {
+      // Redis error is non-fatal, continue to DB check
+      console.warn('Redis check failed:', redisError);
+    }
+
+    // 3. Check database (authoritative check - score already submitted?)
+    try {
+      const isUsed = await isSessionUsed(sessionId);
+      if (isUsed) {
+        return NextResponse.json(
+          { valid: false, reason: 'Session already used' },
+          { status: 400 }
+        );
+      }
+    } catch (dbError) {
+      // Database error - log but allow game to proceed
+      // Better to allow a potential duplicate attempt (which DB will catch)
+      // than to block a legitimate user
+      console.error('Database check error:', dbError);
     }
 
     return NextResponse.json({ valid: true });

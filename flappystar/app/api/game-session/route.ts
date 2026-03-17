@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGameSession, deleteExpiredGameSessions } from '@/lib/supabase';
-import { verifyStripeSession } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { GAME_CONSTANTS } from '@/lib/gameConstants';
 
 /**
  * GET /api/game-session
  *
  * Generate a one-time-use game session token for tournament play.
- * Requires a valid, paid Stripe session.
+ * Validates ONLY against Stripe API - no database checks here.
+ * The tournament_entries record is created AFTER the game is played.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -21,33 +22,44 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verify Stripe session is valid and paid
+    // Validate directly against Stripe API
+    const stripe = getStripe();
+    let stripeSession;
+
     try {
-      const stripeSession = await verifyStripeSession(stripeSessionId);
-
-      if (!stripeSession) {
-        return NextResponse.json(
-          { error: 'Invalid session' },
-          { status: 400 }
-        );
-      }
-
-      if (stripeSession.payment_status !== 'paid') {
-        return NextResponse.json(
-          { error: 'Payment not completed' },
-          { status: 400 }
-        );
-      }
-    } catch (error) {
-      console.error('Stripe session verification error:', error);
+      stripeSession = await stripe.checkout.sessions.retrieve(stripeSessionId);
+    } catch (stripeError) {
+      console.error('Stripe API error:', stripeError);
       return NextResponse.json(
-        { error: 'Session verification failed' },
+        { error: 'Could not verify payment session' },
         { status: 400 }
       );
     }
 
-    // Delete any existing unused expired tokens for this session
-    await deleteExpiredGameSessions(stripeSessionId);
+    // Check payment status
+    if (stripeSession.payment_status !== 'paid') {
+      return NextResponse.json(
+        { error: 'Payment not completed' },
+        { status: 400 }
+      );
+    }
+
+    // Check it's a tournament entry (optional - for extra security)
+    if (stripeSession.metadata?.type !== 'tournament_entry') {
+      console.error('Invalid session type:', stripeSession.metadata);
+      return NextResponse.json(
+        { error: 'Invalid session type' },
+        { status: 400 }
+      );
+    }
+
+    // Clean up any expired tokens for this session
+    try {
+      await deleteExpiredGameSessions(stripeSessionId);
+    } catch (cleanupError) {
+      // Non-fatal, continue
+      console.warn('Failed to clean up expired sessions:', cleanupError);
+    }
 
     // Create game session token
     const { token, expiresAt } = await createGameSession(
