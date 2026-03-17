@@ -562,7 +562,9 @@ export default function FlappyBird({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [jump]);
 
-  const handleClick = () => {
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent | React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (gameState !== 'gameover' && gameState !== 'validating' && gameState !== 'loading') {
       jump();
     }
@@ -583,17 +585,20 @@ export default function FlappyBird({
       style={{ WebkitTapHighlightColor: 'transparent' }}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="relative select-none">
+      <div
+        className="relative select-none"
+        onClick={handleInteraction}
+        onPointerDown={handleInteraction}
+        onTouchStart={handleInteraction}
+      >
         {/* Game canvas */}
         <canvas
           ref={canvasRef}
           width={canvasSize.width}
           height={canvasSize.height}
-          onClick={handleClick}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            handleClick();
-          }}
+          onClick={handleInteraction}
+          onPointerDown={handleInteraction}
+          onTouchStart={handleInteraction}
           onMouseDown={(e) => e.preventDefault()}
           onDoubleClick={(e) => e.preventDefault()}
           className="rounded-xl border border-surface-border cursor-pointer"
@@ -601,6 +606,7 @@ export default function FlappyBird({
             touchAction: 'none',
             userSelect: 'none',
             WebkitUserSelect: 'none',
+            pointerEvents: 'auto',
           }}
         />
 
@@ -621,16 +627,19 @@ export default function FlappyBird({
           )}
         </AnimatePresence>
 
-        {/* Idle overlay */}
+        {/* Idle overlay - clickable to start game */}
         <AnimatePresence>
           {gameState === 'idle' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl"
+              onClick={handleInteraction}
+              onPointerDown={handleInteraction}
+              onTouchStart={handleInteraction}
+              className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl cursor-pointer"
             >
-              <div className="text-center">
+              <div className="text-center pointer-events-none">
                 <motion.p
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}

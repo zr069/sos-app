@@ -54,7 +54,7 @@ export default function Header() {
               />
             </svg>
           </div>
-          <span className="font-display font-bold text-xl text-white tracking-tight hidden sm:block group-hover:text-primary transition-colors duration-200">
+          <span className="font-display font-bold text-xl text-white tracking-tight group-hover:text-primary transition-colors duration-200">
             FlappyStar
           </span>
         </Link>
