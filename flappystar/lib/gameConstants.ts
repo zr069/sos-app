@@ -9,23 +9,23 @@
  */
 
 export const GAME_CONSTANTS = {
-  // Physics - gentle, mobile-friendly feel
-  GRAVITY: 0.22 as number,
-  FLAP_FORCE: -5.5 as number,
+  // Physics - soft flap, doesn't overshoot gaps
+  GRAVITY: 0.18 as number,
+  FLAP_FORCE: -4.8 as number,
   BIRD_X: 80 as number,
   BIRD_SIZE: 20 as number,
   BIRD_COLLISION_FACTOR: 0.7 as number, // Forgiving hitbox (70% of visual size)
   BIRD_START_Y: 300 as number,
   BIRD_START_VELOCITY: 0 as number,
 
-  // Pipes - comfortable, forgiving pacing
+  // Pipes - wide gaps, slow speed, lots of reaction time
   PIPE_WIDTH: 60 as number,
-  PIPE_GAP_START: 220 as number,
-  PIPE_GAP_MIN: 180 as number,
+  PIPE_GAP_START: 230 as number,
+  PIPE_GAP_MIN: 190 as number,
   PIPE_GAP_DECREASE_PER_10: 1 as number,
-  PIPE_SPEED_START: 1.8 as number,
+  PIPE_SPEED_START: 1.6 as number,
   PIPE_SPEED_INCREASE_PER_10: 0.04 as number,
-  PIPE_INTERVAL_MS: 2400 as number,
+  PIPE_INTERVAL_MS: 2500 as number,
   PIPE_START_X: 480 as number,
 
   // Canvas (logical units)
