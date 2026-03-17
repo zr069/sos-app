@@ -27,19 +27,18 @@ export async function createCheckoutSession(
 ): Promise<Stripe.Checkout.Session> {
   const stripe = getStripe();
 
-  // HARDCODED for debugging - bypass env var issues
+  // Hardcoded base URL
   const siteUrl = 'https://flappystar.com';
 
-  // Validate siteUrl
-  if (!siteUrl || !siteUrl.startsWith('http')) {
-    throw new Error(`Invalid siteUrl: "${siteUrl}"`);
-  }
+  // Sanitize locale - only allow known locales
+  const validLocales = ['en', 'de', 'fr', 'es', 'it', 'zh', 'ar', 'pl', 'hr', 'sr', 'ru'];
+  const safeLocale = validLocales.includes(locale) ? locale : 'de';
 
-  // Build URLs without locale prefix (simpler, less error-prone)
-  const successUrl = `${siteUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${siteUrl}/payment/cancel`;
+  // Build URLs with locale prefix (required because pages are under [locale])
+  const successUrl = `${siteUrl}/${safeLocale}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${siteUrl}/${safeLocale}/payment/cancel`;
 
-  console.log('STRIPE URLS:', { siteUrl, successUrl, cancelUrl, locale });
+  console.log('STRIPE CHECKOUT:', { siteUrl, safeLocale, successUrl, cancelUrl });
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
