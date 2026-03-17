@@ -74,18 +74,51 @@ function playScoreSound() {
   try {
     const AudioContext = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
     if (!AudioContext) return;
-
     const ctx = new AudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    oscillator.frequency.setValueAtTime(523, ctx.currentTime); // C5
-    oscillator.frequency.setValueAtTime(659, ctx.currentTime + 0.1); // E5
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.3);
+
+    // Layer 1: Rising sparkle tone
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(440, ctx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+    osc1.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.25);
+    gain1.gain.setValueAtTime(0, ctx.currentTime);
+    gain1.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.35);
+
+    // Layer 2: Warm chord underneath
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(523, ctx.currentTime); // C5
+    osc2.frequency.setValueAtTime(659, ctx.currentTime + 0.1); // E5
+    gain2.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc2.start(ctx.currentTime);
+    osc2.stop(ctx.currentTime + 0.3);
+
+    // Layer 3: High sparkle ping
+    const osc3 = ctx.createOscillator();
+    const gain3 = ctx.createGain();
+    osc3.connect(gain3);
+    gain3.connect(ctx.destination);
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(1760, ctx.currentTime + 0.1);
+    gain3.gain.setValueAtTime(0, ctx.currentTime + 0.1);
+    gain3.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.12);
+    gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc3.start(ctx.currentTime + 0.1);
+    osc3.stop(ctx.currentTime + 0.4);
+
+    // Close context after sounds finish
+    setTimeout(() => ctx.close(), 500);
   } catch {
     // Audio not available
   }
