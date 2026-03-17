@@ -20,7 +20,7 @@ interface ScoreFormProps {
   score: number;
   sessionId: string;
   gameData: GameValidationData;
-  onSubmitted: () => void;
+  tournamentEndDate?: string;
 }
 
 interface FormData {
@@ -42,7 +42,7 @@ export default function ScoreForm({
   score,
   sessionId,
   gameData,
-  onSubmitted,
+  tournamentEndDate = '17. September 2026',
 }: ScoreFormProps) {
   const t = useTranslations('scoreForm');
 
@@ -119,7 +119,7 @@ export default function ScoreForm({
       if (response.ok && data.valid) {
         setResult({ rank: data.rank, score: data.score });
         setShowConfetti(true);
-        onSubmitted();
+        // Success screen will be shown - no redirect
       } else {
         setErrors({ submit: data.error || t('errors.submitFailed') });
       }
@@ -150,21 +150,122 @@ export default function ScoreForm({
     }
   };
 
-  // Show success screen after submission
+  // Show success screen after submission - full screen overlay
   if (result) {
     return (
-      <>
+      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
         <Confetti active={showConfetti} />
 
-        <div className="max-w-lg mx-auto px-4 py-16">
+        <div className="max-w-lg mx-auto px-4 py-8 text-center">
+          {/* Animated Gold Star */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="glass-card rounded-2xl p-8 text-center"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 200,
+              damping: 15,
+              delay: 0.2
+            }}
+            className="mb-8"
           >
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+            <svg
+              width="120"
+              height="120"
+              viewBox="0 0 120 120"
+              className="mx-auto drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]"
+            >
+              <defs>
+                <radialGradient id="successStarGrad" cx="50%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="#FFF8DC" />
+                  <stop offset="50%" stopColor="#FFD700" />
+                  <stop offset="100%" stopColor="#FFA500" />
+                </radialGradient>
+              </defs>
+              {/* Glow */}
+              <polygon
+                points="60,5 72,42 110,42 80,65 90,102 60,80 30,102 40,65 10,42 48,42"
+                fill="#FFD700"
+                opacity="0.3"
+                transform="scale(1.1) translate(-6, -6)"
+              />
+              {/* Main star */}
+              <polygon
+                points="60,5 72,42 110,42 80,65 90,102 60,80 30,102 40,65 10,42 48,42"
+                fill="url(#successStarGrad)"
+                stroke="rgba(255,255,255,0.5)"
+                strokeWidth="2"
+              />
+            </svg>
+          </motion.div>
+
+          {/* Success Message */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <h1 className="text-3xl sm:text-4xl font-display font-bold text-white mb-2">
+              🎉 Dein Score wurde eingetragen!
+            </h1>
+          </motion.div>
+
+          {/* Score Display */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6 }}
+            className="my-8"
+          >
+            <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
+              {result.score}
+            </p>
+            <p className="text-xl text-text-muted mt-2">Punkte</p>
+          </motion.div>
+
+          {/* Rank */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="mb-8"
+          >
+            <p className="text-2xl font-display text-white">
+              Du bist auf <span className="text-primary font-bold">Platz #{result.rank}</span>!
+            </p>
+          </motion.div>
+
+          {/* Tournament End Message */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.0 }}
+            className="mb-10 p-4 rounded-xl bg-white/[0.02] border border-surface-border"
+          >
+            <p className="text-text-muted">
+              Viel Glück! Der Gewinner wird am{' '}
+              <span className="text-white font-medium">{tournamentEndDate}</span>{' '}
+              bekannt gegeben.
+            </p>
+          </motion.div>
+
+          {/* Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+            className="space-y-3"
+          >
+            <Link href="/leaderboard" className="btn-primary w-full block text-center">
+              Rangliste ansehen
+            </Link>
+
+            <button
+              onClick={handleShare}
+              className="btn-secondary w-full flex items-center justify-center gap-2"
+            >
               <svg
-                className="w-10 h-10 text-primary"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -173,62 +274,14 @@ export default function ScoreForm({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M5 13l4 4L19 7"
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
                 />
               </svg>
-            </div>
-
-            <h2 className="text-2xl font-display font-bold text-white mb-6">
-              {t('success.title')}
-            </h2>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="p-4 rounded-xl bg-white/[0.02]">
-                <p className="text-text-muted text-sm mb-1">
-                  {t('success.rank')}
-                </p>
-                <p className="text-3xl font-display font-bold text-primary">
-                  #{result.rank}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-white/[0.02]">
-                <p className="text-text-muted text-sm mb-1">
-                  {t('success.score')}
-                </p>
-                <p className="text-3xl font-display font-bold text-white">
-                  {result.score}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                onClick={handleShare}
-                className="btn-primary w-full flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                  />
-                </svg>
-                {t('success.shareButton')}
-              </button>
-
-              <Link href="/leaderboard" className="btn-secondary w-full block">
-                {t('success.viewLeaderboard')}
-              </Link>
-            </div>
+              Teilen
+            </button>
           </motion.div>
         </div>
-      </>
+      </div>
     );
   }
 

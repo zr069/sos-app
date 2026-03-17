@@ -29,7 +29,6 @@ function PlayContent() {
   const [error, setError] = useState<string | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
-  const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [gameData, setGameData] = useState<GameValidationData | null>(null);
 
   const validateSession = async () => {
@@ -88,10 +87,6 @@ function PlayContent() {
     setGameOver(true);
   };
 
-  const handleScoreSubmitted = () => {
-    setScoreSubmitted(true);
-  };
-
   // Show loading state while validating
   if (mode === 'tournament' && isValidating) {
     return (
@@ -136,14 +131,13 @@ function PlayContent() {
     );
   }
 
-  // Show score form after tournament game over
-  if (mode === 'tournament' && gameOver && !scoreSubmitted && sessionId && gameData) {
+  // Show score form after tournament game over (includes success screen after submission)
+  if (mode === 'tournament' && gameOver && sessionId && gameData) {
     return (
       <ScoreForm
         score={finalScore}
         sessionId={sessionId}
         gameData={gameData}
-        onSubmitted={handleScoreSubmitted}
       />
     );
   }
