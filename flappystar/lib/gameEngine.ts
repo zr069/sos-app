@@ -276,15 +276,15 @@ export function validateScore(
     };
   }
 
-  // Impossibly fast scoring (less than 800ms per point)
-  if (claimedScore > 0 && gameDurationMs < claimedScore * 800) {
-    return {
-      valid: false,
-      serverScore: 0,
-      reason: 'Score achieved too quickly',
-      flags: ['speed_hack'],
-    };
-  }
+  // Impossibly fast scoring check - disabled for now
+  // if (claimedScore > 0 && gameDurationMs < claimedScore * 800) {
+  //   return {
+  //     valid: false,
+  //     serverScore: 0,
+  //     reason: 'Score achieved too quickly',
+  //     flags: ['speed_hack'],
+  //   };
+  // }
 
   // Replay the game
   const replay = replayGame(inputs, gameDurationMs);
