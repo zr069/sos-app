@@ -286,30 +286,33 @@ export default function ScoreForm({
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-16">
+    <div className="min-h-screen flex flex-col items-center pt-4 px-4 pb-8 overflow-y-auto scroll-smooth">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card rounded-2xl p-8"
+        className="glass-card rounded-2xl p-5 sm:p-8 w-full max-w-lg"
       >
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-display font-bold text-white mb-2">
+        {/* Compact header */}
+        <div className="text-center mb-4">
+          <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1">
             {t('title')}
           </h2>
-          <p className="text-text-muted">{t('subtitle')}</p>
+          <p className="text-text-muted text-sm">{t('subtitle')}</p>
 
-          <div className="mt-4 p-4 rounded-xl bg-primary/10">
-            <p className="text-text-muted text-sm">Your Score</p>
-            <p className="text-4xl font-display font-bold gold-shimmer">
+          {/* Compact score display */}
+          <div className="mt-3 py-2 px-4 rounded-xl bg-primary/10 inline-block">
+            <p className="text-text-muted text-xs">Your Score</p>
+            <p className="text-3xl sm:text-4xl font-display font-bold gold-shimmer">
               {score}
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Form with reduced gaps and keyboard-friendly padding */}
+        <form onSubmit={handleSubmit} className="space-y-3 pb-32">
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-white mb-1">
               {t('fullName')}
             </label>
             <input
@@ -324,13 +327,13 @@ export default function ScoreForm({
               }`}
             />
             {errors.fullName && (
-              <p className="mt-1 text-sm text-red-500">{errors.fullName}</p>
+              <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>
             )}
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-white mb-1">
               {t('email')}
             </label>
             <input
@@ -345,13 +348,26 @@ export default function ScoreForm({
               }`}
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              <p className="mt-1 text-xs text-red-500">{errors.email}</p>
             )}
           </div>
 
-          {/* Nickname */}
+          {/* Country - moved up for better mobile keyboard flow */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-white mb-1">
+              {t('country')}
+            </label>
+            <CountrySelect
+              value={formData.country}
+              onChange={(code) => setFormData({ ...formData, country: code })}
+              placeholder={t('countryPlaceholder')}
+              error={errors.country}
+            />
+          </div>
+
+          {/* Nickname - moved down */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-1">
               {t('nickname')}
             </label>
             <input
@@ -366,26 +382,13 @@ export default function ScoreForm({
               }`}
             />
             {errors.nickname && (
-              <p className="mt-1 text-sm text-red-500">{errors.nickname}</p>
+              <p className="mt-1 text-xs text-red-500">{errors.nickname}</p>
             )}
-          </div>
-
-          {/* Country */}
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              {t('country')}
-            </label>
-            <CountrySelect
-              value={formData.country}
-              onChange={(code) => setFormData({ ...formData, country: code })}
-              placeholder={t('countryPlaceholder')}
-              error={errors.country}
-            />
           </div>
 
           {/* Submit Error */}
           {errors.submit && (
-            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
               <p className="text-sm text-red-500">{errors.submit}</p>
             </div>
           )}
@@ -394,7 +397,7 @@ export default function ScoreForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
           >
             {isSubmitting ? (
               <>

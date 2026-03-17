@@ -83,6 +83,7 @@ interface CountrySelectProps {
   onChange: (code: string) => void;
   placeholder?: string;
   error?: string;
+  onOpen?: () => void;
 }
 
 export default function CountrySelect({
@@ -90,11 +91,22 @@ export default function CountrySelect({
   onChange,
   placeholder = 'Select country',
   error,
+  onOpen,
 }: CountrySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll into view when opening on mobile
+  const handleOpen = () => {
+    setIsOpen(true);
+    onOpen?.();
+    // Scroll container into view after a short delay for keyboard
+    setTimeout(() => {
+      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
 
   const selectedCountry = countries.find((c) => c.code === value);
 
@@ -137,7 +149,7 @@ export default function CountrySelect({
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => isOpen ? setIsOpen(false) : handleOpen()}
         className={`w-full px-4 py-3 bg-surface border rounded-lg text-left flex items-center gap-3 transition-colors ${
           error
             ? 'border-red-500'
