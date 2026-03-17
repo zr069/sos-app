@@ -135,7 +135,7 @@ export default function ScoreForm({
     if (!result) return;
 
     const nickname = formData.nickname.trim();
-    const shareUrl = `${window.location.origin}/score/${encodeURIComponent(nickname)}?score=${result.score}&rank=${result.rank}`;
+    const shareUrl = `https://www.flappystar.com/score/${encodeURIComponent(nickname)}?score=${result.score}&rank=${result.rank}`;
     const shareText = `Ich bin auf Platz #${result.rank} mit ${result.score} Punkten! Kannst du mich schlagen?`;
 
     if (navigator.share) {
