@@ -81,14 +81,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Minimum game duration: 5 seconds
-    if (!gameDurationMs || gameDurationMs < 5000) {
-      console.log('[validate-score] Game too short:', gameDurationMs);
-      return NextResponse.json(
-        { error: 'Game too short' },
-        { status: 400 }
-      );
-    }
+    // Minimum game duration check - disabled for now
+    // if (gameDurationMs && gameDurationMs < 5000) {
+    //   console.log('[validate-score] Game too short:', gameDurationMs);
+    //   return NextResponse.json(
+    //     { error: 'Game too short' },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Step 1: Check score is valid range (0-999)
     if (claimedScore < 0 || claimedScore >= 1000) {
