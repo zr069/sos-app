@@ -1,20 +1,28 @@
 /**
- * Server-Side Game Engine
+ * Server-side Game Engine for FlappyStar
  *
- * Deterministic game replay for score validation.
- * Uses exact same physics as client (FlappyBird.tsx).
+ * Replays game inputs to validate scores.
+ * Uses IDENTICAL physics to FlappyBird.tsx client.
+ *
+ * CRITICAL: Keep in sync with:
+ * - lib/gameConstants.ts (physics values)
+ * - components/game/FlappyBird.tsx (LEVEL_CONFIG, pipe spawning)
  */
 
-import { GAME_CONSTANTS as G, type GameInput } from './gameConstants';
+import {
+  GAME_CONSTANTS as G,
+  getPipeGapY,
+  type GameInput,
+} from './gameConstants';
 
-// Level difficulty settings - MUST match client (FlappyBird.tsx)
+// Level difficulty - MUST match FlappyBird.tsx exactly
 const LEVEL_CONFIG = [
-  { minScore: 0,  speed: 2.2, gap: 200 },  // Level 1
-  { minScore: 15, speed: 2.5, gap: 188 },  // Level 2
-  { minScore: 30, speed: 2.8, gap: 176 },  // Level 3
-  { minScore: 45, speed: 3.1, gap: 165 },  // Level 4
-  { minScore: 60, speed: 3.4, gap: 156 },  // Level 5
-  { minScore: 75, speed: 3.7, gap: 148 },  // Level 6+
+  { minScore: 0, speed: 2.2, gap: 200 }, // Level 1
+  { minScore: 15, speed: 2.5, gap: 188 }, // Level 2
+  { minScore: 30, speed: 2.8, gap: 176 }, // Level 3
+  { minScore: 45, speed: 3.1, gap: 165 }, // Level 4
+  { minScore: 60, speed: 3.4, gap: 156 }, // Level 5
+  { minScore: 75, speed: 3.7, gap: 148 }, // Level 6+
 ];
 
 function getLevelConfig(score: number) {
@@ -26,208 +34,185 @@ function getLevelConfig(score: number) {
   return LEVEL_CONFIG[0];
 }
 
-export interface ReplayResult {
-  score: number;
-  valid: boolean;
-  framesSimulated: number;
+interface ServerPipe {
+  x: number;
+  gapY: number;
+  gapHeight: number;
+  passed: boolean;
 }
 
-export interface AntiCheatResult {
-  passed: boolean;
-  flags: string[];
-  autoReject: boolean;
+interface ReplayResult {
+  score: number;
+  valid: boolean;
+  reason?: string;
+  frameCount: number;
+  collisionFrame?: number;
 }
 
 /**
- * Replay a game from recorded inputs.
- * Returns the server-calculated score.
+ * Replay a game from recorded inputs
+ *
+ * @param inputs - Array of flap inputs with timestamps
+ * @param gameDurationMs - Total game duration in milliseconds
+ * @returns Replay result with score and validity
  */
 export function replayGame(
   inputs: GameInput[],
   gameDurationMs: number
 ): ReplayResult {
-  // Game state
+  // Simulation state
   let birdY = G.BIRD_START_Y;
   let birdVelocity = G.BIRD_START_VELOCITY;
+  const pipes: ServerPipe[] = [];
   let score = 0;
-  let gameOver = false;
-
-  // Pipe state
-  const pipes: Array<{
-    x: number;
-    gapY: number;
-    passed: boolean;
-  }> = [];
-
-  let lastPipeTime = 0;
+  let frameCount = 0;
   let firstPipeSpawned = false;
+
+  // Sort inputs by timestamp (defensive)
+  const sortedInputs = [...inputs].sort((a, b) => a.timestamp - b.timestamp);
   let inputIndex = 0;
 
-  const totalFrames = Math.ceil(gameDurationMs / G.FRAME_MS);
+  // Canvas dimensions for pipe spawning (matches client)
+  const canvasWidth = G.CANVAS_WIDTH;
 
-  for (let frame = 0; frame < totalFrames && !gameOver; frame++) {
-    const currentTimeMs = frame * G.FRAME_MS;
+  // Simulate at 60fps
+  const FRAME_MS = G.FRAME_MS; // ~16.67ms
+  const maxFrames = Math.ceil(gameDurationMs / FRAME_MS) + 10; // Allow slight overage
 
-    // Apply gravity
-    birdVelocity += G.GRAVITY;
-    birdY += birdVelocity;
+  for (let frame = 0; frame < maxFrames; frame++) {
+    frameCount = frame;
+    const currentTimeMs = frame * FRAME_MS;
 
-    // Check for flap inputs at this timestamp (±50ms tolerance)
+    // Apply any inputs at this timestamp
     while (
-      inputIndex < inputs.length &&
-      inputs[inputIndex].timestamp <= currentTimeMs + 50
+      inputIndex < sortedInputs.length &&
+      sortedInputs[inputIndex].timestamp <= currentTimeMs
     ) {
-      if (inputs[inputIndex].timestamp >= currentTimeMs - 50) {
-        birdVelocity = G.FLAP_FORCE;
-      }
+      birdVelocity = G.FLAP_FORCE;
       inputIndex++;
     }
 
-    // Get level-based difficulty (same as client)
-    const levelConfig = getLevelConfig(score);
-    const pipeSpeed = levelConfig.speed;
-    const pipeGap = levelConfig.gap;
+    // Update bird physics (delta-time normalized to 60fps = 1.0)
+    birdVelocity += G.GRAVITY;
+    birdY += birdVelocity;
 
-    // Spawn pipes - first pipe comes faster (FIRST_PIPE_DELAY_MS), then regular interval
+    // Get level-based difficulty
+    const levelConfig = getLevelConfig(score);
+    const pipeGap = levelConfig.gap;
+    const pipeSpeed = levelConfig.speed;
+
+    // Distance-based pipe spawning (matches FlappyBird.tsx)
+    const MIN_PIPE_DISTANCE = canvasWidth * 0.75;
+    const FIRST_PIPE_DISTANCE = canvasWidth * 0.4;
+    const PIPE_SPAWN_X = canvasWidth + G.PIPE_WIDTH;
+
+    const lastPipe = pipes[pipes.length - 1];
+    const lastPipeX = lastPipe ? lastPipe.x : -9999;
+
     let shouldSpawnPipe = false;
     if (!firstPipeSpawned) {
-      if (currentTimeMs >= G.FIRST_PIPE_DELAY_MS) {
+      // First pipe after bird travels 40% of canvas
+      const distanceTraveled = frame * pipeSpeed * 0.5;
+      if (distanceTraveled >= FIRST_PIPE_DISTANCE) {
         shouldSpawnPipe = true;
         firstPipeSpawned = true;
-        lastPipeTime = currentTimeMs;
       }
     } else {
-      if (currentTimeMs - lastPipeTime >= G.PIPE_INTERVAL_MS) {
+      // Subsequent pipes based on distance
+      if (lastPipeX <= PIPE_SPAWN_X - MIN_PIPE_DISTANCE) {
         shouldSpawnPipe = true;
-        lastPipeTime = currentTimeMs;
       }
     }
 
     if (shouldSpawnPipe) {
-      // Use deterministic pipe Y position based on frame count
-      // Same algorithm must be used on client side
-      const seed = frame * 9301 + 49297;
-      const gapY = 100 + (seed % (G.CANVAS_HEIGHT - pipeGap - 200));
-      pipes.push({ x: G.PIPE_START_X, gapY, passed: false });
+      const gapY = getPipeGapY(frame, pipeGap);
+      pipes.push({
+        x: PIPE_SPAWN_X,
+        gapY,
+        gapHeight: pipeGap,
+        passed: false,
+      });
     }
 
-    // Move pipes
-    for (const pipe of pipes) {
+    // Update pipes
+    for (let i = pipes.length - 1; i >= 0; i--) {
+      const pipe = pipes[i];
       pipe.x -= pipeSpeed;
 
-      // Score when bird passes pipe
+      // Score when passing pipe
       if (!pipe.passed && pipe.x + G.PIPE_WIDTH < G.BIRD_X) {
         pipe.passed = true;
         score++;
+
+        // Max score cap
+        if (score >= 999) {
+          return {
+            score: 999,
+            valid: true,
+            frameCount,
+          };
+        }
+      }
+
+      // Remove off-screen pipes
+      if (pipe.x < -G.PIPE_WIDTH) {
+        pipes.splice(i, 1);
       }
     }
 
-    // Remove off-screen pipes
-    const activePipes = pipes.filter(p => p.x + G.PIPE_WIDTH > 0);
-    pipes.length = 0;
-    pipes.push(...activePipes);
-
-    // Collision detection - use forgiving hitbox (same as client)
+    // Check collision
     const collisionRadius = G.BIRD_SIZE * G.BIRD_COLLISION_FACTOR;
+    const birdLeft = G.BIRD_X - collisionRadius;
+    const birdRight = G.BIRD_X + collisionRadius;
+    const birdTop = birdY - collisionRadius;
+    const birdBottom = birdY + collisionRadius;
 
     // Floor and ceiling
-    if (birdY - collisionRadius < 0 || birdY + collisionRadius > G.CANVAS_HEIGHT) {
-      gameOver = true;
-      break;
+    if (birdTop < 0 || birdBottom > G.CANVAS_HEIGHT) {
+      return {
+        score,
+        valid: true,
+        reason: 'collision_boundary',
+        frameCount,
+        collisionFrame: frame,
+      };
     }
 
     // Pipe collision
     for (const pipe of pipes) {
-      const birdLeft = G.BIRD_X - collisionRadius;
-      const birdRight = G.BIRD_X + collisionRadius;
-      const birdTop = birdY - collisionRadius;
-      const birdBottom = birdY + collisionRadius;
-
       if (birdRight > pipe.x && birdLeft < pipe.x + G.PIPE_WIDTH) {
-        if (birdTop < pipe.gapY || birdBottom > pipe.gapY + pipeGap) {
-          gameOver = true;
-          break;
+        if (birdTop < pipe.gapY || birdBottom > pipe.gapY + pipe.gapHeight) {
+          return {
+            score,
+            valid: true,
+            reason: 'collision_pipe',
+            frameCount,
+            collisionFrame: frame,
+          };
         }
       }
+    }
+
+    // Check if we've simulated past game duration
+    if (currentTimeMs > gameDurationMs + 100) {
+      break;
     }
   }
 
   return {
     score,
     valid: true,
-    framesSimulated: totalFrames,
+    frameCount,
   };
 }
 
 /**
- * Analyze inputs for cheating patterns.
- * Returns flags and whether to auto-reject.
- */
-export function analyzeInputs(
-  inputs: GameInput[],
-  gameDurationMs: number,
-  claimedScore: number
-): AntiCheatResult {
-  const flags: string[] = [];
-  let autoReject = false;
-
-  // 1. Score sanity check
-  if (claimedScore > G.MAX_VALID_SCORE) {
-    flags.push(`score_exceeds_maximum:${claimedScore}`);
-    autoReject = true;
-  }
-
-  // 2. Duration vs score check
-  const minDuration = claimedScore * G.MIN_DURATION_PER_POINT;
-  if (gameDurationMs < minDuration) {
-    flags.push(`duration_too_short:${gameDurationMs}ms_for_score_${claimedScore}`);
-    autoReject = true;
-  }
-
-  // 3. Input count sanity
-  if (inputs.length < claimedScore * 0.3) {
-    flags.push(`too_few_inputs:${inputs.length}_for_score_${claimedScore}`);
-    autoReject = true;
-  }
-
-  // 4. Minimum flap interval (bot detection)
-  const intervals: number[] = [];
-  for (let i = 1; i < inputs.length; i++) {
-    const interval = inputs[i].timestamp - inputs[i - 1].timestamp;
-    if (interval < G.MIN_FLAP_INTERVAL_MS) {
-      flags.push(`impossible_flap_interval:${interval}ms`);
-      autoReject = true;
-    }
-    intervals.push(interval);
-  }
-
-  // 5. Standard deviation check (robotic timing)
-  if (intervals.length > 5) {
-    const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-    const variance = intervals.reduce((a, b) =>
-      a + Math.pow(b - mean, 2), 0) / intervals.length;
-    const stddev = Math.sqrt(variance);
-
-    if (stddev < G.BOT_STDDEV_THRESHOLD) {
-      flags.push(`robotic_timing:stddev_${stddev.toFixed(1)}ms`);
-      // Don't auto-reject, flag for manual review
-    }
-  }
-
-  // 6. Flag high scores for manual review
-  if (claimedScore > G.REVIEW_SCORE_THRESHOLD && !autoReject) {
-    flags.push(`high_score_review_required:${claimedScore}`);
-  }
-
-  return {
-    passed: !autoReject,
-    flags,
-    autoReject,
-  };
-}
-
-/**
- * Validate score by comparing client claim to server replay.
+ * Validate a score submission
+ *
+ * @param inputs - Recorded game inputs
+ * @param gameDurationMs - Total game duration
+ * @param claimedScore - Score claimed by client
+ * @returns Validation result
  */
 export function validateScore(
   inputs: GameInput[],
@@ -236,41 +221,73 @@ export function validateScore(
 ): {
   valid: boolean;
   serverScore: number;
-  flags: string[];
   reason?: string;
+  flags: string[];
 } {
-  // First, analyze inputs for obvious cheating
-  const antiCheat = analyzeInputs(inputs, gameDurationMs, claimedScore);
+  const flags: string[] = [];
 
-  if (antiCheat.autoReject) {
+  // Basic sanity checks
+  if (inputs.length > 2000) {
     return {
       valid: false,
       serverScore: 0,
-      flags: antiCheat.flags,
-      reason: 'ANTI_CHEAT_REJECTION',
+      reason: 'Too many inputs (bot protection)',
+      flags: ['excessive_inputs'],
+    };
+  }
+
+  if (gameDurationMs < 5000) {
+    return {
+      valid: false,
+      serverScore: 0,
+      reason: 'Game too short (minimum 5 seconds)',
+      flags: ['too_short'],
+    };
+  }
+
+  if (claimedScore < 0 || claimedScore > 999) {
+    return {
+      valid: false,
+      serverScore: 0,
+      reason: 'Invalid score range',
+      flags: ['invalid_score'],
+    };
+  }
+
+  // Can't score without flapping (need at least 1 flap per point roughly)
+  if (inputs.length < claimedScore * 0.5) {
+    flags.push('low_input_ratio');
+  }
+
+  // Impossibly fast scoring (less than 800ms per point)
+  if (claimedScore > 0 && gameDurationMs < claimedScore * 800) {
+    return {
+      valid: false,
+      serverScore: 0,
+      reason: 'Score achieved too quickly',
+      flags: ['speed_hack'],
     };
   }
 
   // Replay the game
   const replay = replayGame(inputs, gameDurationMs);
 
-  // Compare scores within tolerance
+  // Check if replay score matches claimed score (allow tolerance of 2)
   const scoreDiff = Math.abs(replay.score - claimedScore);
-  if (scoreDiff > G.SCORE_REPLAY_TOLERANCE) {
+  if (scoreDiff > 2) {
+    flags.push('score_mismatch');
     return {
       valid: false,
       serverScore: replay.score,
-      flags: [...antiCheat.flags, `score_mismatch:claimed_${claimedScore}_server_${replay.score}`],
-      reason: 'SCORE_MISMATCH',
+      reason: \`Score mismatch: claimed \${claimedScore}, replayed \${replay.score}\`,
+      flags,
     };
   }
 
+  // Use the SERVER's replayed score, not client claimed score
   return {
     valid: true,
     serverScore: replay.score,
-    flags: antiCheat.flags,
+    flags,
   };
 }
-
-// Re-export types
-export type { GameInput };

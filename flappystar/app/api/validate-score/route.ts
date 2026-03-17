@@ -3,16 +3,19 @@ import {
   getGameSession,
   markGameSessionUsed,
   submitScore,
+  logCheatAttempt,
 } from '@/lib/supabase';
 import { verifyStripeSession } from '@/lib/stripe';
 import { getClientIP } from '@/lib/ratelimit';
+import { validateScore } from '@/lib/gameEngine';
+import type { GameInput } from '@/lib/gameConstants';
 
 interface ValidateScoreRequest {
   gameSessionToken: string;
   stripeSessionId: string;
   claimedScore: number;
   gameDurationMs: number;
-  inputs: unknown[];
+  inputs: GameInput[];
   fullName: string;
   email: string;
   nickname: string;
@@ -22,8 +25,8 @@ interface ValidateScoreRequest {
 /**
  * POST /api/validate-score
  *
- * MINIMAL VALIDATION - anti-cheat disabled for now.
- * Just checks: paid + score between 1-999 = accept.
+ * Server-side replay validation of game inputs.
+ * Replays game to verify score matches claimed score.
  */
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);
@@ -35,13 +38,20 @@ export async function POST(request: NextRequest) {
       gameSessionToken,
       stripeSessionId,
       claimedScore,
+      gameDurationMs,
+      inputs,
       fullName,
       email,
       nickname,
       country,
     } = body;
 
-    console.log('[validate-score] Request:', { gameSessionToken: gameSessionToken?.slice(0, 8), claimedScore });
+    console.log('[validate-score] Request:', {
+      gameSessionToken: gameSessionToken?.slice(0, 8),
+      claimedScore,
+      inputsCount: inputs?.length,
+      gameDurationMs,
+    });
 
     // Basic field validation
     if (!gameSessionToken || !stripeSessionId || claimedScore === undefined) {
@@ -51,7 +61,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 1: Check score is valid range (1-999)
+    // Bot protection: reject excessive inputs
+    if (inputs && inputs.length > 2000) {
+      console.log('[validate-score] Too many inputs:', inputs.length);
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: 0,
+        reason: 'Too many inputs (bot protection)',
+        flags: ['excessive_inputs'],
+        inputs_count: inputs.length,
+        game_duration_ms: gameDurationMs || 0,
+      });
+      return NextResponse.json(
+        { error: 'Invalid game data' },
+        { status: 400 }
+      );
+    }
+
+    // Minimum game duration: 5 seconds
+    if (!gameDurationMs || gameDurationMs < 5000) {
+      console.log('[validate-score] Game too short:', gameDurationMs);
+      return NextResponse.json(
+        { error: 'Game too short' },
+        { status: 400 }
+      );
+    }
+
+    // Step 1: Check score is valid range (0-999)
     if (claimedScore < 0 || claimedScore >= 1000) {
       return NextResponse.json(
         { error: 'Invalid score' },
@@ -97,13 +136,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 4: Accept score - no anti-cheat for now
-    const finalScore = claimedScore;
+    // Step 4: Replay game to validate score
+    const validation = validateScore(inputs || [], gameDurationMs, claimedScore);
 
-    console.log('[validate-score] Accepting score:', finalScore);
+    if (!validation.valid) {
+      console.log('[validate-score] Validation failed:', validation.reason);
+
+      // Log cheat attempt
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: validation.serverScore,
+        reason: validation.reason || 'Unknown',
+        flags: validation.flags,
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs,
+      });
+
+      return NextResponse.json(
+        { error: 'Score validation failed', reason: validation.reason },
+        { status: 400 }
+      );
+    }
+
+    // Use SERVER's replayed score, not client claimed score
+    const finalScore = validation.serverScore;
+
+    console.log('[validate-score] Accepting score:', finalScore, 'flags:', validation.flags);
 
     // Step 5: Mark session as used
-    await markGameSessionUsed(gameSessionToken, finalScore, []);
+    await markGameSessionUsed(gameSessionToken, finalScore, validation.flags);
 
     // Step 7: Submit score to tournament
     const submissionResult = await submitScore({
