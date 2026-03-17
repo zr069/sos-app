@@ -113,86 +113,104 @@ function getAudioContext(): AudioContext | null {
   }
 }
 
-// Sound effects using Web Audio API
+// FLAP SOUND - soft whoosh on every tap
+function playFlapSound() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    // Create white noise burst with quick decay
+    const bufferSize = Math.floor(ctx.sampleRate * 0.08);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    // Low-pass filter for soft whoosh
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.08);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    source.start(ctx.currentTime);
+  } catch {
+    // Audio not available
+  }
+}
+
+// SCORE SOUND - rises with combo, multiple layers
 function playScoreSound(combo: number = 0) {
   const ctx = getAudioContext();
   if (!ctx) return;
 
   try {
-    // Pitch multiplier based on combo (up to 64% higher at combo 8+)
-    const pitchMultiplier = 1 + (Math.min(combo, 8) * 0.08);
+    const pitchMult = 1 + Math.min(combo, 10) * 0.07;
 
-    // Layer 1: Rising sparkle tone
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(440 * pitchMultiplier, ctx.currentTime);
-    osc1.frequency.exponentialRampToValueAtTime(880 * pitchMultiplier, ctx.currentTime + 0.15);
-    osc1.frequency.exponentialRampToValueAtTime(1320 * pitchMultiplier, ctx.currentTime + 0.25);
-    gain1.gain.setValueAtTime(0, ctx.currentTime);
-    gain1.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.02);
-    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-    osc1.start(ctx.currentTime);
-    osc1.stop(ctx.currentTime + 0.35);
+    // Rising sparkle
+    const o1 = ctx.createOscillator();
+    const g1 = ctx.createGain();
+    o1.connect(g1);
+    g1.connect(ctx.destination);
+    o1.type = 'sine';
+    o1.frequency.setValueAtTime(440 * pitchMult, ctx.currentTime);
+    o1.frequency.exponentialRampToValueAtTime(880 * pitchMult, ctx.currentTime + 0.12);
+    o1.frequency.exponentialRampToValueAtTime(1320 * pitchMult, ctx.currentTime + 0.22);
+    g1.gain.setValueAtTime(0, ctx.currentTime);
+    g1.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.02);
+    g1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    o1.start(ctx.currentTime);
+    o1.stop(ctx.currentTime + 0.3);
 
-    // Layer 2: Warm chord underneath
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(523 * pitchMultiplier, ctx.currentTime); // C5
-    osc2.frequency.setValueAtTime(659 * pitchMultiplier, ctx.currentTime + 0.1); // E5
-    gain2.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-    osc2.start(ctx.currentTime);
-    osc2.stop(ctx.currentTime + 0.3);
+    // Warm undertone
+    const o2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    o2.connect(g2);
+    g2.connect(ctx.destination);
+    o2.type = 'triangle';
+    o2.frequency.setValueAtTime(523 * pitchMult, ctx.currentTime);
+    g2.gain.setValueAtTime(0.15, ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    o2.start(ctx.currentTime);
+    o2.stop(ctx.currentTime + 0.25);
 
-    // Layer 3: High sparkle ping
-    const osc3 = ctx.createOscillator();
-    const gain3 = ctx.createGain();
-    osc3.connect(gain3);
-    gain3.connect(ctx.destination);
-    osc3.type = 'sine';
-    osc3.frequency.setValueAtTime(1760 * pitchMultiplier, ctx.currentTime + 0.1);
-    gain3.gain.setValueAtTime(0, ctx.currentTime + 0.1);
-    gain3.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.12);
-    gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-    osc3.start(ctx.currentTime + 0.1);
-    osc3.stop(ctx.currentTime + 0.4);
-
-    // Combo 5+: Extra high ping
-    if (combo >= 5) {
-      const osc4 = ctx.createOscillator();
-      const gain4 = ctx.createGain();
-      osc4.connect(gain4);
-      gain4.connect(ctx.destination);
-      osc4.type = 'sine';
-      osc4.frequency.setValueAtTime(2200 * pitchMultiplier, ctx.currentTime + 0.05);
-      gain4.gain.setValueAtTime(0, ctx.currentTime + 0.05);
-      gain4.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.07);
-      gain4.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      osc4.start(ctx.currentTime + 0.05);
-      osc4.stop(ctx.currentTime + 0.3);
+    // High sparkle ping at combo 3+
+    if (combo >= 3) {
+      const o3 = ctx.createOscillator();
+      const g3 = ctx.createGain();
+      o3.connect(g3);
+      g3.connect(ctx.destination);
+      o3.type = 'sine';
+      o3.frequency.setValueAtTime(1760 * pitchMult, ctx.currentTime + 0.08);
+      g3.gain.setValueAtTime(0, ctx.currentTime + 0.08);
+      g3.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.1);
+      g3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      o3.start(ctx.currentTime + 0.08);
+      o3.stop(ctx.currentTime + 0.35);
     }
 
-    // Combo 10+: "On fire" ascending arpeggio
+    // FIRE arpeggio at combo 10+
     if (combo >= 10) {
-      const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
-      notes.forEach((note, i) => {
-        const oscFire = ctx.createOscillator();
-        const gainFire = ctx.createGain();
-        oscFire.connect(gainFire);
-        gainFire.connect(ctx.destination);
-        oscFire.type = 'sine';
-        oscFire.frequency.setValueAtTime(note * 1.5, ctx.currentTime + i * 0.05);
-        gainFire.gain.setValueAtTime(0, ctx.currentTime + i * 0.05);
-        gainFire.gain.linearRampToValueAtTime(0.06, ctx.currentTime + i * 0.05 + 0.02);
-        gainFire.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.05 + 0.15);
-        oscFire.start(ctx.currentTime + i * 0.05);
-        oscFire.stop(ctx.currentTime + i * 0.05 + 0.15);
+      const notes = [523, 659, 784, 1047];
+      notes.forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.type = 'sine';
+        o.frequency.setValueAtTime(freq * 1.5, ctx.currentTime + i * 0.06);
+        g.gain.setValueAtTime(0.1, ctx.currentTime + i * 0.06);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.06 + 0.2);
+        o.start(ctx.currentTime + i * 0.06);
+        o.stop(ctx.currentTime + i * 0.06 + 0.2);
       });
     }
   } catch {
@@ -200,22 +218,37 @@ function playScoreSound(combo: number = 0) {
   }
 }
 
+// GAME OVER SOUND - dramatic descending tone with impact
 function playGameOverSound() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
   try {
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(150, ctx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.4);
-    gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.4);
+    // Impact thud
+    const o1 = ctx.createOscillator();
+    const g1 = ctx.createGain();
+    o1.connect(g1);
+    g1.connect(ctx.destination);
+    o1.type = 'sine';
+    o1.frequency.setValueAtTime(150, ctx.currentTime);
+    o1.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.3);
+    g1.gain.setValueAtTime(0.5, ctx.currentTime);
+    g1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    o1.start(ctx.currentTime);
+    o1.stop(ctx.currentTime + 0.3);
+
+    // Sad descending tone
+    const o2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    o2.connect(g2);
+    g2.connect(ctx.destination);
+    o2.type = 'triangle';
+    o2.frequency.setValueAtTime(400, ctx.currentTime + 0.1);
+    o2.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.5);
+    g2.gain.setValueAtTime(0.2, ctx.currentTime + 0.1);
+    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    o2.start(ctx.currentTime + 0.1);
+    o2.stop(ctx.currentTime + 0.5);
   } catch {
     // Audio not available
   }
@@ -419,18 +452,22 @@ export default function FlappyBird({
     if (disabled) return;
 
     // Initialize and unlock AudioContext on first user interaction (desktop requirement)
-    getAudioContext();
+    getAudioContext()?.resume();
 
     if (gameStateRef.current === 'idle') {
       startGame();
       // Apply flap force immediately so bird doesn't fall right away
       birdRef.current.velocity = G.FLAP_FORCE;
       recordInput();
+      // Play flap sound (skip in demo mode)
+      if (mode !== 'demo') playFlapSound();
     } else if (gameStateRef.current === 'playing') {
       birdRef.current.velocity = G.FLAP_FORCE;
       recordInput();
+      // Play flap sound (skip in demo mode)
+      if (mode !== 'demo') playFlapSound();
     }
-  }, [disabled, startGame, recordInput]);
+  }, [disabled, startGame, recordInput, mode]);
 
   // Validate score with server (tournament mode)
   const validateScore = useCallback(async (finalScore: number, gameDuration: number) => {
