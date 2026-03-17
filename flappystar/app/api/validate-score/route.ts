@@ -125,6 +125,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // FIX 3: Verify token was generated for this stripe session
+    if (gameSession.stripe_session_id !== stripeSessionId) {
+      console.log('[validate-score] Stripe session mismatch:', {
+        tokenStripeSession: gameSession.stripe_session_id?.slice(0, 20),
+        requestStripeSession: stripeSessionId?.slice(0, 20),
+      });
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: 0,
+        reason: 'Token/payment session mismatch',
+        flags: ['session_mismatch'],
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs,
+      });
+      return NextResponse.json(
+        { error: 'Invalid game session' },
+        { status: 400 }
+      );
+    }
+
+    // Server-side timestamp check - minimum time based on score
+    // A score of N requires minimum N * 1200ms (1.2 seconds per point)
+    const gameStartTime = new Date(gameSession.game_start_server_time).getTime();
+    const now = Date.now();
+    const elapsedMs = now - gameStartTime;
+    const minimumRequiredMs = claimedScore * 1200; // 1.2 seconds per point
+
+    if (claimedScore > 0 && elapsedMs < minimumRequiredMs) {
+      console.log('[validate-score] Score achieved too fast:', {
+        claimedScore,
+        elapsedMs,
+        minimumRequiredMs,
+        gameStartServerTime: gameSession.game_start_server_time,
+      });
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: 0,
+        reason: `Score achieved too fast: ${elapsedMs}ms < ${minimumRequiredMs}ms required`,
+        flags: ['timestamp_hack'],
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs,
+      });
+      return NextResponse.json(
+        { error: 'Invalid game timing' },
+        { status: 400 }
+      );
+    }
+
     // Step 3: Verify Stripe payment is paid
     const stripeSession = await verifyStripeSession(stripeSessionId);
 

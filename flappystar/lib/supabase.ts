@@ -273,6 +273,7 @@ export interface GameSession {
   stripe_session_id: string;
   created_at: string;
   expires_at: string;
+  game_start_server_time: string;
   used: boolean;
   used_at: string | null;
   validated_score: number | null;
@@ -331,6 +332,30 @@ export async function getGameSession(token: string): Promise<GameSession | null>
     .from('game_sessions')
     .select('*')
     .eq('token', token)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return data;
+}
+
+/**
+ * Check if a stripe session already has an active (unused, not expired) game token
+ */
+export async function getActiveGameSessionForStripe(
+  stripeSessionId: string
+): Promise<GameSession | null> {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .select('*')
+    .eq('stripe_session_id', stripeSessionId)
+    .eq('used', false)
+    .gt('expires_at', new Date().toISOString())
+    .limit(1)
     .single();
 
   if (error && error.code !== 'PGRST116') {

@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { GAME_CONSTANTS } from '@/lib/gameConstants';
+import {
+  createServerClient,
+  getActiveGameSessionForStripe,
+  deleteExpiredGameSessions,
+} from '@/lib/supabase';
 
 /**
  * GET /api/game-session
  *
  * Generate a one-time-use game session token for tournament play.
- * Validates ONLY against Stripe API - no database dependency.
- * The tournament_entries record is created AFTER the game is played.
+ * Database storage is REQUIRED - tokens must be validated on submission.
  */
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
@@ -16,7 +20,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const stripeSessionId = searchParams.get('session_id');
 
-    console.log('[game-session] Request received:', { stripeSessionId: stripeSessionId?.slice(0, 20) + '...' });
+    console.log('[game-session] Request received:', {
+      stripeSessionId: stripeSessionId?.slice(0, 20) + '...',
+    });
 
     if (!stripeSessionId) {
       console.log('[game-session] Missing session_id parameter');
@@ -66,48 +72,46 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Generate a simple token without database dependency
-    // This allows the game to work even without Supabase configured
-    const token = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + GAME_CONSTANTS.SESSION_EXPIRY_MS).toISOString();
+    // Clean up expired sessions first
+    await deleteExpiredGameSessions(stripeSessionId);
 
-    // Try to store in database (optional - game works without it)
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-      if (supabaseUrl && supabaseServiceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-        // Clean up expired sessions first
-        await supabase
-          .from('game_sessions')
-          .delete()
-          .eq('stripe_session_id', stripeSessionId)
-          .eq('used', false)
-          .lt('expires_at', new Date().toISOString());
-
-        // Insert new session
-        const { error: insertError } = await supabase.from('game_sessions').insert({
-          token,
-          stripe_session_id: stripeSessionId,
-          expires_at: expiresAt,
-        });
-
-        if (insertError) {
-          console.warn('[game-session] DB insert warning (non-fatal):', insertError.message);
-          // Continue anyway - token is valid
-        } else {
-          console.log('[game-session] Session stored in database');
-        }
-      } else {
-        console.log('[game-session] Supabase not configured, skipping DB storage');
-      }
-    } catch (dbError) {
-      console.warn('[game-session] DB operation failed (non-fatal):', dbError);
-      // Continue anyway - the token is still valid for this session
+    // FIX 1: Check if stripe session already has an active game token
+    const existingSession = await getActiveGameSessionForStripe(stripeSessionId);
+    if (existingSession) {
+      console.log('[game-session] Session already has active token:', {
+        existingToken: existingSession.token.slice(0, 8),
+        expiresAt: existingSession.expires_at,
+      });
+      return NextResponse.json(
+        { error: 'Session already has active game token' },
+        { status: 409 }
+      );
     }
+
+    // Generate token and store in database (REQUIRED)
+    const token = crypto.randomUUID();
+    const now = Date.now();
+    const expiresAt = new Date(now + GAME_CONSTANTS.SESSION_EXPIRY_MS).toISOString();
+    const gameStartServerTime = new Date(now).toISOString();
+
+    // Database storage is mandatory - fail if it fails
+    const supabase = createServerClient();
+    const { error: insertError } = await supabase.from('game_sessions').insert({
+      token,
+      stripe_session_id: stripeSessionId,
+      expires_at: expiresAt,
+      game_start_server_time: gameStartServerTime,
+    });
+
+    if (insertError) {
+      console.error('[game-session] Database insert failed:', insertError.message);
+      return NextResponse.json(
+        { error: 'Failed to create game session' },
+        { status: 500 }
+      );
+    }
+
+    console.log('[game-session] Session stored in database');
 
     const duration = Date.now() - startTime;
     console.log('[game-session] Success in', duration, 'ms');

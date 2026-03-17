@@ -87,8 +87,10 @@ export function getPipeGap(score: number): number {
 
 // Types used across client and server
 export interface GameInput {
-  type: 'flap';
+  type: 'flap' | 'move' | 'honeypot';
   timestamp: number; // ms since game start
+  x?: number; // For move events
+  y?: number; // For move events
 }
 
 export interface Pipe {

@@ -304,6 +304,11 @@ export default function FlappyBird({
   const inputsRef = useRef<GameInput[]>([]);
   const gameStartTimeRef = useRef(0);
 
+  // Bot detection (tournament mode only)
+  const lastMoveTimeRef = useRef(0); // Throttle movement tracking
+  const honeypotClickedRef = useRef(false);
+  const honeypotIdRef = useRef<string>('');
+
   // Game refs (to avoid state in animation loop)
   const gameStateRef = useRef<GameState>(mode === 'tournament' ? 'loading' : mode === 'demo' ? 'playing' : 'idle');
   const demoRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -345,6 +350,9 @@ export default function FlappyBird({
 
         // Calculate server time offset
         serverTimeOffsetRef.current = data.serverTime - Date.now();
+
+        // Generate fresh honeypot ID for this game session
+        honeypotIdRef.current = `hp_${crypto.randomUUID().slice(0, 8)}`;
 
         setGameState('idle');
         gameStateRef.current = 'idle';
@@ -435,6 +443,28 @@ export default function FlappyBird({
     inputsRef.current.push({ type: 'flap', timestamp });
   }, [mode]);
 
+  // Record mouse/touch movement (tournament mode only, throttled)
+  const recordMovement = useCallback((x: number, y: number) => {
+    if (mode !== 'tournament') return;
+    if (gameStateRef.current !== 'playing') return;
+
+    // Throttle to max 10 events per second
+    const now = performance.now();
+    if (now - lastMoveTimeRef.current < 100) return;
+    lastMoveTimeRef.current = now;
+
+    const timestamp = now - gameStartTimeRef.current;
+    inputsRef.current.push({ type: 'move', timestamp, x: Math.round(x), y: Math.round(y) });
+  }, [mode]);
+
+  // Handle honeypot click (instant bot flag)
+  const handleHoneypotClick = useCallback(() => {
+    if (mode !== 'tournament') return;
+    honeypotClickedRef.current = true;
+    const timestamp = performance.now() - gameStartTimeRef.current;
+    inputsRef.current.push({ type: 'honeypot', timestamp });
+  }, [mode]);
+
   // Reset game
   const resetGame = useCallback(() => {
     birdRef.current = {
@@ -455,6 +485,10 @@ export default function FlappyBird({
     // Reset input recording
     inputsRef.current = [];
     gameStartTimeRef.current = 0;
+
+    // Reset bot detection
+    lastMoveTimeRef.current = 0;
+    honeypotClickedRef.current = false;
 
     // Reset juice effects
     trailParticlesRef.current = [];
@@ -1134,6 +1168,35 @@ export default function FlappyBird({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [jump, mode]);
 
+  // Mouse/touch movement tracking (tournament mode only, for bot detection)
+  useEffect(() => {
+    if (mode !== 'tournament') return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      recordMovement(e.clientX - rect.left, e.clientY - rect.top);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const rect = container.getBoundingClientRect();
+        const touch = e.touches[0];
+        recordMovement(touch.clientX - rect.left, touch.clientY - rect.top);
+      }
+    };
+
+    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+    return () => {
+      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [mode, recordMovement]);
+
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent | React.PointerEvent) => {
     // Safari: unlock audio synchronously in gesture handler
     getAudioContext();
@@ -1161,6 +1224,24 @@ export default function FlappyBird({
       style={{ WebkitTapHighlightColor: 'transparent' }}
       onContextMenu={(e) => e.preventDefault()}
     >
+      {/* Invisible honeypot for bot detection (tournament mode only) */}
+      {mode === 'tournament' && honeypotIdRef.current && (
+        <button
+          id={honeypotIdRef.current}
+          onClick={handleHoneypotClick}
+          aria-hidden="true"
+          tabIndex={-1}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: '-9999px',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            pointerEvents: 'auto',
+          }}
+        />
+      )}
       <div
         className="relative select-none"
         onClick={handleInteraction}

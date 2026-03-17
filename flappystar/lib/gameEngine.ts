@@ -68,8 +68,9 @@ export function replayGame(
   let frameCount = 0;
   let firstPipeSpawned = false;
 
-  // Sort inputs by timestamp (defensive)
-  const sortedInputs = [...inputs].sort((a, b) => a.timestamp - b.timestamp);
+  // Filter to only flap inputs and sort by timestamp
+  const flapInputs = inputs.filter(i => i.type === 'flap');
+  const sortedInputs = [...flapInputs].sort((a, b) => a.timestamp - b.timestamp);
   let inputIndex = 0;
 
   // Canvas dimensions for pipe spawning (matches client)
@@ -255,8 +256,24 @@ export function validateScore(
   }
 
   // Can't score without flapping (need at least 1 flap per point roughly)
-  if (inputs.length < claimedScore * 0.5) {
+  const flapInputs = inputs.filter(i => i.type === 'flap');
+  if (flapInputs.length < claimedScore * 0.5) {
     flags.push('low_input_ratio');
+  }
+
+  // Bot detection: analyze input patterns
+  const botFlags = analyzeInputsForBots(inputs);
+  flags.push(...botFlags);
+
+  // Honeypot triggered = instant bot detection
+  const honeypotTriggered = inputs.some(i => i.type === 'honeypot');
+  if (honeypotTriggered) {
+    return {
+      valid: false,
+      serverScore: 0,
+      reason: 'Bot detected (honeypot triggered)',
+      flags: [...flags, 'honeypot_triggered'],
+    };
   }
 
   // Impossibly fast scoring (less than 800ms per point)
@@ -290,4 +307,54 @@ export function validateScore(
     serverScore: replay.score,
     flags,
   };
+}
+
+/**
+ * Analyze inputs for bot-like patterns
+ *
+ * @param inputs - All recorded game inputs (flaps, moves, honeypot)
+ * @returns Array of bot detection flags
+ */
+export function analyzeInputsForBots(inputs: GameInput[]): string[] {
+  const flags: string[] = [];
+
+  const flapInputs = inputs.filter(i => i.type === 'flap');
+  const moveInputs = inputs.filter(i => i.type === 'move');
+
+  // Check 1: No mouse/touch movement at all = suspicious
+  // Real humans move their mouse/finger while playing
+  if (moveInputs.length === 0 && flapInputs.length > 5) {
+    flags.push('no_mouse_movement');
+  }
+
+  // Check 2: Very low move-to-flap ratio = suspicious
+  // Real humans typically have many more move events than flaps
+  if (flapInputs.length > 10 && moveInputs.length < flapInputs.length * 0.5) {
+    flags.push('low_movement_ratio');
+  }
+
+  // Check 3: All flaps with zero moves = likely bot
+  if (flapInputs.length > 0 && moveInputs.length === 0) {
+    flags.push('bot_suspected');
+  }
+
+  // Check 4: Suspiciously regular flap timing (robotic)
+  if (flapInputs.length >= 10) {
+    const intervals: number[] = [];
+    for (let i = 1; i < flapInputs.length; i++) {
+      intervals.push(flapInputs[i].timestamp - flapInputs[i - 1].timestamp);
+    }
+
+    // Calculate standard deviation of intervals
+    const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const variance = intervals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / intervals.length;
+    const stdDev = Math.sqrt(variance);
+
+    // Very low standard deviation = suspiciously consistent timing
+    if (stdDev < 20) { // Less than 20ms variation
+      flags.push('robotic_timing');
+    }
+  }
+
+  return flags;
 }
