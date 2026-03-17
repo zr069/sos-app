@@ -5,20 +5,28 @@ import { isRedisAvailable } from '@/lib/ratelimit';
 // Optional Redis caching
 let getCachedTournamentSettings: (() => Promise<unknown>) | null = null;
 let setCachedTournamentSettings: ((data: unknown) => Promise<void>) | null = null;
+let redisImported = false;
 
-if (isRedisAvailable) {
-  import('@/lib/redis').then((redis) => {
-    getCachedTournamentSettings = redis.getCachedTournamentSettings;
-    setCachedTournamentSettings = redis.setCachedTournamentSettings;
-  }).catch(() => {
-    // Redis not available
-  });
+async function ensureRedisImport() {
+  if (!redisImported && isRedisAvailable()) {
+    redisImported = true;
+    try {
+      const redis = await import('@/lib/redis');
+      getCachedTournamentSettings = redis.getCachedTournamentSettings;
+      setCachedTournamentSettings = redis.setCachedTournamentSettings;
+    } catch {
+      // Redis not available
+    }
+  }
 }
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    // Ensure Redis is imported if available
+    await ensureRedisImport();
+
     // Get tournament stats from Supabase
     const stats = await getTournamentStats();
 

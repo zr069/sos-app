@@ -203,6 +203,9 @@ export default function FlappyBird({
 
     if (gameStateRef.current === 'idle') {
       startGame();
+      // Apply flap force immediately so bird doesn't fall right away
+      birdRef.current.velocity = G.FLAP_FORCE;
+      recordInput();
     } else if (gameStateRef.current === 'playing') {
       birdRef.current.velocity = G.FLAP_FORCE;
       recordInput();

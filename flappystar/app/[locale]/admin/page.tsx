@@ -145,7 +145,7 @@ export default function AdminPage() {
       } else {
         setAuthError('Invalid password');
       }
-    } catch (error) {
+    } catch {
       setAuthError('Connection error');
     }
   };

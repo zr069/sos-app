@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface EnterTournamentButtonProps {
   locale: string;
@@ -13,7 +12,6 @@ export default function EnterTournamentButton({
   children,
 }: EnterTournamentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleClick = async () => {
     setIsLoading(true);

@@ -3,7 +3,7 @@ import { isSessionPaid } from '@/lib/stripe';
 import { submitScore } from '@/lib/supabase';
 import { lockSession, invalidateLeaderboardCache } from '@/lib/redis';
 import {
-  submitScoreRatelimit,
+  getSubmitScoreRatelimit,
   checkRateLimit,
   getClientIP,
   getRateLimitHeaders,
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting by IP (fallback protection)
     const ip = getClientIP(request);
-    const rateLimitResult = await checkRateLimit(submitScoreRatelimit, ip);
+    const rateLimitResult = await checkRateLimit(getSubmitScoreRatelimit, ip);
 
     if (!rateLimitResult.success) {
       return NextResponse.json(

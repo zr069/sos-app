@@ -1,10 +1,21 @@
 import Stripe from 'stripe';
 
-// Initialize Stripe client
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-02-25.clover',
-  typescript: true,
-});
+// Lazy-initialized Stripe client (only created when needed)
+let stripeInstance: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!stripeInstance) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+    }
+    stripeInstance = new Stripe(secretKey, {
+      apiVersion: '2026-02-25.clover',
+      typescript: true,
+    });
+  }
+  return stripeInstance;
+}
 
 // Tournament entry price in cents
 export const TOURNAMENT_ENTRY_PRICE = 50; // €0.50
@@ -14,6 +25,7 @@ export const CURRENCY = 'eur';
 export async function createCheckoutSession(
   locale: string = 'en'
 ): Promise<Stripe.Checkout.Session> {
+  const stripe = getStripe();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   const session = await stripe.checkout.sessions.create({
@@ -47,6 +59,7 @@ export async function createCheckoutSession(
 export async function getCheckoutSession(
   sessionId: string
 ): Promise<Stripe.Checkout.Session> {
+  const stripe = getStripe();
   return stripe.checkout.sessions.retrieve(sessionId);
 }
 
@@ -63,6 +76,7 @@ export async function isSessionPaid(sessionId: string): Promise<boolean> {
 // Verify and return Stripe session for anti-cheat validation
 export async function verifyStripeSession(sessionId: string): Promise<Stripe.Checkout.Session | null> {
   try {
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     // Verify it's a tournament entry
     if (session.metadata?.type !== 'tournament_entry') {
@@ -79,6 +93,7 @@ export function verifyWebhookSignature(
   payload: string | Buffer,
   signature: string
 ): Stripe.Event {
+  const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
   return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
 }

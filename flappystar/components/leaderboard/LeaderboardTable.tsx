@@ -27,7 +27,6 @@ export default function LeaderboardTable({
   entries: entriesProp,
   page,
   totalPages,
-  total,
   onPageChange,
   searchQuery = '',
   onSearchChange,

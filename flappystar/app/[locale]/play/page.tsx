@@ -32,16 +32,6 @@ function PlayContent() {
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [gameData, setGameData] = useState<GameValidationData | null>(null);
 
-  // Validate session for tournament mode
-  useEffect(() => {
-    if (mode === 'tournament' && sessionId) {
-      validateSession();
-    } else if (mode === 'tournament' && !sessionId) {
-      setError(t('sessionInvalid'));
-      setIsValidating(false);
-    }
-  }, [mode, sessionId]);
-
   const validateSession = async () => {
     try {
       const response = await fetch(
@@ -60,12 +50,23 @@ function PlayContent() {
             : t('sessionInvalid')
         );
       }
-    } catch (err) {
+    } catch {
       setError(t('serverError'));
     } finally {
       setIsValidating(false);
     }
   };
+
+  // Validate session for tournament mode
+  useEffect(() => {
+    if (mode === 'tournament' && sessionId) {
+      validateSession();
+    } else if (mode === 'tournament' && !sessionId) {
+      setError(t('sessionInvalid'));
+      setIsValidating(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, sessionId]);
 
   const handleGameOver = (score: number) => {
     setFinalScore(score);

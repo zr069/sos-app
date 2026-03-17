@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createCheckoutSession } from '@/lib/stripe';
 import {
-  checkoutRatelimit,
+  getCheckoutRatelimit,
   checkRateLimit,
   getClientIP,
   getRateLimitHeaders,
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting
     const ip = getClientIP(request);
-    const rateLimitResult = await checkRateLimit(checkoutRatelimit, ip);
+    const rateLimitResult = await checkRateLimit(getCheckoutRatelimit, ip);
 
     if (!rateLimitResult.success) {
       return NextResponse.json(

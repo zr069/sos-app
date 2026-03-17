@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getLeaderboard, getTopLeaderboard, searchLeaderboard } from '@/lib/supabase';
 import {
-  leaderboardRatelimit,
+  getLeaderboardRatelimit,
   checkRateLimit,
   getClientIP,
   getRateLimitHeaders,
@@ -14,23 +14,31 @@ let getCachedLeaderboardTop: ((key?: string) => Promise<unknown>) | null = null;
 let setCachedLeaderboardTop: ((data: unknown) => Promise<void>) | null = null;
 let getCachedLeaderboardPage: ((page: number) => Promise<unknown>) | null = null;
 let setCachedLeaderboardPage: ((page: number, data: unknown) => Promise<void>) | null = null;
+let redisImported = false;
 
-if (isRedisAvailable) {
-  import('@/lib/redis').then((redis) => {
-    getCachedLeaderboardTop = redis.getCachedLeaderboardTop;
-    setCachedLeaderboardTop = redis.setCachedLeaderboardTop;
-    getCachedLeaderboardPage = redis.getCachedLeaderboardPage;
-    setCachedLeaderboardPage = redis.setCachedLeaderboardPage;
-  }).catch(() => {
-    // Redis not available, continue without caching
-  });
+async function ensureRedisImport() {
+  if (!redisImported && isRedisAvailable()) {
+    redisImported = true;
+    try {
+      const redis = await import('@/lib/redis');
+      getCachedLeaderboardTop = redis.getCachedLeaderboardTop;
+      setCachedLeaderboardTop = redis.setCachedLeaderboardTop;
+      getCachedLeaderboardPage = redis.getCachedLeaderboardPage;
+      setCachedLeaderboardPage = redis.setCachedLeaderboardPage;
+    } catch {
+      // Redis not available, continue without caching
+    }
+  }
 }
 
 export async function GET(request: NextRequest) {
   try {
+    // Ensure Redis is imported if available
+    await ensureRedisImport();
+
     // Rate limiting (gracefully handles missing Redis)
     const ip = getClientIP(request);
-    const rateLimitResult = await checkRateLimit(leaderboardRatelimit, ip);
+    const rateLimitResult = await checkRateLimit(getLeaderboardRatelimit, ip);
 
     if (!rateLimitResult.success) {
       return NextResponse.json(

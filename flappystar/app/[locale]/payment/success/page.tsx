@@ -13,7 +13,7 @@ function PaymentSuccessContent() {
 
   const sessionId = searchParams.get('session_id');
   const [countdown, setCountdown] = useState(3);
-  const [showConfetti, setShowConfetti] = useState(true);
+  const showConfetti = true;
 
   useEffect(() => {
     if (!sessionId) {

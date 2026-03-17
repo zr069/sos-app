@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import CountrySelect from '@/components/ui/CountrySelect';
 import Confetti from '@/components/ui/Confetti';
@@ -46,7 +45,6 @@ export default function ScoreForm({
   onSubmitted,
 }: ScoreFormProps) {
   const t = useTranslations('scoreForm');
-  const router = useRouter();
 
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
@@ -125,7 +123,7 @@ export default function ScoreForm({
       } else {
         setErrors({ submit: data.error || t('errors.submitFailed') });
       }
-    } catch (error) {
+    } catch {
       setErrors({ submit: t('errors.submitFailed') });
     } finally {
       setIsSubmitting(false);
@@ -143,7 +141,7 @@ export default function ScoreForm({
           text: shareText,
           url: shareUrl,
         });
-      } catch (err) {
+      } catch {
         // User cancelled or error
       }
     } else {
