@@ -583,7 +583,7 @@ export default function FlappyBird({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full min-h-[500px] flex items-center justify-center select-none"
+      className="relative w-full h-full min-h-[380px] flex items-center justify-center select-none"
       style={{ WebkitTapHighlightColor: 'transparent' }}
       onContextMenu={(e) => e.preventDefault()}
     >

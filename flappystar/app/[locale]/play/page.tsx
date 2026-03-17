@@ -95,7 +95,7 @@ function PlayContent() {
   // Show loading state while validating
   if (mode === 'tournament' && isValidating) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+      <div className="max-w-lg mx-auto px-4 pt-4 text-center">
         <div className="glass-card rounded-2xl p-8">
           <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-text-muted">Validating session...</p>
@@ -107,7 +107,7 @@ function PlayContent() {
   // Show error if validation failed
   if (mode === 'tournament' && error) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+      <div className="max-w-lg mx-auto px-4 pt-4 text-center">
         <div className="glass-card rounded-2xl p-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
             <svg
@@ -149,8 +149,8 @@ function PlayContent() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="h-[600px] sm:h-[700px]">
+    <div className="max-w-2xl mx-auto px-4 pt-2">
+      <div className="h-[550px] sm:h-[650px]">
         <FlappyBird
           mode={mode}
           stripeSessionId={sessionId || undefined}
@@ -167,8 +167,8 @@ export default function PlayPage() {
   return (
     <Suspense
       fallback={
-        <div className="max-w-lg mx-auto px-4 py-16">
-          <Skeleton className="h-[600px] rounded-xl" />
+        <div className="max-w-lg mx-auto px-4 pt-2">
+          <Skeleton className="h-[550px] rounded-xl" />
         </div>
       }
     >
