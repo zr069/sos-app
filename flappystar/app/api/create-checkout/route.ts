@@ -8,6 +8,12 @@ import {
 } from '@/lib/ratelimit';
 
 export async function POST(request: NextRequest) {
+  // Debug environment variables
+  console.log('ENV CHECK:', {
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NODE_ENV: process.env.NODE_ENV,
+  });
+
   try {
     // Rate limiting
     const ip = getClientIP(request);
