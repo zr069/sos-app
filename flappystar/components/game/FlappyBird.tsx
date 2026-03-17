@@ -10,7 +10,7 @@ import {
 } from '@/lib/gameConstants';
 
 interface FlappyBirdProps {
-  mode: 'free' | 'tournament';
+  mode: 'free' | 'tournament' | 'demo';
   stripeSessionId?: string;
   onGameOver?: (score: number) => void;
   onValidationComplete?: (result: ValidationResult) => void;
@@ -124,9 +124,9 @@ export default function FlappyBird({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Game state
+  // Game state - demo mode starts playing immediately
   const [gameState, setGameState] = useState<GameState>(
-    mode === 'tournament' ? 'loading' : 'idle'
+    mode === 'tournament' ? 'loading' : mode === 'demo' ? 'playing' : 'idle'
   );
   const [score, setScore] = useState(0);
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -143,7 +143,8 @@ export default function FlappyBird({
   const gameStartTimeRef = useRef(0);
 
   // Game refs (to avoid state in animation loop)
-  const gameStateRef = useRef<GameState>(mode === 'tournament' ? 'loading' : 'idle');
+  const gameStateRef = useRef<GameState>(mode === 'tournament' ? 'loading' : mode === 'demo' ? 'playing' : 'idle');
+  const demoRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scoreRef = useRef(0);
   const levelRef = useRef(1);
   const birdRef = useRef({ x: 0, y: 0, velocity: 0 });
@@ -189,13 +190,31 @@ export default function FlappyBird({
     fetchGameSession();
   }, [mode, stripeSessionId]);
 
-  // Load best score from localStorage
+  // Load best score from localStorage (skip in demo mode)
   useEffect(() => {
+    if (mode === 'demo') return;
     const saved = localStorage.getItem('flappystar_best');
     if (saved) {
       setBestScore(parseInt(saved, 10));
     }
-  }, []);
+  }, [mode]);
+
+  // Demo mode: auto-start and cleanup
+  useEffect(() => {
+    if (mode !== 'demo') return;
+
+    // Start playing immediately
+    gameStartTimeRef.current = performance.now();
+    setGameState('playing');
+    gameStateRef.current = 'playing';
+
+    return () => {
+      // Cleanup timeout on unmount
+      if (demoRestartTimeoutRef.current) {
+        clearTimeout(demoRestartTimeoutRef.current);
+      }
+    };
+  }, [mode]);
 
   // Handle resize
   useEffect(() => {
@@ -332,6 +351,21 @@ export default function FlappyBird({
     const finalScore = scoreRef.current;
     const gameDuration = performance.now() - gameStartTimeRef.current;
 
+    // Demo mode: auto-restart after 1 second, no sounds
+    if (mode === 'demo') {
+      // Brief pause then restart
+      setGameState('gameover');
+      gameStateRef.current = 'gameover';
+
+      demoRestartTimeoutRef.current = setTimeout(() => {
+        resetGame();
+        gameStartTimeRef.current = performance.now();
+        setGameState('playing');
+        gameStateRef.current = 'playing';
+      }, 1000);
+      return;
+    }
+
     playGameOverSound();
     setScore(finalScore);
 
@@ -353,7 +387,7 @@ export default function FlappyBird({
     if (onGameOver) {
       onGameOver(finalScore);
     }
-  }, [bestScore, mode, onGameOver, validateScore]);
+  }, [bestScore, mode, onGameOver, validateScore, resetGame]);
 
   // Draw star (bird)
   const drawBird = useCallback(
@@ -530,6 +564,28 @@ export default function FlappyBird({
         // Normalize to 60fps (16.67ms per frame)
         const dt = cappedDelta / 16.67;
 
+        // BOT LOGIC (demo mode only)
+        if (mode === 'demo') {
+          // Find the next pipe that hasn't been passed
+          const nextPipe = pipesRef.current.find(p => !p.passed && p.x + G.PIPE_WIDTH > G.BIRD_X);
+
+          if (nextPipe) {
+            // Calculate center of the gap
+            const gapCenter = nextPipe.gapY + nextPipe.gapHeight / 2;
+
+            // If bird is below gap center + offset, flap
+            // Add randomness so it doesn't look robotic
+            if (birdRef.current.y > gapCenter + 30 && Math.random() > 0.3) {
+              birdRef.current.velocity = G.FLAP_FORCE;
+            }
+          } else {
+            // No pipes yet - keep bird roughly centered
+            if (birdRef.current.y > G.CANVAS_HEIGHT / 2 && Math.random() > 0.5) {
+              birdRef.current.velocity = G.FLAP_FORCE;
+            }
+          }
+        }
+
         // Update bird physics with delta-time
         birdRef.current.velocity += G.GRAVITY * dt;
         birdRef.current.y += birdRef.current.velocity * dt;
@@ -581,7 +637,11 @@ export default function FlappyBird({
             const prevLevel = levelRef.current;
             scoreRef.current++;
             setScore(scoreRef.current);
-            playScoreSound();
+
+            // Play sound (skip in demo mode)
+            if (mode !== 'demo') {
+              playScoreSound();
+            }
 
             // Check for level up
             const newLevel = getLevel(scoreRef.current);
@@ -660,10 +720,13 @@ export default function FlappyBird({
     drawStars,
     checkCollision,
     handleGameOver,
+    mode,
   ]);
 
-  // Input handlers
+  // Input handlers (disabled in demo mode)
   useEffect(() => {
+    if (mode === 'demo') return; // No input in demo mode
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' || e.key === ' ') {
         e.preventDefault();
@@ -673,9 +736,10 @@ export default function FlappyBird({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [jump]);
+  }, [jump, mode]);
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent | React.PointerEvent) => {
+    if (mode === 'demo') return; // No input in demo mode
     e.preventDefault();
     e.stopPropagation();
     if (gameState !== 'gameover' && gameState !== 'validating' && gameState !== 'loading') {
@@ -746,9 +810,9 @@ export default function FlappyBird({
           )}
         </AnimatePresence>
 
-        {/* Loading overlay (tournament mode) */}
+        {/* Loading overlay (tournament mode) - skip in demo */}
         <AnimatePresence>
-          {gameState === 'loading' && (
+          {gameState === 'loading' && mode !== 'demo' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -763,9 +827,9 @@ export default function FlappyBird({
           )}
         </AnimatePresence>
 
-        {/* Idle overlay - clickable to start game */}
+        {/* Idle overlay - clickable to start game - skip in demo */}
         <AnimatePresence>
-          {gameState === 'idle' && (
+          {gameState === 'idle' && mode !== 'demo' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -788,9 +852,9 @@ export default function FlappyBird({
           )}
         </AnimatePresence>
 
-        {/* Validating overlay (tournament mode) */}
+        {/* Validating overlay (tournament mode) - skip in demo */}
         <AnimatePresence>
-          {gameState === 'validating' && (
+          {gameState === 'validating' && mode !== 'demo' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -806,9 +870,9 @@ export default function FlappyBird({
           )}
         </AnimatePresence>
 
-        {/* Game over overlay */}
+        {/* Game over overlay - skip in demo */}
         <AnimatePresence>
-          {gameState === 'gameover' && (
+          {gameState === 'gameover' && mode !== 'demo' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

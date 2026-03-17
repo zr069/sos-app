@@ -5,7 +5,7 @@ import LiveWidget from '@/components/leaderboard/LiveWidget';
 import TournamentStats from '@/components/landing/TournamentStats';
 import Accordion from '@/components/ui/Accordion';
 import EnterTournamentButton from './EnterTournamentButton';
-import GamePreview from '@/components/landing/GamePreview';
+import DemoPreview from '@/components/landing/DemoPreview';
 
 export async function generateMetadata({
   params,
@@ -76,9 +76,9 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Game Preview Section */}
+      {/* Live Game Demo */}
       <section className="mb-16 sm:mb-24">
-        <GamePreview />
+        <DemoPreview />
       </section>
 
       {/* How It Works */}
