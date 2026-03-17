@@ -1,5 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
+/**
+ * Database Performance: Required Indexes
+ * Run these in Supabase SQL Editor if not already created:
+ *
+ * -- Fast leaderboard queries (ORDER BY score DESC)
+ * CREATE INDEX IF NOT EXISTS idx_entries_score ON tournament_entries(score DESC);
+ *
+ * -- Fast recent entries queries (ORDER BY created_at DESC)
+ * CREATE INDEX IF NOT EXISTS idx_entries_created ON tournament_entries(created_at DESC);
+ *
+ * -- Fast country count (for stats)
+ * CREATE INDEX IF NOT EXISTS idx_entries_country ON tournament_entries(country);
+ */
+
 // Types for our database
 export interface TournamentEntry {
   id: string;
@@ -247,4 +261,223 @@ export async function searchLeaderboard(query: string, page: number = 1, limit: 
     page,
     totalPages: Math.ceil((count || 0) / limit),
   };
+}
+
+// ============================================
+// GAME SESSION FUNCTIONS (Anti-Cheat)
+// ============================================
+
+export interface GameSession {
+  id: string;
+  token: string;
+  stripe_session_id: string;
+  created_at: string;
+  expires_at: string;
+  used: boolean;
+  used_at: string | null;
+  validated_score: number | null;
+  retry_count: number;
+  cheat_flags: string[];
+}
+
+/**
+ * Delete expired unused game sessions for a stripe session
+ */
+export async function deleteExpiredGameSessions(stripeSessionId: string): Promise<void> {
+  const supabase = createServerClient();
+
+  const { error } = await supabase
+    .from('game_sessions')
+    .delete()
+    .eq('stripe_session_id', stripeSessionId)
+    .eq('used', false)
+    .lt('expires_at', new Date().toISOString());
+
+  if (error) {
+    console.error('Failed to delete expired sessions:', error);
+  }
+}
+
+/**
+ * Create a new game session token
+ */
+export async function createGameSession(
+  stripeSessionId: string,
+  expiresInMs: number = 30 * 60 * 1000
+): Promise<{ token: string; expiresAt: string }> {
+  const supabase = createServerClient();
+
+  const token = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + expiresInMs).toISOString();
+
+  const { error } = await supabase.from('game_sessions').insert({
+    token,
+    stripe_session_id: stripeSessionId,
+    expires_at: expiresAt,
+  });
+
+  if (error) throw error;
+
+  return { token, expiresAt };
+}
+
+/**
+ * Get and validate a game session token
+ */
+export async function getGameSession(token: string): Promise<GameSession | null> {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .select('*')
+    .eq('token', token)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return data;
+}
+
+/**
+ * Mark a game session as used with the validated score
+ */
+export async function markGameSessionUsed(
+  token: string,
+  score: number,
+  cheatFlags: string[] = []
+): Promise<void> {
+  const supabase = createServerClient();
+
+  const { error } = await supabase
+    .from('game_sessions')
+    .update({
+      used: true,
+      used_at: new Date().toISOString(),
+      validated_score: score,
+      cheat_flags: cheatFlags,
+    })
+    .eq('token', token);
+
+  if (error) throw error;
+}
+
+/**
+ * Increment retry count for a game session
+ */
+export async function incrementGameSessionRetry(token: string): Promise<number> {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .update({ retry_count: supabase.rpc('increment') })
+    .eq('token', token)
+    .select('retry_count')
+    .single();
+
+  if (error) {
+    // Fallback: do manual increment
+    const session = await getGameSession(token);
+    if (session) {
+      const newCount = (session.retry_count || 0) + 1;
+      await supabase
+        .from('game_sessions')
+        .update({ retry_count: newCount })
+        .eq('token', token);
+      return newCount;
+    }
+    throw error;
+  }
+
+  return data?.retry_count || 1;
+}
+
+/**
+ * Log a cheat attempt
+ */
+export async function logCheatAttempt(attempt: {
+  stripe_session_id?: string;
+  game_session_token?: string;
+  ip_address?: string;
+  claimed_score: number;
+  server_score: number;
+  reason: string;
+  flags: string[];
+  inputs_count: number;
+  game_duration_ms: number;
+}): Promise<void> {
+  const supabase = createServerClient();
+
+  const { error } = await supabase.from('cheat_attempts').insert({
+    stripe_session_id: attempt.stripe_session_id,
+    game_session_token: attempt.game_session_token,
+    ip_address: attempt.ip_address,
+    claimed_score: attempt.claimed_score,
+    server_score: attempt.server_score,
+    reason: attempt.reason,
+    flags: attempt.flags,
+    inputs_count: attempt.inputs_count,
+    game_duration_ms: attempt.game_duration_ms,
+  });
+
+  if (error) {
+    console.error('Failed to log cheat attempt:', error);
+  }
+}
+
+/**
+ * Get cheat attempts with pagination
+ */
+export async function getCheatAttempts(page: number = 1, limit: number = 50) {
+  const supabase = createServerClient();
+  const offset = (page - 1) * limit;
+
+  const { data, error, count } = await supabase
+    .from('cheat_attempts')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) throw error;
+
+  return {
+    attempts: data || [],
+    total: count || 0,
+    page,
+    totalPages: Math.ceil((count || 0) / limit),
+  };
+}
+
+/**
+ * Log a validation attempt (success or failure)
+ */
+export async function logValidationAttempt(log: {
+  game_session_id?: string;
+  stripe_session_id?: string;
+  ip_address?: string;
+  claimed_score: number;
+  server_score: number;
+  valid: boolean;
+  cheat_flags: string[];
+  timing_stats?: Record<string, unknown>;
+  duration_ms: number;
+}): Promise<void> {
+  const supabase = createServerClient();
+
+  const { error } = await supabase.from('validation_log').insert({
+    game_session_id: log.game_session_id,
+    stripe_session_id: log.stripe_session_id,
+    ip_address: log.ip_address,
+    claimed_score: log.claimed_score,
+    server_score: log.server_score,
+    valid: log.valid,
+    cheat_flags: log.cheat_flags,
+    timing_stats: log.timing_stats,
+    duration_ms: log.duration_ms,
+  });
+
+  if (error) {
+    console.error('Failed to log validation attempt:', error);
+  }
 }

@@ -3,11 +3,25 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  GAME_CONSTANTS as G,
+  getPipeGapY,
+  type GameInput,
+} from '@/lib/gameConstants';
 
 interface FlappyBirdProps {
   mode: 'free' | 'tournament';
+  stripeSessionId?: string;
   onGameOver?: (score: number) => void;
+  onValidationComplete?: (result: ValidationResult) => void;
   disabled?: boolean;
+}
+
+interface ValidationResult {
+  valid: boolean;
+  score: number;
+  rank?: number;
+  error?: string;
 }
 
 interface Star {
@@ -25,22 +39,17 @@ interface Pipe {
   passed: boolean;
 }
 
-type GameState = 'idle' | 'playing' | 'gameover';
+type GameState = 'loading' | 'idle' | 'playing' | 'gameover' | 'validating';
 
-// Game constants
-const GRAVITY = 0.5;
-const JUMP_FORCE = -9;
-const BIRD_SIZE = 24;
-const PIPE_WIDTH = 60;
-const PIPE_GAP_START = 180;
-const PIPE_GAP_MIN = 120;
-const PIPE_SPEED_START = 3;
-const PIPE_SPAWN_INTERVAL = 1800;
+// Visual constants (not physics)
+const BIRD_SIZE = G.BIRD_SIZE * 2;
 const STAR_COUNT = 50;
 
 export default function FlappyBird({
   mode,
+  stripeSessionId,
   onGameOver,
+  onValidationComplete,
   disabled = false,
 }: FlappyBirdProps) {
   const t = useTranslations('game');
@@ -48,20 +57,65 @@ export default function FlappyBird({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Game state
-  const [gameState, setGameState] = useState<GameState>('idle');
+  const [gameState, setGameState] = useState<GameState>(
+    mode === 'tournament' ? 'loading' : 'idle'
+  );
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
-  const [canvasSize, setCanvasSize] = useState({ width: 400, height: 600 });
+  const [canvasSize, setCanvasSize] = useState({ width: G.CANVAS_WIDTH, height: G.CANVAS_HEIGHT });
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Game session (tournament mode)
+  const gameSessionTokenRef = useRef<string | null>(null);
+  const serverTimeOffsetRef = useRef(0); // Difference between server and client time
+
+  // Input recording (tournament mode)
+  const inputsRef = useRef<GameInput[]>([]);
+  const gameStartTimeRef = useRef(0);
 
   // Game refs (to avoid state in animation loop)
-  const gameStateRef = useRef<GameState>('idle');
+  const gameStateRef = useRef<GameState>(mode === 'tournament' ? 'loading' : 'idle');
   const scoreRef = useRef(0);
   const birdRef = useRef({ x: 0, y: 0, velocity: 0 });
   const pipesRef = useRef<Pipe[]>([]);
   const starsRef = useRef<Star[]>([]);
   const frameRef = useRef<number>(0);
   const lastPipeSpawnRef = useRef(0);
-  const difficultyRef = useRef({ speed: PIPE_SPEED_START, gapHeight: PIPE_GAP_START });
+  const difficultyRef = useRef({ speed: G.PIPE_SPEED_START, gapHeight: G.PIPE_GAP_START });
+  const frameCountRef = useRef(0); // Frame counter for deterministic pipe generation
+
+  // Fetch game session token (tournament mode)
+  useEffect(() => {
+    if (mode !== 'tournament' || !stripeSessionId) return;
+
+    const fetchGameSession = async () => {
+      try {
+        const response = await fetch(
+          `/api/game-session?session_id=${encodeURIComponent(stripeSessionId)}`
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to get game session');
+        }
+
+        const data = await response.json();
+        gameSessionTokenRef.current = data.token;
+
+        // Calculate server time offset
+        serverTimeOffsetRef.current = data.serverTime - Date.now();
+
+        setGameState('idle');
+        gameStateRef.current = 'idle';
+      } catch (error) {
+        console.error('Failed to fetch game session:', error);
+        setValidationError('Failed to initialize game. Please refresh and try again.');
+        setGameState('gameover');
+        gameStateRef.current = 'gameover';
+      }
+    };
+
+    fetchGameSession();
+  }, [mode, stripeSessionId]);
 
   // Load best score from localStorage
   useEffect(() => {
@@ -102,27 +156,46 @@ export default function FlappyBird({
     starsRef.current = stars;
   }, [canvasSize]);
 
+  // Record input (tournament mode)
+  const recordInput = useCallback(() => {
+    if (mode !== 'tournament') return;
+
+    const timestamp = performance.now() - gameStartTimeRef.current;
+    inputsRef.current.push({ type: 'flap', timestamp });
+  }, [mode]);
+
   // Reset game
   const resetGame = useCallback(() => {
     birdRef.current = {
-      x: canvasSize.width * 0.25,
-      y: canvasSize.height * 0.5,
-      velocity: 0,
+      x: G.BIRD_X,
+      y: G.BIRD_START_Y,
+      velocity: G.BIRD_START_VELOCITY,
     };
     pipesRef.current = [];
     scoreRef.current = 0;
     setScore(0);
     lastPipeSpawnRef.current = 0;
-    difficultyRef.current = { speed: PIPE_SPEED_START, gapHeight: PIPE_GAP_START };
-  }, [canvasSize]);
+    frameCountRef.current = 0;
+    difficultyRef.current = { speed: G.PIPE_SPEED_START, gapHeight: G.PIPE_GAP_START };
+
+    // Reset input recording
+    inputsRef.current = [];
+    gameStartTimeRef.current = 0;
+  }, []);
 
   // Start game
   const startGame = useCallback(() => {
     if (disabled) return;
+    if (mode === 'tournament' && !gameSessionTokenRef.current) return;
+
     resetGame();
+
+    // Record start time
+    gameStartTimeRef.current = performance.now();
+
     setGameState('playing');
     gameStateRef.current = 'playing';
-  }, [disabled, resetGame]);
+  }, [disabled, mode, resetGame]);
 
   // Jump action
   const jump = useCallback(() => {
@@ -131,16 +204,55 @@ export default function FlappyBird({
     if (gameStateRef.current === 'idle') {
       startGame();
     } else if (gameStateRef.current === 'playing') {
-      birdRef.current.velocity = JUMP_FORCE;
+      birdRef.current.velocity = G.FLAP_FORCE;
+      recordInput();
     }
-  }, [disabled, startGame]);
+  }, [disabled, startGame, recordInput]);
+
+  // Validate score with server (tournament mode)
+  const validateScore = useCallback(async (finalScore: number, gameDuration: number) => {
+    if (mode !== 'tournament' || !gameSessionTokenRef.current || !stripeSessionId) {
+      return;
+    }
+
+    setGameState('validating');
+    gameStateRef.current = 'validating';
+
+    try {
+      // Note: We don't have player info here yet - that comes from the form
+      // For now, we just pass the game data and let the parent handle the form
+      const validationData = {
+        gameSessionToken: gameSessionTokenRef.current,
+        stripeSessionId,
+        claimedScore: finalScore,
+        gameDuration,
+        inputs: inputsRef.current,
+      };
+
+      // Store validation data for later submission with player info
+      if (onValidationComplete) {
+        onValidationComplete({
+          valid: true, // Preliminary - actual validation happens with player info
+          score: finalScore,
+          ...validationData,
+        } as ValidationResult & { gameSessionToken: string; inputs: GameInput[]; gameDuration: number });
+      }
+
+      setGameState('gameover');
+      gameStateRef.current = 'gameover';
+    } catch (error) {
+      console.error('Validation error:', error);
+      setValidationError('Score could not be verified. Please try again.');
+      setGameState('gameover');
+      gameStateRef.current = 'gameover';
+    }
+  }, [mode, stripeSessionId, onValidationComplete]);
 
   // Handle game over
   const handleGameOver = useCallback(() => {
-    setGameState('gameover');
-    gameStateRef.current = 'gameover';
-
     const finalScore = scoreRef.current;
+    const gameDuration = performance.now() - gameStartTimeRef.current;
+
     setScore(finalScore);
 
     // Update best score
@@ -149,11 +261,19 @@ export default function FlappyBird({
       localStorage.setItem('flappystar_best', finalScore.toString());
     }
 
-    // Callback for tournament mode
+    // For tournament mode, validate with server
+    if (mode === 'tournament') {
+      validateScore(finalScore, gameDuration);
+    } else {
+      setGameState('gameover');
+      gameStateRef.current = 'gameover';
+    }
+
+    // Callback
     if (onGameOver) {
       onGameOver(finalScore);
     }
-  }, [bestScore, onGameOver]);
+  }, [bestScore, mode, onGameOver, validateScore]);
 
   // Draw star (bird)
   const drawBird = useCallback(
@@ -210,19 +330,19 @@ export default function FlappyBird({
 
       // Top pipe
       ctx.fillStyle = '#1e0a3c';
-      ctx.fillRect(x, 0, PIPE_WIDTH, gapY);
+      ctx.fillRect(x, 0, G.PIPE_WIDTH, gapY);
 
       // Top pipe gold edge
       ctx.fillStyle = '#FFD700';
-      ctx.fillRect(x - 4, gapY - 20, PIPE_WIDTH + 8, 20);
+      ctx.fillRect(x - 4, gapY - 20, G.PIPE_WIDTH + 8, 20);
 
       // Bottom pipe
       ctx.fillStyle = '#1e0a3c';
-      ctx.fillRect(x, gapY + gapHeight, PIPE_WIDTH, height - gapY - gapHeight);
+      ctx.fillRect(x, gapY + gapHeight, G.PIPE_WIDTH, height - gapY - gapHeight);
 
       // Bottom pipe gold edge
       ctx.fillStyle = '#FFD700';
-      ctx.fillRect(x - 4, gapY + gapHeight, PIPE_WIDTH + 8, 20);
+      ctx.fillRect(x - 4, gapY + gapHeight, G.PIPE_WIDTH + 8, 20);
     },
     []
   );
@@ -253,23 +373,21 @@ export default function FlappyBird({
   // Check collision
   const checkCollision = useCallback(
     (bird: typeof birdRef.current, pipes: Pipe[]) => {
-      const birdRadius = BIRD_SIZE / 2 - 4; // Slightly smaller hitbox
+      // Use G.BIRD_SIZE for collision to match server
+      const birdLeft = G.BIRD_X - G.BIRD_SIZE;
+      const birdRight = G.BIRD_X + G.BIRD_SIZE;
+      const birdTop = bird.y - G.BIRD_SIZE;
+      const birdBottom = bird.y + G.BIRD_SIZE;
 
       // Floor and ceiling
-      if (bird.y - birdRadius < 0 || bird.y + birdRadius > canvasSize.height) {
+      if (birdTop < 0 || birdBottom > G.CANVAS_HEIGHT) {
         return true;
       }
 
       // Pipes
       for (const pipe of pipes) {
-        if (
-          bird.x + birdRadius > pipe.x &&
-          bird.x - birdRadius < pipe.x + PIPE_WIDTH
-        ) {
-          if (
-            bird.y - birdRadius < pipe.gapY ||
-            bird.y + birdRadius > pipe.gapY + pipe.gapHeight
-          ) {
+        if (birdRight > pipe.x && birdLeft < pipe.x + G.PIPE_WIDTH) {
+          if (birdTop < pipe.gapY || birdBottom > pipe.gapY + pipe.gapHeight) {
             return true;
           }
         }
@@ -277,7 +395,7 @@ export default function FlappyBird({
 
       return false;
     },
-    [canvasSize]
+    []
   );
 
   // Game loop
@@ -287,6 +405,11 @@ export default function FlappyBird({
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Prevent text selection and default behaviors on canvas
+    canvas.style.userSelect = 'none';
+    canvas.style.webkitUserSelect = 'none';
+    canvas.style.touchAction = 'none';
 
     let lastTime = 0;
 
@@ -317,44 +440,53 @@ export default function FlappyBird({
       drawStars(ctx, deltaTime);
 
       if (gameStateRef.current === 'playing') {
+        // Increment frame counter for deterministic pipe generation
+        frameCountRef.current++;
+
         // Update bird physics
-        birdRef.current.velocity += GRAVITY;
+        birdRef.current.velocity += G.GRAVITY;
         birdRef.current.y += birdRef.current.velocity;
 
-        // Spawn pipes
-        if (timestamp - lastPipeSpawnRef.current > PIPE_SPAWN_INTERVAL) {
-          const gapY =
-            Math.random() * (canvasSize.height - difficultyRef.current.gapHeight - 100) + 50;
+        // Calculate current time in ms
+        const currentTimeMs = frameCountRef.current * G.FRAME_MS;
+
+        // Calculate current pipe gap based on score
+        const pipeGap = Math.max(
+          G.PIPE_GAP_MIN,
+          G.PIPE_GAP_START - Math.floor(scoreRef.current / 10) * G.PIPE_GAP_DECREASE_PER_10
+        );
+
+        // Calculate current pipe speed based on score
+        const speedMultiplier = 1 + Math.floor(scoreRef.current / 10) *
+          (G.PIPE_SPEED_INCREASE_PER_10 / G.PIPE_SPEED_START);
+        const pipeSpeed = G.PIPE_SPEED_START * speedMultiplier;
+
+        // Spawn pipes deterministically (same algorithm as server)
+        if (currentTimeMs - lastPipeSpawnRef.current >= G.PIPE_INTERVAL_MS) {
+          // Use deterministic pipe Y position based on frame count
+          // MUST match server algorithm: seed = frame * 9301 + 49297
+          const gapY = getPipeGapY(frameCountRef.current, pipeGap);
           pipesRef.current.push({
-            x: canvasSize.width,
+            x: G.PIPE_START_X,
             gapY,
-            gapHeight: difficultyRef.current.gapHeight,
+            gapHeight: pipeGap,
             passed: false,
           });
-          lastPipeSpawnRef.current = timestamp;
+          lastPipeSpawnRef.current = currentTimeMs;
         }
 
         // Update pipes
         pipesRef.current = pipesRef.current.filter((pipe) => {
-          pipe.x -= difficultyRef.current.speed;
+          pipe.x -= pipeSpeed;
 
           // Score when passing pipe
-          if (!pipe.passed && pipe.x + PIPE_WIDTH < birdRef.current.x) {
+          if (!pipe.passed && pipe.x + G.PIPE_WIDTH < G.BIRD_X) {
             pipe.passed = true;
             scoreRef.current++;
             setScore(scoreRef.current);
-
-            // Increase difficulty every 10 points
-            if (scoreRef.current % 10 === 0) {
-              difficultyRef.current.speed += 0.25;
-              difficultyRef.current.gapHeight = Math.max(
-                PIPE_GAP_MIN,
-                difficultyRef.current.gapHeight - 2
-              );
-            }
           }
 
-          return pipe.x > -PIPE_WIDTH;
+          return pipe.x > -G.PIPE_WIDTH;
         });
 
         // Check collision
@@ -386,9 +518,8 @@ export default function FlappyBird({
 
       // Idle state: floating animation
       if (gameStateRef.current === 'idle') {
-        birdRef.current.x = canvasSize.width * 0.25;
-        birdRef.current.y =
-          canvasSize.height * 0.5 + Math.sin(timestamp * 0.003) * 20;
+        birdRef.current.x = G.BIRD_X;
+        birdRef.current.y = G.BIRD_START_Y + Math.sin(timestamp * 0.003) * 20;
       }
 
       frameRef.current = requestAnimationFrame(gameLoop);
@@ -396,9 +527,9 @@ export default function FlappyBird({
 
     // Initialize bird position
     birdRef.current = {
-      x: canvasSize.width * 0.25,
-      y: canvasSize.height * 0.5,
-      velocity: 0,
+      x: G.BIRD_X,
+      y: G.BIRD_START_Y,
+      velocity: G.BIRD_START_VELOCITY,
     };
 
     frameRef.current = requestAnimationFrame(gameLoop);
@@ -429,7 +560,7 @@ export default function FlappyBird({
   }, [jump]);
 
   const handleClick = () => {
-    if (gameState !== 'gameover') {
+    if (gameState !== 'gameover' && gameState !== 'validating' && gameState !== 'loading') {
       jump();
     }
   };
@@ -445,9 +576,11 @@ export default function FlappyBird({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full min-h-[500px] flex items-center justify-center"
+      className="relative w-full h-full min-h-[500px] flex items-center justify-center select-none"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+      onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="relative">
+      <div className="relative select-none">
         {/* Game canvas */}
         <canvas
           ref={canvasRef}
@@ -458,9 +591,32 @@ export default function FlappyBird({
             e.preventDefault();
             handleClick();
           }}
+          onMouseDown={(e) => e.preventDefault()}
+          onDoubleClick={(e) => e.preventDefault()}
           className="rounded-xl border border-surface-border cursor-pointer"
-          style={{ touchAction: 'none' }}
+          style={{
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+          }}
         />
+
+        {/* Loading overlay (tournament mode) */}
+        <AnimatePresence>
+          {gameState === 'loading' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-xl"
+            >
+              <div className="text-center">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-white">{t('loading') || 'Preparing game...'}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Idle overlay */}
         <AnimatePresence>
@@ -484,6 +640,24 @@ export default function FlappyBird({
           )}
         </AnimatePresence>
 
+        {/* Validating overlay (tournament mode) */}
+        <AnimatePresence>
+          {gameState === 'validating' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-xl"
+            >
+              <div className="text-center">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-white">Validating score...</p>
+                <p className="text-text-muted text-sm mt-2">Please wait</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Game over overlay */}
         <AnimatePresence>
           {gameState === 'gameover' && (
@@ -502,21 +676,27 @@ export default function FlappyBird({
                   {t('gameOver')}
                 </h2>
 
-                <div className="space-y-2 mb-6">
-                  <div>
-                    <p className="text-text-muted text-sm">{t('yourScore')}</p>
-                    <p className="text-4xl font-display font-bold gold-shimmer">
-                      {score}
-                    </p>
+                {validationError ? (
+                  <div className="mb-6">
+                    <p className="text-red-400 text-sm">{validationError}</p>
                   </div>
+                ) : (
+                  <div className="space-y-2 mb-6">
+                    <div>
+                      <p className="text-text-muted text-sm">{t('yourScore')}</p>
+                      <p className="text-4xl font-display font-bold gold-shimmer">
+                        {score}
+                      </p>
+                    </div>
 
-                  <div>
-                    <p className="text-text-muted text-sm">{t('bestScore')}</p>
-                    <p className="text-xl font-medium text-white">
-                      {Math.max(score, bestScore)}
-                    </p>
+                    <div>
+                      <p className="text-text-muted text-sm">{t('bestScore')}</p>
+                      <p className="text-xl font-medium text-white">
+                        {Math.max(score, bestScore)}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {mode === 'free' && (
                   <button
@@ -527,7 +707,7 @@ export default function FlappyBird({
                   </button>
                 )}
 
-                {mode === 'tournament' && (
+                {mode === 'tournament' && !validationError && (
                   <p className="text-primary font-medium">
                     {t('submitScore')}
                   </p>
@@ -548,7 +728,7 @@ export default function FlappyBird({
           </div>
         )}
 
-        {mode === 'tournament' && gameState !== 'gameover' && (
+        {mode === 'tournament' && gameState !== 'gameover' && gameState !== 'validating' && (
           <div className="absolute top-4 left-4 right-4">
             <div className="glass-card px-3 py-1.5 rounded-full text-center border border-primary/30">
               <span className="text-sm text-primary font-medium">
@@ -561,3 +741,6 @@ export default function FlappyBird({
     </div>
   );
 }
+
+// Export types for parent components
+export type { ValidationResult, GameInput };

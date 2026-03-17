@@ -24,7 +24,7 @@ interface LeaderboardTableProps {
 }
 
 export default function LeaderboardTable({
-  entries,
+  entries: entriesProp,
   page,
   totalPages,
   total,
@@ -34,6 +34,7 @@ export default function LeaderboardTable({
   isLoading = false,
 }: LeaderboardTableProps) {
   const t = useTranslations('leaderboard');
+  const entries = entriesProp ?? [];
 
   const getRankDisplay = (index: number) => {
     const rank = (page - 1) * 25 + index + 1;

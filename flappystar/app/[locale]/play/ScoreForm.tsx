@@ -8,9 +8,19 @@ import CountrySelect from '@/components/ui/CountrySelect';
 import Confetti from '@/components/ui/Confetti';
 import { Link } from '@/i18n/routing';
 
+import type { GameInput } from '@/lib/gameConstants';
+
+interface GameValidationData {
+  gameSessionToken: string;
+  inputs: GameInput[];
+  gameDuration: number;
+  stripeSessionId?: string;
+}
+
 interface ScoreFormProps {
   score: number;
   sessionId: string;
+  gameData: GameValidationData;
   onSubmitted: () => void;
 }
 
@@ -32,6 +42,7 @@ interface FormErrors {
 export default function ScoreForm({
   score,
   sessionId,
+  gameData,
   onSubmitted,
 }: ScoreFormProps) {
   const t = useTranslations('scoreForm');
@@ -86,24 +97,28 @@ export default function ScoreForm({
     setErrors({});
 
     try {
-      const response = await fetch('/api/submit-score', {
+      // Call the server-side validation API with game inputs
+      const response = await fetch('/api/validate-score', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          session_id: sessionId,
-          full_name: formData.fullName,
+          gameSessionToken: gameData.gameSessionToken,
+          stripeSessionId: sessionId,
+          claimedScore: score,
+          gameDuration: gameData.gameDuration,
+          inputs: gameData.inputs,
+          fullName: formData.fullName,
           email: formData.email,
           nickname: formData.nickname,
           country: formData.country,
-          score: score,
         }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
+      if (response.ok && data.valid) {
         setResult({ rank: data.rank, score: data.score });
         setShowConfetti(true);
         onSubmitted();

@@ -39,6 +39,27 @@ interface EntriesData {
   totalPages: number;
 }
 
+interface CheatAttempt {
+  id: string;
+  created_at: string;
+  stripe_session_id: string | null;
+  game_session_token: string | null;
+  ip_address: string | null;
+  claimed_score: number;
+  server_score: number;
+  reason: string;
+  flags: string[];
+  inputs_count: number;
+  game_duration_ms: number;
+}
+
+interface CheatAttemptsData {
+  attempts: CheatAttempt[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
 // Helper to create auth header
 const getAuthHeader = (password: string) => {
   return `Basic ${btoa(`admin:${password}`)}`;
@@ -55,6 +76,9 @@ export default function AdminPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [entries, setEntries] = useState<EntriesData | null>(null);
   const [entriesPage, setEntriesPage] = useState(1);
+  const [cheatAttempts, setCheatAttempts] = useState<CheatAttemptsData | null>(null);
+  const [cheatAttemptsPage, setCheatAttemptsPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<'entries' | 'cheats'>('entries');
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -69,10 +93,11 @@ export default function AdminPage() {
     try {
       const headers = { Authorization: getAuthHeader(password) };
 
-      const [statsRes, settingsRes, entriesRes] = await Promise.all([
+      const [statsRes, settingsRes, entriesRes, cheatsRes] = await Promise.all([
         fetch('/api/admin?type=stats', { headers }),
         fetch('/api/admin?type=settings', { headers }),
         fetch(`/api/admin?type=entries&page=${entriesPage}`, { headers }),
+        fetch(`/api/admin?type=cheat_attempts&page=${cheatAttemptsPage}`, { headers }),
       ]);
 
       if (statsRes.status === 401) {
@@ -81,21 +106,23 @@ export default function AdminPage() {
         return;
       }
 
-      const [statsData, settingsData, entriesData] = await Promise.all([
+      const [statsData, settingsData, entriesData, cheatsData] = await Promise.all([
         statsRes.json(),
         settingsRes.json(),
         entriesRes.json(),
+        cheatsRes.json(),
       ]);
 
       setStats(statsData);
       setSettings(settingsData);
       setEntries(entriesData);
+      setCheatAttempts(cheatsData);
     } catch (error) {
       console.error('Failed to fetch admin data:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, password, entriesPage]);
+  }, [isAuthenticated, password, entriesPage, cheatAttemptsPage]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -193,7 +220,7 @@ export default function AdminPage() {
 
   // Export CSV
   const handleExportCSV = () => {
-    if (!entries) return;
+    if (!entries || !entries.entries || entries.entries.length === 0) return;
 
     const headers = ['Rank', 'Name', 'Email', 'Nickname', 'Country', 'Score', 'Date'];
     const rows = entries.entries.map((entry, index) => [
@@ -408,18 +435,50 @@ export default function AdminPage() {
         )}
       </section>
 
-      {/* Entries */}
+      {/* Data Tabs */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-display font-bold text-white">
+        {/* Tab buttons */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setActiveTab('entries')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'entries'
+                ? 'bg-primary text-black'
+                : 'bg-surface border border-surface-border text-white hover:bg-white/10'
+            }`}
+          >
             {t('entries.title')}
-          </h2>
-          <button onClick={handleExportCSV} className="btn-secondary text-sm">
-            {t('entries.export')}
+          </button>
+          <button
+            onClick={() => setActiveTab('cheats')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'cheats'
+                ? 'bg-red-500 text-white'
+                : 'bg-surface border border-surface-border text-white hover:bg-white/10'
+            }`}
+          >
+            Cheat Attempts
+            {cheatAttempts && cheatAttempts.total > 0 && (
+              <span className="ml-2 px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full">
+                {cheatAttempts.total}
+              </span>
+            )}
           </button>
         </div>
 
-        {isLoading && !entries ? (
+        {/* Entries Tab */}
+        {activeTab === 'entries' && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-display font-bold text-white">
+                {t('entries.title')}
+              </h2>
+              <button onClick={handleExportCSV} className="btn-secondary text-sm">
+                {t('entries.export')}
+              </button>
+            </div>
+
+            {isLoading && !entries ? (
           <TableSkeleton />
         ) : entries ? (
           <div className="glass-card rounded-xl overflow-hidden">
@@ -437,7 +496,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-border">
-                  {entries.entries.map((entry, index) => (
+                  {(entries?.entries ?? []).map((entry, index) => (
                     <tr key={entry.id} className="hover:bg-white/[0.02]">
                       <td className="px-4 py-3 text-white">
                         {(entriesPage - 1) * 50 + index + 1}
@@ -487,6 +546,125 @@ export default function AdminPage() {
             )}
           </div>
         ) : null}
+          </>
+        )}
+
+        {/* Cheat Attempts Tab */}
+        {activeTab === 'cheats' && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-display font-bold text-white">
+                Cheat Attempts
+              </h2>
+              <span className="text-sm text-text-muted">
+                Total: {cheatAttempts?.total || 0}
+              </span>
+            </div>
+
+            {isLoading && !cheatAttempts ? (
+              <TableSkeleton />
+            ) : cheatAttempts && cheatAttempts.attempts.length > 0 ? (
+              <div className="glass-card rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-surface-border text-left text-xs text-text-muted uppercase tracking-wider">
+                        <th className="px-4 py-3">Date</th>
+                        <th className="px-4 py-3">IP Address</th>
+                        <th className="px-4 py-3">Claimed</th>
+                        <th className="px-4 py-3">Server</th>
+                        <th className="px-4 py-3">Reason</th>
+                        <th className="px-4 py-3">Flags</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-surface-border">
+                      {cheatAttempts.attempts.map((attempt) => (
+                        <tr key={attempt.id} className="hover:bg-white/[0.02]">
+                          <td className="px-4 py-3 text-text-muted text-sm">
+                            {new Date(attempt.created_at).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-white font-mono text-sm">
+                            {attempt.ip_address || 'N/A'}
+                          </td>
+                          <td className="px-4 py-3 text-red-400 font-bold">
+                            {attempt.claimed_score}
+                          </td>
+                          <td className="px-4 py-3 text-primary font-bold">
+                            {attempt.server_score}
+                          </td>
+                          <td className="px-4 py-3 text-white text-sm">
+                            {attempt.reason}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {(attempt.flags || []).slice(0, 3).map((flag, i) => (
+                                <span
+                                  key={i}
+                                  className="px-2 py-0.5 bg-red-500/10 text-red-400 text-xs rounded"
+                                >
+                                  {flag.split(':')[0]}
+                                </span>
+                              ))}
+                              {(attempt.flags || []).length > 3 && (
+                                <span className="px-2 py-0.5 bg-surface text-text-muted text-xs rounded">
+                                  +{attempt.flags.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {cheatAttempts.totalPages > 1 && (
+                  <div className="px-4 py-3 border-t border-surface-border flex items-center justify-between">
+                    <span className="text-sm text-text-muted">
+                      Page {cheatAttempts.page} of {cheatAttempts.totalPages}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setCheatAttemptsPage(cheatAttemptsPage - 1)}
+                        disabled={cheatAttemptsPage <= 1}
+                        className="px-3 py-1 text-sm border border-surface-border rounded disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => setCheatAttemptsPage(cheatAttemptsPage + 1)}
+                        disabled={cheatAttemptsPage >= cheatAttempts.totalPages}
+                        className="px-3 py-1 text-sm border border-surface-border rounded disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="glass-card rounded-xl p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <p className="text-white font-medium">No cheat attempts detected</p>
+                <p className="text-text-muted text-sm mt-1">All scores have been validated successfully</p>
+              </div>
+            )}
+          </>
+        )}
       </section>
     </div>
   );

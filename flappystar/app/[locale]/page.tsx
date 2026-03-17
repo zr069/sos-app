@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import LiveWidget from '@/components/leaderboard/LiveWidget';
+import TournamentStats from '@/components/landing/TournamentStats';
 import Accordion from '@/components/ui/Accordion';
 import EnterTournamentButton from './EnterTournamentButton';
 
@@ -30,7 +31,7 @@ export default async function HomePage({
   const t = await getTranslations('landing');
   const tFaq = await getTranslations('landing.faq');
 
-  const tournamentEndDate = process.env.TOURNAMENT_END_DATE || '2025-06-30T23:59:59Z';
+  const tournamentEndDate = process.env.TOURNAMENT_END_DATE || '2026-09-17T23:59:59Z';
 
   // FAQ items
   const faqItems = [
@@ -158,50 +159,7 @@ export default async function HomePage({
       {/* Live Leaderboard + Stats */}
       <section className="grid lg:grid-cols-2 gap-6 mb-16 sm:mb-24">
         <LiveWidget />
-
-        <div className="glass-card rounded-2xl p-6">
-          <h3 className="text-xl font-display font-bold text-white mb-6">
-            Tournament Stats
-          </h3>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
-              <div className="text-2xl sm:text-3xl font-display font-bold text-primary mb-1">
-                1,234
-              </div>
-              <div className="text-xs text-text-muted uppercase tracking-wider">
-                {t('stats.entries')}
-              </div>
-            </div>
-
-            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">
-                45
-              </div>
-              <div className="text-xs text-text-muted uppercase tracking-wider">
-                {t('stats.daysLeft')}
-              </div>
-            </div>
-
-            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
-              <div className="text-2xl sm:text-3xl font-display font-bold gold-shimmer mb-1">
-                €10,000
-              </div>
-              <div className="text-xs text-text-muted uppercase tracking-wider">
-                {t('stats.prize')}
-              </div>
-            </div>
-
-            <div className="text-center p-4 rounded-xl bg-white/[0.02]">
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">
-                42
-              </div>
-              <div className="text-xs text-text-muted uppercase tracking-wider">
-                {t('stats.countries')}
-              </div>
-            </div>
-          </div>
-        </div>
+        <TournamentStats />
       </section>
 
       {/* FAQ */}

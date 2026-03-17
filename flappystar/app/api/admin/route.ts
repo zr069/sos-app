@@ -4,6 +4,7 @@ import {
   getTournamentSettings,
   updateTournamentSettings,
   getAllEntries,
+  getCheatAttempts,
 } from '@/lib/supabase';
 import {
   getCachedTournamentSettings,
@@ -76,6 +77,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(entries);
       }
 
+      case 'cheat_attempts': {
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        const attempts = await getCheatAttempts(page, 50);
+        return NextResponse.json(attempts);
+      }
+
       default:
         return NextResponse.json(
           { error: 'Invalid type parameter' },
@@ -85,7 +92,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Admin GET error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch data' },
+      { error: 'Failed to fetch data', entries: [], total: 0, page: 1, totalPages: 0 },
       { status: 500 }
     );
   }

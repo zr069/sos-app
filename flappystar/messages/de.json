@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "FlappyStar - Gewinne €10.000 beim Flappy Bird spielen",
-    "description": "Nimm für nur €0,50 am Turnier teil. Spiele Flappy Bird, erziele Highscores, gewinne €10.000. Kostenloses Spielen verfügbar."
+    "title": "FlappyStar - Gewinne €10.000 beim FlappyStar spielen",
+    "description": "Nimm für nur €0,50 am Turnier teil. Spiele FlappyStar, erziele Highscores, gewinne €10.000. Kostenloses Spielen verfügbar."
   },
   "common": {
     "loading": "Laden...",
@@ -26,7 +26,7 @@
     "hero": {
       "title": "Spielen. Gewinnen.",
       "prize": "€10.000",
-      "subtitle": "Nimm am ultimativen Flappy Bird Turnier teil. Ein einfaches Spiel. Ein riesiger Preis.",
+      "subtitle": "Nimm am ultimativen FlappyStar Turnier teil. Ein einfaches Spiel. Ein riesiger Preis.",
       "ctaEnter": "Am Turnier teilnehmen — €0,50",
       "ctaFree": "Kostenlos spielen"
     },

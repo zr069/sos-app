@@ -53,58 +53,65 @@ export default function LocaleSwitcher() {
 
   return (
     <div ref={containerRef} className="relative">
+      {/* Minimal trigger - just flag + chevron */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-white hover:bg-white/5 transition-colors"
+        className="flex items-center gap-1.5 py-2 text-white/60 hover:text-white transition-colors duration-200"
         aria-label="Change language"
       >
-        <span className="text-lg">{getFlag(locale)}</span>
+        <span className="text-lg leading-none">{getFlag(locale)}</span>
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          strokeWidth={2}
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
             d="M19 9l-7 7-7-7"
           />
         </svg>
       </button>
 
+      {/* Dropdown */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 mt-2 w-48 bg-background border border-surface-border rounded-xl shadow-xl overflow-hidden z-50"
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute right-0 mt-3 w-44 overflow-hidden rounded-xl z-50"
+            style={{
+              background: 'rgba(15, 15, 20, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.10)',
+              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+            }}
           >
-            <div className="py-1 max-h-64 overflow-y-auto">
+            <div className="py-1.5 max-h-72 overflow-y-auto scrollbar-thin">
               {locales.map((loc) => (
                 <button
                   key={loc}
                   onClick={() => handleLocaleChange(loc)}
-                  className={`w-full px-4 py-2.5 flex items-center gap-3 text-left hover:bg-surface transition-colors ${
-                    locale === loc ? 'bg-surface text-primary' : 'text-white'
+                  className={`w-full px-3.5 py-2.5 flex items-center gap-3 text-left transition-colors duration-150 ${
+                    locale === loc
+                      ? 'text-[#FFD700] bg-white/5'
+                      : 'text-white/70 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <span className="text-lg">{getFlag(loc)}</span>
-                  <span className="text-sm">{localeNames[loc]}</span>
+                  <span className="text-lg leading-none">{getFlag(loc)}</span>
+                  <span className="text-sm font-medium">{localeNames[loc]}</span>
                   {locale === loc && (
-                    <svg
-                      className="w-4 h-4 text-primary ml-auto"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <span
+                      className="ml-auto w-1.5 h-1.5 rounded-full bg-[#FFD700]"
+                      style={{
+                        boxShadow: '0 0 6px 1px rgba(255, 215, 0, 0.5)',
+                      }}
+                    />
                   )}
                 </button>
               ))}

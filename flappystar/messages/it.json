@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "FlappyStar - Vinci €10.000 giocando a Flappy Bird",
-    "description": "Partecipa al torneo per soli €0,50. Gioca a Flappy Bird, ottieni punteggi alti, vinci €10.000. Modalità gratuita disponibile."
+    "title": "FlappyStar - Vinci €10.000 giocando a FlappyStar",
+    "description": "Partecipa al torneo per soli €0,50. Gioca a FlappyStar, ottieni punteggi alti, vinci €10.000. Modalità gratuita disponibile."
   },
   "common": {
     "loading": "Caricamento...",
@@ -26,7 +26,7 @@
     "hero": {
       "title": "Gioca. Vinci.",
       "prize": "€10.000",
-      "subtitle": "Partecipa al torneo definitivo di Flappy Bird. Un gioco semplice. Un premio enorme.",
+      "subtitle": "Partecipa al torneo definitivo di FlappyStar. Un gioco semplice. Un premio enorme.",
       "ctaEnter": "Partecipa al torneo — €0,50",
       "ctaFree": "Gioca gratis"
     },

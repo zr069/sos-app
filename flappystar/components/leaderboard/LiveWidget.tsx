@@ -49,6 +49,12 @@ export default function LiveWidget() {
     return null;
   }
 
+  const entries = data?.entries ?? [];
+
+  if (entries.length === 0) {
+    return null;
+  }
+
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
@@ -73,7 +79,7 @@ export default function LiveWidget() {
 
       {/* Entries */}
       <div className="space-y-1">
-        {data.entries.map((entry, index) => (
+        {entries.map((entry, index) => (
           <motion.div
             key={entry.id}
             initial={{ opacity: 0, x: -10 }}

@@ -3,9 +3,18 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import FlappyBird from '@/components/game/FlappyBird';
+import FlappyBird, { type ValidationResult } from '@/components/game/FlappyBird';
+import type { GameInput } from '@/lib/gameConstants';
 import ScoreForm from './ScoreForm';
 import { Skeleton } from '@/components/ui/Skeleton';
+
+// Extended validation result with game data
+interface GameValidationData extends ValidationResult {
+  gameSessionToken: string;
+  inputs: GameInput[];
+  gameDuration: number;
+  stripeSessionId?: string;
+}
 
 function PlayContent() {
   const searchParams = useSearchParams();
@@ -21,6 +30,7 @@ function PlayContent() {
   const [gameOver, setGameOver] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
+  const [gameData, setGameData] = useState<GameValidationData | null>(null);
 
   // Validate session for tournament mode
   useEffect(() => {
@@ -59,6 +69,21 @@ function PlayContent() {
 
   const handleGameOver = (score: number) => {
     setFinalScore(score);
+    // For free mode, just set game over
+    if (mode === 'free') {
+      setGameOver(true);
+    }
+  };
+
+  const handleValidationComplete = (result: ValidationResult & { gameSessionToken?: string; inputs?: GameInput[]; gameDuration?: number }) => {
+    setFinalScore(result.score);
+    setGameData({
+      ...result,
+      gameSessionToken: result.gameSessionToken || '',
+      inputs: result.inputs || [],
+      gameDuration: result.gameDuration || 0,
+      stripeSessionId: sessionId || undefined,
+    } as GameValidationData);
     setGameOver(true);
   };
 
@@ -111,11 +136,12 @@ function PlayContent() {
   }
 
   // Show score form after tournament game over
-  if (mode === 'tournament' && gameOver && !scoreSubmitted && sessionId) {
+  if (mode === 'tournament' && gameOver && !scoreSubmitted && sessionId && gameData) {
     return (
       <ScoreForm
         score={finalScore}
         sessionId={sessionId}
+        gameData={gameData}
         onSubmitted={handleScoreSubmitted}
       />
     );
@@ -126,7 +152,9 @@ function PlayContent() {
       <div className="h-[600px] sm:h-[700px]">
         <FlappyBird
           mode={mode}
-          onGameOver={mode === 'tournament' ? handleGameOver : undefined}
+          stripeSessionId={sessionId || undefined}
+          onGameOver={mode === 'free' ? handleGameOver : undefined}
+          onValidationComplete={mode === 'tournament' ? handleValidationComplete : undefined}
           disabled={mode === 'tournament' && !isValid}
         />
       </div>

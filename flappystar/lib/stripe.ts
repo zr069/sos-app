@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 
 // Initialize Stripe client
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-04-30.basil',
+  apiVersion: '2026-02-25.clover',
   typescript: true,
 });
 
@@ -60,6 +60,20 @@ export async function isSessionPaid(sessionId: string): Promise<boolean> {
   }
 }
 
+// Verify and return Stripe session for anti-cheat validation
+export async function verifyStripeSession(sessionId: string): Promise<Stripe.Checkout.Session | null> {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // Verify it's a tournament entry
+    if (session.metadata?.type !== 'tournament_entry') {
+      return null;
+    }
+    return session;
+  } catch {
+    return null;
+  }
+}
+
 // Verify Stripe webhook signature
 export function verifyWebhookSignature(
   payload: string | Buffer,
@@ -78,7 +92,8 @@ function mapLocaleToStripe(locale: string): Stripe.Checkout.SessionCreateParams.
     es: 'es',
     it: 'it',
     zh: 'zh',
-    ar: 'ar',
+    // Arabic uses auto fallback (not directly supported by Stripe)
+    ar: 'auto',
     pl: 'pl',
     hr: 'hr',
     // Serbian uses Croatian fallback
