@@ -69,13 +69,33 @@ function getLevelConfig(score: number) {
   return LEVEL_CONFIG[Math.min(level - 1, LEVEL_CONFIG.length - 1)];
 }
 
+// Shared AudioContext for desktop browser compatibility
+// Desktop browsers require user gesture to unlock AudioContext
+let sharedAudioCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  try {
+    if (!sharedAudioCtx) {
+      const AudioCtx = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return null;
+      sharedAudioCtx = new AudioCtx();
+    }
+    // Resume if suspended (desktop requirement after user gesture)
+    if (sharedAudioCtx.state === 'suspended') {
+      sharedAudioCtx.resume();
+    }
+    return sharedAudioCtx;
+  } catch {
+    return null;
+  }
+}
+
 // Sound effects using Web Audio API
 function playScoreSound() {
-  try {
-    const AudioContext = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+  const ctx = getAudioContext();
+  if (!ctx) return;
 
+  try {
     // Layer 1: Rising sparkle tone
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
@@ -116,20 +136,16 @@ function playScoreSound() {
     gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     osc3.start(ctx.currentTime + 0.1);
     osc3.stop(ctx.currentTime + 0.4);
-
-    // Close context after sounds finish
-    setTimeout(() => ctx.close(), 500);
   } catch {
     // Audio not available
   }
 }
 
 function playGameOverSound() {
-  try {
-    const AudioContext = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
-    if (!AudioContext) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
 
-    const ctx = new AudioContext();
+  try {
     const oscillator = ctx.createOscillator();
     const gainNode = ctx.createGain();
     oscillator.connect(gainNode);
@@ -326,6 +342,9 @@ export default function FlappyBird({
   // Jump action
   const jump = useCallback(() => {
     if (disabled) return;
+
+    // Initialize and unlock AudioContext on first user interaction (desktop requirement)
+    getAudioContext();
 
     if (gameStateRef.current === 'idle') {
       startGame();
