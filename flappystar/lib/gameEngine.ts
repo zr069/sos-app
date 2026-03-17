@@ -237,14 +237,15 @@ export function validateScore(
     };
   }
 
-  if (gameDurationMs < 5000) {
-    return {
-      valid: false,
-      serverScore: 0,
-      reason: 'Game too short (minimum 5 seconds)',
-      flags: ['too_short'],
-    };
-  }
+  // Game duration check - disabled for now
+  // if (gameDurationMs < 5000) {
+  //   return {
+  //     valid: false,
+  //     serverScore: 0,
+  //     reason: 'Game too short (minimum 5 seconds)',
+  //     flags: ['too_short'],
+  //   };
+  // }
 
   if (claimedScore < 0 || claimedScore > 999) {
     return {
