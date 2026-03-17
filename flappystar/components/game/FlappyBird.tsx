@@ -45,6 +45,74 @@ type GameState = 'loading' | 'idle' | 'playing' | 'gameover' | 'validating';
 const BIRD_SIZE = G.BIRD_SIZE * 2;
 const STAR_COUNT = 50;
 
+// Level difficulty settings
+const LEVEL_CONFIG = [
+  { minScore: 0,  speed: 1.8, gap: 210 },  // Level 1
+  { minScore: 15, speed: 2.1, gap: 195 },  // Level 2
+  { minScore: 30, speed: 2.4, gap: 180 },  // Level 3
+  { minScore: 45, speed: 2.7, gap: 168 },  // Level 4
+  { minScore: 60, speed: 3.0, gap: 158 },  // Level 5
+  { minScore: 75, speed: 3.3, gap: 150 },  // Level 6+
+];
+
+function getLevel(score: number): number {
+  for (let i = LEVEL_CONFIG.length - 1; i >= 0; i--) {
+    if (score >= LEVEL_CONFIG[i].minScore) {
+      return i + 1;
+    }
+  }
+  return 1;
+}
+
+function getLevelConfig(score: number) {
+  const level = getLevel(score);
+  return LEVEL_CONFIG[Math.min(level - 1, LEVEL_CONFIG.length - 1)];
+}
+
+// Sound effects using Web Audio API
+function playScoreSound() {
+  try {
+    const AudioContext = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+    if (!AudioContext) return;
+
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.frequency.setValueAtTime(523, ctx.currentTime); // C5
+    oscillator.frequency.setValueAtTime(659, ctx.currentTime + 0.1); // E5
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.3);
+  } catch {
+    // Audio not available
+  }
+}
+
+function playGameOverSound() {
+  try {
+    const AudioContext = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+    if (!AudioContext) return;
+
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(150, ctx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.4);
+    gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.4);
+  } catch {
+    // Audio not available
+  }
+}
+
 export default function FlappyBird({
   mode,
   stripeSessionId,
@@ -61,6 +129,7 @@ export default function FlappyBird({
     mode === 'tournament' ? 'loading' : 'idle'
   );
   const [score, setScore] = useState(0);
+  const [showLevelUp, setShowLevelUp] = useState(false);
   const [bestScore, setBestScore] = useState(0);
   const [canvasSize, setCanvasSize] = useState({ width: G.CANVAS_WIDTH, height: G.CANVAS_HEIGHT });
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -76,6 +145,7 @@ export default function FlappyBird({
   // Game refs (to avoid state in animation loop)
   const gameStateRef = useRef<GameState>(mode === 'tournament' ? 'loading' : 'idle');
   const scoreRef = useRef(0);
+  const levelRef = useRef(1);
   const birdRef = useRef({ x: 0, y: 0, velocity: 0 });
   const pipesRef = useRef<Pipe[]>([]);
   const starsRef = useRef<Star[]>([]);
@@ -173,10 +243,12 @@ export default function FlappyBird({
     };
     pipesRef.current = [];
     scoreRef.current = 0;
+    levelRef.current = 1;
     setScore(0);
+    setShowLevelUp(false);
     lastPipeSpawnRef.current = 0;
     frameCountRef.current = 0;
-    difficultyRef.current = { speed: G.PIPE_SPEED_START, gapHeight: G.PIPE_GAP_START };
+    difficultyRef.current = { speed: LEVEL_CONFIG[0].speed, gapHeight: LEVEL_CONFIG[0].gap };
 
     // Reset input recording
     inputsRef.current = [];
@@ -256,6 +328,7 @@ export default function FlappyBird({
     const finalScore = scoreRef.current;
     const gameDuration = performance.now() - gameStartTimeRef.current;
 
+    playGameOverSound();
     setScore(finalScore);
 
     // Update best score
@@ -454,16 +527,10 @@ export default function FlappyBird({
         // Calculate current time in ms
         const currentTimeMs = frameCountRef.current * G.FRAME_MS;
 
-        // Calculate current pipe gap based on score
-        const pipeGap = Math.max(
-          G.PIPE_GAP_MIN,
-          G.PIPE_GAP_START - Math.floor(scoreRef.current / 10) * G.PIPE_GAP_DECREASE_PER_10
-        );
-
-        // Calculate current pipe speed based on score
-        const speedMultiplier = 1 + Math.floor(scoreRef.current / 10) *
-          (G.PIPE_SPEED_INCREASE_PER_10 / G.PIPE_SPEED_START);
-        const pipeSpeed = G.PIPE_SPEED_START * speedMultiplier;
+        // Get level-based difficulty
+        const levelConfig = getLevelConfig(scoreRef.current);
+        const pipeGap = levelConfig.gap;
+        const pipeSpeed = levelConfig.speed;
 
         // Spawn pipes deterministically (same algorithm as server)
         if (currentTimeMs - lastPipeSpawnRef.current >= G.PIPE_INTERVAL_MS) {
@@ -486,8 +553,18 @@ export default function FlappyBird({
           // Score when passing pipe
           if (!pipe.passed && pipe.x + G.PIPE_WIDTH < G.BIRD_X) {
             pipe.passed = true;
+            const prevLevel = levelRef.current;
             scoreRef.current++;
             setScore(scoreRef.current);
+            playScoreSound();
+
+            // Check for level up
+            const newLevel = getLevel(scoreRef.current);
+            if (newLevel > prevLevel) {
+              levelRef.current = newLevel;
+              setShowLevelUp(true);
+              setTimeout(() => setShowLevelUp(false), 1000);
+            }
           }
 
           return pipe.x > -G.PIPE_WIDTH;
@@ -511,13 +588,22 @@ export default function FlappyBird({
           : 0;
       drawBird(ctx, birdRef.current.x, birdRef.current.y, rotation);
 
-      // Draw score
-      ctx.font = 'bold 48px Syne, sans-serif';
-      ctx.fillStyle = '#FFD700';
+      // Draw score and level
       ctx.textAlign = 'center';
       ctx.shadowBlur = 10;
       ctx.shadowColor = '#FFD700';
+
+      // Score
+      ctx.font = 'bold 48px Syne, sans-serif';
+      ctx.fillStyle = '#FFD700';
       ctx.fillText(scoreRef.current.toString(), canvasSize.width / 2, 60);
+
+      // Level indicator
+      ctx.font = 'bold 16px Syne, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowBlur = 0;
+      const levelText = `Level ${levelRef.current}`;
+      ctx.fillText(levelText, canvasSize.width / 2, 85);
       ctx.shadowBlur = 0;
 
       // Idle state: floating animation (no physics, just gentle bobbing)
@@ -611,6 +697,29 @@ export default function FlappyBird({
             pointerEvents: 'auto',
           }}
         />
+
+        {/* Level up animation */}
+        <AnimatePresence>
+          {showLevelUp && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, y: 0 }}
+              animate={{ opacity: 1, scale: 1.2, y: -20 }}
+              exit={{ opacity: 0, scale: 1.5, y: -40 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none z-50"
+            >
+              <div
+                className="text-4xl font-display font-bold"
+                style={{
+                  color: '#FFD700',
+                  textShadow: '0 0 20px #FFD700, 0 0 40px #FFA500, 0 0 60px #FF8C00',
+                }}
+              >
+                LEVEL UP!
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Loading overlay (tournament mode) */}
         <AnimatePresence>

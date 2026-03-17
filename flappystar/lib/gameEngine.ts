@@ -7,6 +7,25 @@
 
 import { GAME_CONSTANTS as G, type GameInput } from './gameConstants';
 
+// Level difficulty settings - MUST match client (FlappyBird.tsx)
+const LEVEL_CONFIG = [
+  { minScore: 0,  speed: 1.8, gap: 210 },  // Level 1
+  { minScore: 15, speed: 2.1, gap: 195 },  // Level 2
+  { minScore: 30, speed: 2.4, gap: 180 },  // Level 3
+  { minScore: 45, speed: 2.7, gap: 168 },  // Level 4
+  { minScore: 60, speed: 3.0, gap: 158 },  // Level 5
+  { minScore: 75, speed: 3.3, gap: 150 },  // Level 6+
+];
+
+function getLevelConfig(score: number) {
+  for (let i = LEVEL_CONFIG.length - 1; i >= 0; i--) {
+    if (score >= LEVEL_CONFIG[i].minScore) {
+      return LEVEL_CONFIG[i];
+    }
+  }
+  return LEVEL_CONFIG[0];
+}
+
 export interface ReplayResult {
   score: number;
   valid: boolean;
@@ -63,14 +82,10 @@ export function replayGame(
       inputIndex++;
     }
 
-    // Calculate current pipe speed and gap based on score
-    const speedMultiplier = 1 + Math.floor(score / 10) *
-      (G.PIPE_SPEED_INCREASE_PER_10 / G.PIPE_SPEED_START);
-    const pipeSpeed = G.PIPE_SPEED_START * speedMultiplier;
-    const pipeGap = Math.max(
-      G.PIPE_GAP_MIN,
-      G.PIPE_GAP_START - Math.floor(score / 10) * G.PIPE_GAP_DECREASE_PER_10
-    );
+    // Get level-based difficulty (same as client)
+    const levelConfig = getLevelConfig(score);
+    const pipeSpeed = levelConfig.speed;
+    const pipeGap = levelConfig.gap;
 
     // Spawn new pipe
     if (currentTimeMs - lastPipeTime >= G.PIPE_INTERVAL_MS) {
