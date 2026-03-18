@@ -106,7 +106,7 @@ export default function ScoreForm({
           gameSessionToken: gameData.gameSessionToken,
           stripeSessionId: sessionId,
           claimedScore: score,
-          gameDuration: gameData.gameDuration,
+          gameDurationMs: gameData.gameDuration,
           inputs: gameData.inputs,
           fullName: formData.fullName,
           email: formData.email,

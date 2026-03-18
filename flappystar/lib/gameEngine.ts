@@ -60,6 +60,11 @@ export function replayGame(
   inputs: GameInput[],
   gameDurationMs: number
 ): ReplayResult {
+  // Fallback if gameDurationMs is undefined/invalid
+  if (!gameDurationMs || gameDurationMs <= 0) {
+    gameDurationMs = 120000; // 2 minute fallback
+  }
+
   // Simulation state
   let birdY = G.BIRD_START_Y;
   let birdVelocity = G.BIRD_START_VELOCITY;
@@ -225,6 +230,11 @@ export function validateScore(
   reason?: string;
   flags: string[];
 } {
+  // Fallback if gameDurationMs is undefined/invalid
+  if (!gameDurationMs || gameDurationMs <= 0) {
+    gameDurationMs = 120000; // 2 minute fallback
+  }
+
   const flags: string[] = [];
 
   // Basic sanity checks
