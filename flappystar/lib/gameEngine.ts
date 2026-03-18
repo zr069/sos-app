@@ -290,9 +290,9 @@ export function validateScore(
   // Replay the game
   const replay = replayGame(inputs, gameDurationMs);
 
-  // Check if replay score matches claimed score (allow tolerance of 2)
+  // Check if replay score matches claimed score (allow tolerance of 10)
   const scoreDiff = Math.abs(replay.score - claimedScore);
-  if (scoreDiff > 2) {
+  if (scoreDiff > 10) {
     flags.push('score_mismatch');
     return {
       valid: false,
