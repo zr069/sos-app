@@ -1,14 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface ShareModalProps {
-  locale: string;
-}
-
-export default function ShareModal({ locale }: ShareModalProps) {
+export default function ShareModal() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +13,16 @@ export default function ShareModal({ locale }: ShareModalProps) {
     score: number;
     rank: number;
   } | null>(null);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    // Remove query params from URL without reload
+    const url = new URL(window.location.href);
+    url.searchParams.delete('sharedBy');
+    url.searchParams.delete('score');
+    url.searchParams.delete('rank');
+    router.replace(url.pathname, { scroll: false });
+  }, [router]);
 
   useEffect(() => {
     const sharedBy = searchParams.get('sharedBy');
@@ -38,17 +44,7 @@ export default function ShareModal({ locale }: ShareModalProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [searchParams]);
-
-  const handleClose = () => {
-    setIsOpen(false);
-    // Remove query params from URL without reload
-    const url = new URL(window.location.href);
-    url.searchParams.delete('sharedBy');
-    url.searchParams.delete('score');
-    url.searchParams.delete('rank');
-    router.replace(url.pathname, { scroll: false });
-  };
+  }, [searchParams, handleClose]);
 
   const handlePlay = () => {
     handleClose();

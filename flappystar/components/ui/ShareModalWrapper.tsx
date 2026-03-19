@@ -3,14 +3,10 @@
 import { Suspense } from 'react';
 import ShareModal from './ShareModal';
 
-interface ShareModalWrapperProps {
-  locale: string;
-}
-
-export default function ShareModalWrapper({ locale }: ShareModalWrapperProps) {
+export default function ShareModalWrapper() {
   return (
     <Suspense fallback={null}>
-      <ShareModal locale={locale} />
+      <ShareModal />
     </Suspense>
   );
 }

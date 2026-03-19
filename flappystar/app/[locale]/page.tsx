@@ -46,7 +46,7 @@ export default async function HomePage({
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 sm:py-16">
       {/* Share Modal (shown when URL has share params) */}
-      <ShareModalWrapper locale={locale} />
+      <ShareModalWrapper />
 
       {/* Hero Section */}
       <section id="tournament" className="text-center mb-16 sm:mb-24">
