@@ -40,16 +40,16 @@
     "howItWorks": {
       "title": "How It Works",
       "step1": {
-        "title": "Pay €0.50",
-        "description": "Secure payment via Stripe. One entry, one chance to win."
+        "title": "Choose Your Stake",
+        "description": "Entry from €1.00. The higher your stake, the higher your score multiplier – and the greater your chance to win."
       },
       "step2": {
-        "title": "Play Flappy Star",
-        "description": "Navigate through obstacles. Score as high as you can."
+        "title": "Play FlappyStar",
+        "description": "Navigate through obstacles. Score as high as you can – your score is multiplied by your multiplier."
       },
       "step3": {
         "title": "Win €10,000",
-        "description": "Highest score at tournament end wins the grand prize."
+        "description": "Top 3 scores qualify for the live finale on Twitch. Whoever lasts longest wins €10,000."
       }
     },
     "stats": {

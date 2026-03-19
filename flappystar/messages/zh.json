@@ -40,16 +40,16 @@
     "howItWorks": {
       "title": "如何参与",
       "step1": {
-        "title": "支付€0.50",
-        "description": "通过Stripe安全支付。一次入场，一次赢取机会。"
+        "title": "选择你的投注",
+        "description": "最低€1.00起。投注越高，分数倍率越高 – 获胜机会越大。"
       },
       "step2": {
-        "title": "玩Flappy Star",
-        "description": "穿越障碍物。尽可能获得高分。"
+        "title": "玩FlappyStar",
+        "description": "穿越障碍物。尽可能获得高分 – 你的分数将乘以你的倍率。"
       },
       "step3": {
         "title": "赢取€10,000",
-        "description": "锦标赛结束时最高分获得大奖。"
+        "description": "前3名高分将晋级Twitch直播决赛。坚持最久的人赢得€10,000。"
       }
     },
     "stats": {

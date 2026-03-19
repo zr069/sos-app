@@ -40,16 +40,16 @@
     "howItWorks": {
       "title": "Kako funkcioniše",
       "step1": {
-        "title": "Plati €0,50",
-        "description": "Sigurno plaćanje putem Stripe-a. Jedna prijava, jedna šansa za pobedu."
+        "title": "Odaberi svoj ulog",
+        "description": "Ulaz od €1,00. Što veći ulog, veći je multiplikator rezultata – i veća je tvoja šansa za pobedu."
       },
       "step2": {
-        "title": "Igraj Flappy Star",
-        "description": "Izbegavaj prepreke. Postići što veći rezultat."
+        "title": "Igraj FlappyStar",
+        "description": "Izbegavaj prepreke. Postići što veći rezultat – tvoj rezultat se množi sa tvojim multiplikatorom."
       },
       "step3": {
         "title": "Osvoji €10.000",
-        "description": "Najveći rezultat na kraju turnira osvaja glavnu nagradu."
+        "description": "Tri najbolja rezultata kvalifikuju se za finale uživo na Twitch-u. Ko najduže izdrži, osvaja €10.000."
       }
     },
     "stats": {

@@ -40,16 +40,16 @@
     "howItWorks": {
       "title": "Come funziona",
       "step1": {
-        "title": "Paga €0,50",
-        "description": "Pagamento sicuro tramite Stripe. Un'iscrizione, una possibilità di vincere."
+        "title": "Scegli la tua puntata",
+        "description": "Iscrizione da €1,00. Più alta è la puntata, più alto è il moltiplicatore del punteggio – e maggiori sono le tue possibilità di vincere."
       },
       "step2": {
-        "title": "Gioca a Flappy Star",
-        "description": "Naviga tra gli ostacoli. Ottieni il punteggio più alto possibile."
+        "title": "Gioca a FlappyStar",
+        "description": "Naviga tra gli ostacoli. Ottieni il punteggio più alto possibile – il tuo punteggio viene moltiplicato dal tuo moltiplicatore."
       },
       "step3": {
         "title": "Vinci €10.000",
-        "description": "Il punteggio più alto alla fine del torneo vince il grande premio."
+        "description": "I 3 punteggi più alti si qualificano per la finale in diretta su Twitch. Chi resiste più a lungo vince €10.000."
       }
     },
     "stats": {
