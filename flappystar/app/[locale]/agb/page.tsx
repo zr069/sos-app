@@ -29,8 +29,8 @@ export default async function AGBPage({
             § 1 Veranstalter
           </h2>
           <p className="text-text-muted">
-            Veranstalter des FlappyStar-Turniers ist DR. SARAFI Rechtsanwaltsgesellschaft mbH,
-            Frankfurter Str. 84, 65779 Kelkheim (Taunus).
+            Veranstalter des FlappyStar-Turniers ist Devory IT GmbH,
+            Frankfurter Straße 84, 65779 Kelkheim (Taunus).
           </p>
         </section>
 

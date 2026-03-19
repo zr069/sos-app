@@ -10,7 +10,13 @@ export async function generateMetadata({
 
   return {
     title: t('impressum'),
-    robots: { index: true, follow: true },
+    robots: {
+      index: false,
+      follow: false,
+      noarchive: true,
+      nosnippet: true,
+      noimageindex: true,
+    },
   };
 }
 
@@ -22,7 +28,6 @@ export default async function ImpressumPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations('legal');
   const tFooter = await getTranslations('footer');
 
   return (
@@ -33,38 +38,55 @@ export default async function ImpressumPage({
 
       <div className="glass-card rounded-2xl p-8">
         <div className="prose prose-invert max-w-none">
-          <p className="text-text-muted">{t('placeholder')}</p>
-
-          <div className="mt-8 space-y-4 text-text-muted">
+          <div className="space-y-6 text-text-muted">
             <h2 className="text-xl font-display font-bold text-white">
-              Angaben gemäß § 5 TMG
+              Angaben gemäß § 5 DDG
             </h2>
-            <p>
-              FlappyStar GmbH
-              <br />
-              Musterstraße 123
-              <br />
-              12345 Musterstadt
-              <br />
-              Deutschland
+            <p className="text-sm text-text-muted/70">
+              (Digitale-Dienste-Gesetz)
             </p>
 
-            <h2 className="text-xl font-display font-bold text-white mt-6">
+            <div className="mt-6">
+              <p className="text-white font-bold text-lg">Devory IT GmbH</p>
+              <p>
+                Frankfurter Straße 84
+                <br />
+                65779 Kelkheim (Taunus)
+                <br />
+                Deutschland
+              </p>
+            </div>
+
+            <h2 className="text-xl font-display font-bold text-white mt-8">
+              Handelsregister
+            </h2>
+            <p>
+              Amtsgericht Königstein (Taunus)
+              <br />
+              Registernummer: HRB 11764
+            </p>
+
+            <h2 className="text-xl font-display font-bold text-white mt-8">
+              Umsatzsteuer-ID
+            </h2>
+            <p>DE368032735</p>
+
+            <h2 className="text-xl font-display font-bold text-white mt-8">
+              Geschäftsführer
+            </h2>
+            <p>Dr. Nik Sarafi</p>
+
+            <h2 className="text-xl font-display font-bold text-white mt-8">
               Kontakt
             </h2>
             <p>
-              E-Mail: contact@flappystar.com
-            </p>
-
-            <h2 className="text-xl font-display font-bold text-white mt-6">
-              Verantwortlich für den Inhalt
-            </h2>
-            <p>
-              Max Mustermann
-              <br />
-              Musterstraße 123
-              <br />
-              12345 Musterstadt
+              E-Mail:{' '}
+              <a
+                href="mailto:info@flappystar.com"
+                className="text-primary hover:underline"
+              >
+                info@flappystar.com
+              </a>
             </p>
           </div>
         </div>

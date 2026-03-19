@@ -8,5 +8,19 @@ Allow: /
 Disallow: /admin
 Disallow: /*/admin
 
+# Disallow impressum pages (legal notice)
+Disallow: /de/impressum
+Disallow: /en/impressum
+Disallow: /fr/impressum
+Disallow: /es/impressum
+Disallow: /it/impressum
+Disallow: /zh/impressum
+Disallow: /ar/impressum
+Disallow: /pl/impressum
+Disallow: /hr/impressum
+Disallow: /sr/impressum
+Disallow: /ru/impressum
+Disallow: /*/impressum
+
 # Sitemap
 Sitemap: https://flappystar.com/sitemap.xml
