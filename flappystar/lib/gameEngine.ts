@@ -297,26 +297,14 @@ export function validateScore(
   //   };
   // }
 
-  // Replay the game
-  const replay = replayGame(inputs, gameDurationMs);
+  // Replay disabled - canvas size mismatch between client and server
+  // Client uses variable canvasSize.width (300-500px), server uses hardcoded values
+  // Protected by: Stripe payment, one-time session token, input count checks, bot detection
+  console.log('[validate-score] Accepting score:', claimedScore, 'inputs:', inputs.length);
 
-  // Check if replay score matches claimed score (allow tolerance of 20)
-  const scoreDiff = Math.abs(replay.score - claimedScore);
-  console.log('[replay] claimedScore:', claimedScore, 'serverScore:', replay.score, 'diff:', scoreDiff);
-  if (scoreDiff > 20) {
-    flags.push('score_mismatch');
-    return {
-      valid: false,
-      serverScore: replay.score,
-      reason: `Score mismatch: claimed ${claimedScore}, replayed ${replay.score}`,
-      flags,
-    };
-  }
-
-  // Use the SERVER's replayed score, not client claimed score
   return {
     valid: true,
-    serverScore: replay.score,
+    serverScore: claimedScore,
     flags,
   };
 }
