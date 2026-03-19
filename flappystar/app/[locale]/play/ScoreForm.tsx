@@ -54,9 +54,12 @@ export default function ScoreForm({
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<{ rank: number; score: number } | null>(
-    null
-  );
+  const [result, setResult] = useState<{
+    rank: number;
+    score: number;
+    baseScore?: number;
+    multiplier?: number;
+  } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -118,7 +121,12 @@ export default function ScoreForm({
       const data = await response.json();
 
       if (response.ok && data.valid) {
-        setResult({ rank: data.rank, score: data.score });
+        setResult({
+          rank: data.rank,
+          score: data.score,
+          baseScore: data.baseScore,
+          multiplier: data.multiplier,
+        });
         setShowConfetti(true);
         // Success screen will be shown - no redirect
       } else {
@@ -227,10 +235,25 @@ export default function ScoreForm({
             transition={{ delay: 0.6 }}
             className="my-8"
           >
-            <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
-              {result.score}
-            </p>
-            <p className="text-xl text-text-muted mt-2">Punkte</p>
+            {result.multiplier && result.multiplier > 1 && result.baseScore ? (
+              <>
+                {/* Show multiplier calculation */}
+                <div className="text-2xl text-text-muted mb-2">
+                  {result.baseScore} <span className="text-primary">x{result.multiplier}</span>
+                </div>
+                <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
+                  {result.score}
+                </p>
+                <p className="text-xl text-text-muted mt-2">Punkte</p>
+              </>
+            ) : (
+              <>
+                <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
+                  {result.score}
+                </p>
+                <p className="text-xl text-text-muted mt-2">Punkte</p>
+              </>
+            )}
           </motion.div>
 
           {/* Rank */}

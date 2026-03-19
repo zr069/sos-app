@@ -1,7 +1,7 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
-import { Link, usePathname } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LocaleSwitcher from './LocaleSwitcher';
@@ -9,33 +9,27 @@ import LocaleSwitcher from './LocaleSwitcher';
 export default function Header() {
   const t = useTranslations('nav');
   const pathname = usePathname();
-  const locale = useLocale();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
+  // Nav items - play button now redirects to homepage with #tournament anchor
   const navItems = [
-    { href: '/', label: t('home'), isCheckout: false },
-    { href: '/play', label: t('play'), isCheckout: true },
-    { href: '/leaderboard', label: t('leaderboard'), isCheckout: false },
+    { href: '/', label: t('home'), isPlayButton: false },
+    { href: '/#tournament', label: t('play'), isPlayButton: true },
+    { href: '/leaderboard', label: t('leaderboard'), isPlayButton: false },
   ];
 
-  const handleCheckout = async () => {
-    if (isCheckoutLoading) return;
-    setIsCheckoutLoading(true);
-    try {
-      const response = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locale }),
-      });
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
+  const handlePlayClick = () => {
+    // If on homepage, scroll to tournament section
+    if (pathname === '/') {
+      const el = document.getElementById('tournament');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        return;
       }
-    } catch (err) {
-      console.error('Checkout error:', err);
-      setIsCheckoutLoading(false);
     }
+    // Otherwise navigate to homepage with anchor
+    router.push('/#tournament');
   };
 
   const isActive = (href: string) => {
@@ -92,15 +86,14 @@ export default function Header() {
           }}
         >
           {navItems.map((item) => (
-            item.isCheckout ? (
+            item.isPlayButton ? (
               <button
                 key={item.href}
-                onClick={handleCheckout}
-                disabled={isCheckoutLoading}
+                onClick={handlePlayClick}
                 className="relative px-5 py-2 text-sm font-medium transition-colors duration-200 group cursor-pointer"
               >
                 <span className="relative z-10 text-white/60 hover:text-white">
-                  {isCheckoutLoading ? '...' : item.label}
+                  {item.label}
                 </span>
               </button>
             ) : (
@@ -195,16 +188,15 @@ export default function Header() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  {item.isCheckout ? (
+                  {item.isPlayButton ? (
                     <button
                       onClick={() => {
                         setIsMobileMenuOpen(false);
-                        handleCheckout();
+                        handlePlayClick();
                       }}
-                      disabled={isCheckoutLoading}
                       className="relative flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-colors duration-200 text-white/60 hover:text-white hover:bg-white/5 w-full text-left"
                     >
-                      {isCheckoutLoading ? '...' : item.label}
+                      {item.label}
                     </button>
                   ) : (
                     <Link

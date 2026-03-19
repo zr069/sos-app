@@ -168,23 +168,21 @@ function playFlapSound() {
   }
 }
 
-// SCORE SOUND - rises with combo, multiple layers
-function playScoreSound(combo: number = 0) {
+// SCORE SOUND - satisfying rising sparkle
+function playScoreSound() {
   const ctx = getAudioContext();
   if (!ctx || ctx.state !== 'running') return;
 
   try {
-    const pitchMult = 1 + Math.min(combo, 10) * 0.07;
-
     // Rising sparkle
     const o1 = ctx.createOscillator();
     const g1 = ctx.createGain();
     o1.connect(g1);
     g1.connect(ctx.destination);
     o1.type = 'sine';
-    o1.frequency.setValueAtTime(440 * pitchMult, ctx.currentTime);
-    o1.frequency.exponentialRampToValueAtTime(880 * pitchMult, ctx.currentTime + 0.12);
-    o1.frequency.exponentialRampToValueAtTime(1320 * pitchMult, ctx.currentTime + 0.22);
+    o1.frequency.setValueAtTime(440, ctx.currentTime);
+    o1.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+    o1.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.22);
     g1.gain.setValueAtTime(0, ctx.currentTime);
     g1.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.02);
     g1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
@@ -197,43 +195,11 @@ function playScoreSound(combo: number = 0) {
     o2.connect(g2);
     g2.connect(ctx.destination);
     o2.type = 'triangle';
-    o2.frequency.setValueAtTime(523 * pitchMult, ctx.currentTime);
+    o2.frequency.setValueAtTime(523, ctx.currentTime);
     g2.gain.setValueAtTime(0.15, ctx.currentTime);
     g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
     o2.start(ctx.currentTime);
     o2.stop(ctx.currentTime + 0.25);
-
-    // High sparkle ping at combo 3+
-    if (combo >= 3) {
-      const o3 = ctx.createOscillator();
-      const g3 = ctx.createGain();
-      o3.connect(g3);
-      g3.connect(ctx.destination);
-      o3.type = 'sine';
-      o3.frequency.setValueAtTime(1760 * pitchMult, ctx.currentTime + 0.08);
-      g3.gain.setValueAtTime(0, ctx.currentTime + 0.08);
-      g3.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.1);
-      g3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-      o3.start(ctx.currentTime + 0.08);
-      o3.stop(ctx.currentTime + 0.35);
-    }
-
-    // FIRE arpeggio at combo 10+
-    if (combo >= 10) {
-      const notes = [523, 659, 784, 1047];
-      notes.forEach((freq, i) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.connect(g);
-        g.connect(ctx.destination);
-        o.type = 'sine';
-        o.frequency.setValueAtTime(freq * 1.5, ctx.currentTime + i * 0.06);
-        g.gain.setValueAtTime(0.1, ctx.currentTime + i * 0.06);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.06 + 0.2);
-        o.start(ctx.currentTime + i * 0.06);
-        o.stop(ctx.currentTime + i * 0.06 + 0.2);
-      });
-    }
   } catch {
     // Audio not available
   }
@@ -326,10 +292,8 @@ export default function FlappyBird({
   // Juice effect refs
   const trailParticlesRef = useRef<TrailParticle[]>([]);
   const burstParticlesRef = useRef<BurstParticle[]>([]);
-  const comboRef = useRef(0);
   const shakeRef = useRef({ x: 0, y: 0, intensity: 0 });
   const starPulseRef = useRef(1.0);
-  const comboDisplayRef = useRef({ value: 0, alpha: 0 });
 
   // Fetch game session token (tournament mode)
   useEffect(() => {
@@ -493,10 +457,8 @@ export default function FlappyBird({
     // Reset juice effects
     trailParticlesRef.current = [];
     burstParticlesRef.current = [];
-    comboRef.current = 0;
     shakeRef.current = { x: 0, y: 0, intensity: 0 };
     starPulseRef.current = 1.0;
-    comboDisplayRef.current = { value: 0, alpha: 0 };
   }, []);
 
   // Start game
@@ -617,9 +579,9 @@ export default function FlappyBird({
     }
   }, [bestScore, mode, onGameOver, validateScore, resetGame]);
 
-  // Draw star (bird) with combo-based glow and pulse
+  // Draw star (bird) with score-based glow and pulse
   const drawBird = useCallback(
-    (ctx: CanvasRenderingContext2D, x: number, y: number, rotation: number, combo: number, pulse: number) => {
+    (ctx: CanvasRenderingContext2D, x: number, y: number, rotation: number, currentScore: number, pulse: number) => {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(rotation);
@@ -627,16 +589,16 @@ export default function FlappyBird({
       // Scale by pulse
       ctx.scale(pulse, pulse);
 
-      // Combo-based glow effect
-      if (combo >= 10) {
+      // Score-based glow effect
+      if (currentScore >= 50) {
         // ON FIRE: red/white glow
         ctx.shadowBlur = 50;
         ctx.shadowColor = '#FF2200';
-      } else if (combo >= 6) {
+      } else if (currentScore >= 25) {
         // HOT: orange glow
         ctx.shadowBlur = 35;
         ctx.shadowColor = '#FF6600';
-      } else if (combo >= 3) {
+      } else if (currentScore >= 10) {
         // Warm: brighter gold glow
         ctx.shadowBlur = 25;
         ctx.shadowColor = '#FFD700';
@@ -646,8 +608,8 @@ export default function FlappyBird({
         ctx.shadowColor = '#FFD700';
       }
 
-      // Draw flame particles around star when on fire (combo 10+)
-      if (combo >= 10) {
+      // Draw flame particles around star when on fire (score 50+)
+      if (currentScore >= 50) {
         for (let i = 0; i < 6; i++) {
           const angle = (i / 6) * Math.PI * 2 + Date.now() * 0.005;
           const dist = BIRD_SIZE * 0.6 + Math.sin(Date.now() * 0.01 + i) * 5;
@@ -685,14 +647,14 @@ export default function FlappyBird({
       }
       ctx.closePath();
 
-      // Fill with gradient (hotter colors for higher combos)
+      // Fill with gradient (hotter colors for higher scores)
       const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, outerRadius);
-      if (combo >= 10) {
+      if (currentScore >= 50) {
         gradient.addColorStop(0, '#FFFFFF');
         gradient.addColorStop(0.3, '#FFFF00');
         gradient.addColorStop(0.6, '#FF6600');
         gradient.addColorStop(1, '#FF2200');
-      } else if (combo >= 6) {
+      } else if (currentScore >= 25) {
         gradient.addColorStop(0, '#FFFACD');
         gradient.addColorStop(0.5, '#FFD700');
         gradient.addColorStop(1, '#FF6600');
@@ -705,8 +667,8 @@ export default function FlappyBird({
       ctx.fill();
 
       // White edge
-      ctx.strokeStyle = combo >= 10 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)';
-      ctx.lineWidth = combo >= 6 ? 3 : 2;
+      ctx.strokeStyle = currentScore >= 50 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = currentScore >= 25 ? 3 : 2;
       ctx.stroke();
 
       ctx.restore();
@@ -934,34 +896,19 @@ export default function FlappyBird({
         pipesRef.current = pipesRef.current.filter((pipe) => {
           pipe.x -= pipeSpeed * dt;
 
-          // Check for near-miss (within 20px of pipe edge) - breaks combo
-          if (!pipe.passed && pipe.x + G.PIPE_WIDTH > G.BIRD_X - 30 && pipe.x < G.BIRD_X + 30) {
-            const birdTop = birdRef.current.y - G.BIRD_SIZE * 0.5;
-            const birdBottom = birdRef.current.y + G.BIRD_SIZE * 0.5;
-            const distToTop = birdTop - pipe.gapY;
-            const distToBottom = pipe.gapY + pipe.gapHeight - birdBottom;
-            if (distToTop < 20 || distToBottom < 20) {
-              comboRef.current = 0;
-            }
-          }
-
           // Score when passing pipe
           if (!pipe.passed && pipe.x + G.PIPE_WIDTH < G.BIRD_X) {
             pipe.passed = true;
             const prevLevel = levelRef.current;
             scoreRef.current++;
-            comboRef.current++;
             setScore(scoreRef.current);
-
-            // Update combo display
-            comboDisplayRef.current = { value: comboRef.current, alpha: 1.0 };
 
             // Star pulse on score
             starPulseRef.current = 1.4;
 
-            // Play sound with combo pitch (skip in demo mode)
+            // Play sound (skip in demo mode)
             if (mode !== 'demo') {
-              playScoreSound(comboRef.current);
+              playScoreSound();
             }
 
             // Spawn burst particles at pipe location
@@ -1073,12 +1020,12 @@ export default function FlappyBird({
         drawPipe(ctx, pipe, canvasSize.height);
       });
 
-      // Draw bird with combo glow and pulse
+      // Draw bird with score-based glow and pulse
       const rotation =
         gameStateRef.current === 'playing' || gameStateRef.current === 'frozen'
           ? Math.min(Math.max(birdRef.current.velocity * 0.05, -0.5), 0.5)
           : 0;
-      drawBird(ctx, birdRef.current.x, birdRef.current.y, rotation, comboRef.current, starPulseRef.current);
+      drawBird(ctx, birdRef.current.x, birdRef.current.y, rotation, scoreRef.current, starPulseRef.current);
 
       // Draw score and level
       ctx.textAlign = 'center';
@@ -1097,25 +1044,6 @@ export default function FlappyBird({
       const levelText = `Level ${levelRef.current}`;
       ctx.fillText(levelText, canvasSize.width / 2, 85);
 
-      // Draw combo display (when combo >= 3)
-      if (comboDisplayRef.current.alpha > 0.05 && comboDisplayRef.current.value >= 3) {
-        const combo = comboDisplayRef.current.value;
-        let comboColor = '#FFD700'; // Gold
-        if (combo >= 10) comboColor = '#FF2200'; // Red/fire
-        else if (combo >= 6) comboColor = '#FF6600'; // Orange
-
-        ctx.font = 'bold 20px Syne, sans-serif';
-        ctx.fillStyle = comboColor;
-        ctx.globalAlpha = comboDisplayRef.current.alpha;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = comboColor;
-        ctx.fillText(`${combo}x COMBO!`, canvasSize.width / 2, 115);
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
-
-        // Fade out combo display
-        comboDisplayRef.current.alpha *= 0.98;
-      }
       ctx.shadowBlur = 0;
 
       // Restore from screen shake

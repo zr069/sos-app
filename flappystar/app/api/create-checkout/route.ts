@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createCheckoutSession } from '@/lib/stripe';
+import { createCheckoutSession, STAKE_TIERS, DEFAULT_STAKE_ID } from '@/lib/stripe';
 import {
   getCheckoutRatelimit,
   checkRateLimit,
@@ -33,12 +33,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get locale from request body or default to 'en'
+    // Get locale and stake from request body
     const body = await request.json().catch(() => ({}));
     const locale = body.locale || 'en';
 
+    // Validate stake ID
+    const stakeId = body.stake || DEFAULT_STAKE_ID;
+    const validStake = STAKE_TIERS.find(t => t.id === stakeId);
+    if (!validStake) {
+      return NextResponse.json(
+        { error: 'Invalid stake tier' },
+        { status: 400 }
+      );
+    }
+
     // Create Stripe checkout session
-    const session = await createCheckoutSession(locale);
+    const session = await createCheckoutSession(locale, stakeId);
 
     return NextResponse.json(
       { url: session.url },

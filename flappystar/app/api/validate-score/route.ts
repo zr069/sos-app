@@ -214,10 +214,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use SERVER's replayed score, not client claimed score
-    const finalScore = validation.serverScore;
+    // Get multiplier from Stripe session metadata
+    const multiplier = parseInt(stripeSession.metadata?.multiplier || '1', 10);
+    const validMultiplier = [1, 2, 3, 5].includes(multiplier) ? multiplier : 1;
 
-    console.log('[validate-score] Accepting score:', finalScore, 'flags:', validation.flags);
+    // Apply multiplier to final score
+    const baseScore = validation.serverScore;
+    const finalScore = baseScore * validMultiplier;
+
+    console.log('[validate-score] Accepting score:', {
+      baseScore,
+      multiplier: validMultiplier,
+      finalScore,
+      flags: validation.flags,
+    });
 
     // Step 5: Mark session as used
     await markGameSessionUsed(gameSessionToken, finalScore, validation.flags);
@@ -244,6 +254,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       valid: true,
       score: finalScore,
+      baseScore,
+      multiplier: validMultiplier,
       rank: submissionResult.rank,
     });
   } catch (error) {

@@ -3,7 +3,7 @@ import CountdownTimer from '@/components/ui/CountdownTimer';
 import LiveWidget from '@/components/leaderboard/LiveWidget';
 import TournamentStats from '@/components/landing/TournamentStats';
 import Accordion from '@/components/ui/Accordion';
-import EnterTournamentButton from './EnterTournamentButton';
+import StakeSelector from '@/components/landing/StakeSelector';
 import DemoPreview from '@/components/landing/DemoPreview';
 
 export async function generateMetadata({
@@ -63,10 +63,8 @@ export default async function HomePage({
           <CountdownTimer targetDate={tournamentEndDate} />
         </div>
 
-        {/* CTA */}
-        <EnterTournamentButton locale={locale}>
-          {t('hero.ctaEnter')}
-        </EnterTournamentButton>
+        {/* Stake Selector */}
+        <StakeSelector locale={locale} />
       </section>
 
       {/* Live Game Demo */}

@@ -17,15 +17,33 @@ export function getStripe(): Stripe {
   return stripeInstance;
 }
 
-// Tournament entry price in cents
-export const TOURNAMENT_ENTRY_PRICE = 50; // €0.50
+// Stake tiers configuration
+export const STAKE_TIERS = [
+  { id: 'basic', price: 50, multiplier: 1, label: '€0.50' },
+  { id: 'standard', price: 100, multiplier: 1, label: '€1.00' },
+  { id: 'premium', price: 500, multiplier: 2, label: '€5.00' },
+  { id: 'elite', price: 1000, multiplier: 3, label: '€10.00' },
+  { id: 'champion', price: 2500, multiplier: 5, label: '€25.00' },
+] as const;
+
+export type StakeTierId = typeof STAKE_TIERS[number]['id'];
+
+// Default stake (basic)
+export const DEFAULT_STAKE_ID: StakeTierId = 'basic';
 export const CURRENCY = 'eur';
+
+// Get stake tier by ID
+export function getStakeTier(stakeId: string) {
+  return STAKE_TIERS.find(t => t.id === stakeId) || STAKE_TIERS[0];
+}
 
 // Create a checkout session for tournament entry
 export async function createCheckoutSession(
-  locale: string = 'en'
+  locale: string = 'en',
+  stakeId: string = DEFAULT_STAKE_ID
 ): Promise<Stripe.Checkout.Session> {
   const stripe = getStripe();
+  const stakeTier = getStakeTier(stakeId);
 
   // Hardcoded base URL
   const siteUrl = 'https://flappystar.com';
@@ -38,7 +56,12 @@ export async function createCheckoutSession(
   const successUrl = `${siteUrl}/${safeLocale}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${siteUrl}/${safeLocale}/payment/cancel`;
 
-  console.log('STRIPE CHECKOUT:', { siteUrl, safeLocale, successUrl, cancelUrl });
+  console.log('STRIPE CHECKOUT:', { siteUrl, safeLocale, successUrl, cancelUrl, stakeTier });
+
+  // Build product description based on multiplier
+  const description = stakeTier.multiplier > 1
+    ? `One entry with ${stakeTier.multiplier}x score multiplier`
+    : 'One entry to compete for €10,000';
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
@@ -49,9 +72,9 @@ export async function createCheckoutSession(
           currency: CURRENCY,
           product_data: {
             name: 'FlappyStar Tournament Entry',
-            description: 'One entry to compete for €10,000',
+            description,
           },
-          unit_amount: TOURNAMENT_ENTRY_PRICE,
+          unit_amount: stakeTier.price,
         },
         quantity: 1,
       },
@@ -60,6 +83,8 @@ export async function createCheckoutSession(
     cancel_url: cancelUrl,
     metadata: {
       type: 'tournament_entry',
+      stake_id: stakeTier.id,
+      multiplier: stakeTier.multiplier.toString(),
     },
     locale: mapLocaleToStripe(locale),
   });
