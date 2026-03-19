@@ -41,15 +41,15 @@
       "title": "Come funziona",
       "step1": {
         "title": "Scegli la tua puntata",
-        "description": "Iscrizione da €1,00. Più alta è la puntata, più alto è il moltiplicatore del punteggio – e maggiori sono le tue possibilità di vincere."
+        "description": "Iscrizione da €1,00. Più alta è la puntata, più alto è il moltiplicatore del punteggio e maggiori sono le tue possibilità di vincere."
       },
       "step2": {
         "title": "Gioca a FlappyStar",
-        "description": "Naviga tra gli ostacoli. Ottieni il punteggio più alto possibile – il tuo punteggio viene moltiplicato dal tuo moltiplicatore."
+        "description": "Naviga tra gli ostacoli. Ottieni il punteggio più alto possibile. Il tuo punteggio viene moltiplicato dal tuo moltiplicatore."
       },
       "step3": {
         "title": "Vinci €10.000",
-        "description": "I 3 punteggi più alti si qualificano per la finale in diretta su Twitch. Chi resiste più a lungo vince €10.000 – tramite bonifico o in contanti."
+        "description": "I 3 punteggi più alti si qualificano per la finale in diretta su Twitch. Chi resiste più a lungo vince €10.000, tramite bonifico o in contanti."
       }
     },
     "stats": {
@@ -69,7 +69,7 @@
       "title": "Domande frequenti",
       "q1": {
         "question": "Come partecipo al torneo?",
-        "answer": "Scegli la tua puntata (da €1,00, o €0,50 durante il periodo promozionale), paga in sicurezza tramite Stripe e inizia a giocare immediatamente. Più alta è la tua puntata, più alto è il tuo moltiplicatore di punteggio – e maggiore è la tua possibilità di raggiungere la finale. Dopo il gioco, inserisci i tuoi dati di contatto e il tuo punteggio finale (punteggio di gioco × moltiplicatore) viene salvato nella classifica."
+        "answer": "Scegli la tua puntata (da €1,00, o €0,50 durante il periodo promozionale), paga in sicurezza tramite Stripe e inizia a giocare immediatamente. Più alta è la tua puntata, più alto è il tuo moltiplicatore di punteggio e maggiore è la tua possibilità di raggiungere la finale. Dopo il gioco, inserisci i tuoi dati di contatto e il tuo punteggio finale (punteggio di gioco × moltiplicatore) viene salvato nella classifica."
       },
       "q2": {
         "question": "Posso giocare più volte?",
@@ -77,15 +77,15 @@
       },
       "q3": {
         "question": "Come funziona il moltiplicatore del punteggio?",
-        "answer": "Più alta è la tua puntata, più alto è il tuo moltiplicatore. Il tuo punteggio di gioco viene moltiplicato dal tuo moltiplicatore – es., 15 punti × 3 = 45 punti classificati."
+        "answer": "Più alta è la tua puntata, più alto è il tuo moltiplicatore. Il tuo punteggio di gioco viene moltiplicato dal tuo moltiplicatore, es. 15 punti × 3 = 45 punti classificati."
       },
       "q4": {
         "question": "Come viene determinato il vincitore?",
-        "answer": "I tre partecipanti con i punteggi ponderati più alti (punteggio di gioco × moltiplicatore) si qualificano per una finale in diretta su Twitch. Nella finale, tutti e tre competono – chi resiste più a lungo vince €10.000."
+        "answer": "I tre partecipanti con i punteggi ponderati più alti (punteggio di gioco × moltiplicatore) si qualificano per una finale in diretta su Twitch. Nella finale, tutti e tre competono. Chi resiste più a lungo vince €10.000."
       },
       "q5": {
         "question": "Come viene pagato il premio?",
-        "answer": "Il vincitore della finale in diretta su Twitch riceve €10.000 – tramite bonifico bancario (entro 14 giorni) o in contanti con ritiro personale presso la nostra sede a Kelkheim (Taunus), Germania."
+        "answer": "Il vincitore della finale in diretta su Twitch riceve €10.000, tramite bonifico bancario (entro 14 giorni) o in contanti con ritiro personale presso la nostra sede a Kelkheim (Taunus), Germania."
       }
     }
   },

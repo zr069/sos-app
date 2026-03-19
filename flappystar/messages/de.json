@@ -41,15 +41,15 @@
       "title": "So funktioniert's",
       "step1": {
         "title": "Wähle deinen Einsatz",
-        "description": "Ab €1,00 Eintritt. Je höher dein Einsatz, desto höher dein Score-Multiplikator – und desto größer deine Gewinnchance."
+        "description": "Ab €1,00 Eintritt. Je höher dein Einsatz, desto höher dein Score-Multiplikator und desto größer deine Gewinnchance."
       },
       "step2": {
         "title": "Spiele FlappyStar",
-        "description": "Navigiere durch die Hindernisse. Erziele so viele Punkte wie möglich – dein Score wird mit deinem Multiplikator vervielfacht."
+        "description": "Navigiere durch die Hindernisse. Erziele so viele Punkte wie möglich. Dein Score wird mit deinem Multiplikator vervielfacht."
       },
       "step3": {
         "title": "Gewinne €10.000",
-        "description": "Die drei höchsten Scores qualifizieren sich für das Live-Finale auf Twitch. Wer dort am längsten durchhält, gewinnt €10.000 – per Überweisung oder in bar."
+        "description": "Die drei höchsten Scores qualifizieren sich für das Live-Finale auf Twitch. Wer dort am längsten durchhält, gewinnt €10.000, per Überweisung oder in bar."
       }
     },
     "stats": {
@@ -69,7 +69,7 @@
       "title": "Häufig gestellte Fragen",
       "q1": {
         "question": "Wie nehme ich am Turnier teil?",
-        "answer": "Wähle deinen Einsatz (ab €1,00, oder €0,50 in der Promo-Phase), zahle sicher über Stripe und spiele sofort los. Je höher dein Einsatz, desto höher dein Score-Multiplikator – und desto größer deine Chance auf das Finale. Nach dem Spiel gibst du deine Kontaktdaten ein und dein gewerteter Score (Spielscore × Multiplikator) wird in der Rangliste gespeichert."
+        "answer": "Wähle deinen Einsatz (ab €1,00, oder €0,50 in der Promo-Phase), zahle sicher über Stripe und spiele sofort los. Je höher dein Einsatz, desto höher dein Score-Multiplikator und desto größer deine Chance auf das Finale. Nach dem Spiel gibst du deine Kontaktdaten ein und dein gewerteter Score (Spielscore × Multiplikator) wird in der Rangliste gespeichert."
       },
       "q2": {
         "question": "Kann ich mehrmals spielen?",
@@ -77,15 +77,15 @@
       },
       "q3": {
         "question": "Wie funktioniert der Score-Multiplikator?",
-        "answer": "Je höher dein Einsatz, desto höher dein Multiplikator. Dein Spielscore wird mit dem Multiplikator multipliziert – z.B. 15 Punkte × 3 = 45 gewertete Punkte."
+        "answer": "Je höher dein Einsatz, desto höher dein Multiplikator. Dein Spielscore wird mit dem Multiplikator multipliziert, z.B. 15 Punkte × 3 = 45 gewertete Punkte."
       },
       "q4": {
         "question": "Wie wird der Gewinner ermittelt?",
-        "answer": "Die drei Teilnehmer mit den höchsten gewerteten Scores (Spielscore × Multiplikator) qualifizieren sich für ein Live-Finale auf Twitch. Im Finale spielen alle drei gegeneinander – wer am längsten durchhält, gewinnt €10.000."
+        "answer": "Die drei Teilnehmer mit den höchsten gewerteten Scores (Spielscore × Multiplikator) qualifizieren sich für ein Live-Finale auf Twitch. Im Finale spielen alle drei gegeneinander. Wer am längsten durchhält, gewinnt €10.000."
       },
       "q5": {
         "question": "Wie wird der Gewinn ausgezahlt?",
-        "answer": "Der Gewinner des Live-Finales auf Twitch erhält €10.000 – wahlweise per Banküberweisung (binnen 14 Tagen) oder in bar bei persönlicher Abholung bei uns in Kelkheim (Taunus)."
+        "answer": "Der Gewinner des Live-Finales auf Twitch erhält €10.000, wahlweise per Banküberweisung (binnen 14 Tagen) oder in bar bei persönlicher Abholung bei uns in Kelkheim (Taunus)."
       }
     }
   },

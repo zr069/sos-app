@@ -41,15 +41,15 @@
       "title": "Jak to działa",
       "step1": {
         "title": "Wybierz swój zakład",
-        "description": "Wejście od €1,00. Im wyższy zakład, tym wyższy mnożnik wyniku – i większa szansa na wygraną."
+        "description": "Wejście od €1,00. Im wyższy zakład, tym wyższy mnożnik wyniku i większa szansa na wygraną."
       },
       "step2": {
         "title": "Graj w FlappyStar",
-        "description": "Omijaj przeszkody. Zdobądź jak najwyższy wynik – twój wynik jest mnożony przez twój mnożnik."
+        "description": "Omijaj przeszkody. Zdobądź jak najwyższy wynik. Twój wynik jest mnożony przez twój mnożnik."
       },
       "step3": {
         "title": "Wygraj €10 000",
-        "description": "3 najlepsze wyniki kwalifikują się do finału na żywo na Twitch. Kto przetrwa najdłużej, wygrywa €10 000 – przelewem lub gotówką."
+        "description": "3 najlepsze wyniki kwalifikują się do finału na żywo na Twitch. Kto przetrwa najdłużej, wygrywa €10 000, przelewem lub gotówką."
       }
     },
     "stats": {
@@ -69,7 +69,7 @@
       "title": "Często zadawane pytania",
       "q1": {
         "question": "Jak wziąć udział w turnieju?",
-        "answer": "Wybierz swój zakład (od €1,00 lub €0,50 w okresie promocyjnym), zapłać bezpiecznie przez Stripe i natychmiast rozpocznij grę. Im wyższy zakład, tym wyższy mnożnik wyniku – i większa szansa na dotarcie do finału. Po grze wprowadź swoje dane kontaktowe, a Twój końcowy wynik (wynik gry × mnożnik) zostanie zapisany w rankingu."
+        "answer": "Wybierz swój zakład (od €1,00 lub €0,50 w okresie promocyjnym), zapłać bezpiecznie przez Stripe i natychmiast rozpocznij grę. Im wyższy zakład, tym wyższy mnożnik wyniku i większa szansa na dotarcie do finału. Po grze wprowadź swoje dane kontaktowe, a Twój końcowy wynik (wynik gry × mnożnik) zostanie zapisany w rankingu."
       },
       "q2": {
         "question": "Czy mogę grać wiele razy?",
@@ -77,15 +77,15 @@
       },
       "q3": {
         "question": "Jak działa mnożnik wyniku?",
-        "answer": "Im wyższy zakład, tym wyższy mnożnik. Twój wynik gry jest mnożony przez twój mnożnik – np. 15 punktów × 3 = 45 punktów rankingowych."
+        "answer": "Im wyższy zakład, tym wyższy mnożnik. Twój wynik gry jest mnożony przez twój mnożnik, np. 15 punktów × 3 = 45 punktów rankingowych."
       },
       "q4": {
         "question": "Jak wyłaniany jest zwycięzca?",
-        "answer": "Trzech uczestników z najwyższymi ważonymi wynikami (wynik gry × mnożnik) kwalifikuje się do finału na żywo na Twitch. W finale wszyscy trzej rywalizują – kto przetrwa najdłużej, wygrywa €10 000."
+        "answer": "Trzech uczestników z najwyższymi ważonymi wynikami (wynik gry × mnożnik) kwalifikuje się do finału na żywo na Twitch. W finale wszyscy trzej rywalizują. Kto przetrwa najdłużej, wygrywa €10 000."
       },
       "q5": {
         "question": "Jak wypłacana jest nagroda?",
-        "answer": "Zwycięzca finału na żywo na Twitch otrzymuje €10.000 – przelewem bankowym (w ciągu 14 dni) lub gotówką przy osobistym odbiorze w naszym biurze w Kelkheim (Taunus), Niemcy."
+        "answer": "Zwycięzca finału na żywo na Twitch otrzymuje €10.000, przelewem bankowym (w ciągu 14 dni) lub gotówką przy osobistym odbiorze w naszym biurze w Kelkheim (Taunus), Niemcy."
       }
     }
   },

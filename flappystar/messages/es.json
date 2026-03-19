@@ -41,15 +41,15 @@
       "title": "Cómo funciona",
       "step1": {
         "title": "Elige tu apuesta",
-        "description": "Entrada desde €1,00. Cuanto mayor sea tu apuesta, mayor será tu multiplicador de puntuación – y mayores tus posibilidades de ganar."
+        "description": "Entrada desde €1,00. Cuanto mayor sea tu apuesta, mayor será tu multiplicador de puntuación y mayores tus posibilidades de ganar."
       },
       "step2": {
         "title": "Juega a FlappyStar",
-        "description": "Navega entre obstáculos. Consigue la mayor puntuación posible – tu puntuación se multiplica por tu multiplicador."
+        "description": "Navega entre obstáculos. Consigue la mayor puntuación posible. Tu puntuación se multiplica por tu multiplicador."
       },
       "step3": {
         "title": "Gana €10.000",
-        "description": "Las 3 mejores puntuaciones se clasifican para la final en directo en Twitch. Quien aguante más tiempo gana €10.000 – por transferencia o en efectivo."
+        "description": "Las 3 mejores puntuaciones se clasifican para la final en directo en Twitch. Quien aguante más tiempo gana €10.000, por transferencia o en efectivo."
       }
     },
     "stats": {
@@ -69,7 +69,7 @@
       "title": "Preguntas frecuentes",
       "q1": {
         "question": "¿Cómo participo en el torneo?",
-        "answer": "Elige tu apuesta (desde €1,00, o €0,50 durante el período promocional), paga de forma segura a través de Stripe y comienza a jugar de inmediato. Cuanto mayor sea tu apuesta, mayor será tu multiplicador de puntuación – y mayor será tu oportunidad de llegar a la final. Después del juego, ingresa tus datos de contacto y tu puntuación final (puntuación del juego × multiplicador) se guarda en la clasificación."
+        "answer": "Elige tu apuesta (desde €1,00, o €0,50 durante el período promocional), paga de forma segura a través de Stripe y comienza a jugar de inmediato. Cuanto mayor sea tu apuesta, mayor será tu multiplicador de puntuación y mayor será tu oportunidad de llegar a la final. Después del juego, ingresa tus datos de contacto y tu puntuación final (puntuación del juego × multiplicador) se guarda en la clasificación."
       },
       "q2": {
         "question": "¿Puedo jugar varias veces?",
@@ -77,15 +77,15 @@
       },
       "q3": {
         "question": "¿Cómo funciona el multiplicador de puntuación?",
-        "answer": "Cuanto mayor sea tu apuesta, mayor será tu multiplicador. Tu puntuación del juego se multiplica por tu multiplicador – ej., 15 puntos × 3 = 45 puntos clasificados."
+        "answer": "Cuanto mayor sea tu apuesta, mayor será tu multiplicador. Tu puntuación del juego se multiplica por tu multiplicador, ej. 15 puntos × 3 = 45 puntos clasificados."
       },
       "q4": {
         "question": "¿Cómo se determina el ganador?",
-        "answer": "Los tres participantes con las puntuaciones ponderadas más altas (puntuación del juego × multiplicador) se clasifican para una final en directo en Twitch. En la final, los tres compiten – quien aguante más tiempo gana €10.000."
+        "answer": "Los tres participantes con las puntuaciones ponderadas más altas (puntuación del juego × multiplicador) se clasifican para una final en directo en Twitch. En la final, los tres compiten. Quien aguante más tiempo gana €10.000."
       },
       "q5": {
         "question": "¿Cómo se paga el premio?",
-        "answer": "El ganador de la final en directo en Twitch recibe €10.000 – por transferencia bancaria (en 14 días) o en efectivo con recogida personal en nuestra oficina en Kelkheim (Taunus), Alemania."
+        "answer": "El ganador de la final en directo en Twitch recibe €10.000, por transferencia bancaria (en 14 días) o en efectivo con recogida personal en nuestra oficina en Kelkheim (Taunus), Alemania."
       }
     }
   },

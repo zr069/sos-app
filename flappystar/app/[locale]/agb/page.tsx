@@ -42,8 +42,8 @@ export default async function AGBPage({
           <p className="text-text-muted">
             FlappyStar ist ein Geschicklichkeitswettbewerb. Teilnehmer erwerben gegen einen Einsatz
             das Recht, einmalig am Turnier teilzunehmen und ihren Highscore in der Rangliste zu
-            platzieren. Der Ausgang hängt ausschließlich von der Geschicklichkeit des Spielers ab
-            – nicht vom Zufall.
+            platzieren. Der Ausgang hängt ausschließlich von der Geschicklichkeit des Spielers ab,
+            nicht vom Zufall.
           </p>
         </section>
 
@@ -61,7 +61,7 @@ export default async function AGBPage({
             </li>
             <li>
               Mit dem Kauf der Teilnahme wird kein Anspruch auf Rückerstattung des Einsatzes
-              erworben – unabhängig vom erzielten Ergebnis, technischen Problemen auf Seiten des
+              erworben, unabhängig vom erzielten Ergebnis, technischen Problemen auf Seiten des
               Teilnehmers oder sonstigen Umständen, die nicht vom Veranstalter zu vertreten sind.
             </li>
             <li>
@@ -132,7 +132,7 @@ export default async function AGBPage({
             </li>
             <li>
               Im Finale spielen die drei Qualifizierten gegeneinander in Echtzeit. Wer am längsten
-              durchhält – also den höchsten Score im Finale erzielt – gewinnt den Gesamtpreis von
+              durchhält und den höchsten Score im Finale erzielt, gewinnt den Gesamtpreis von
               <span className="text-primary font-bold"> €10.000</span>.
             </li>
             <li>
@@ -154,7 +154,7 @@ export default async function AGBPage({
             </li>
             <li>
               Wer falsche oder unvollständige Daten eingibt, verliert jeden Anspruch auf den
-              Gewinn – auch wenn er in der Rangliste geführt wird.
+              Gewinn, auch wenn er in der Rangliste geführt wird.
             </li>
             <li>
               Der Veranstalter ist berechtigt, die Identität der Finalisten vor Auszahlung des
@@ -181,7 +181,7 @@ export default async function AGBPage({
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Per Banküberweisung binnen 14 Tagen nach dem Finale, oder</li>
               <li>
-                In bar – der Gewinner kann das Preisgeld persönlich bei uns abholen:
+                In bar: Der Gewinner kann das Preisgeld persönlich bei uns abholen:
                 <br />
                 <span className="text-white">Devory IT GmbH, Frankfurter Straße 84, 65779 Kelkheim (Taunus)</span>
               </li>

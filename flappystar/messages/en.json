@@ -41,15 +41,15 @@
       "title": "How It Works",
       "step1": {
         "title": "Choose Your Stake",
-        "description": "Entry from €1.00. The higher your stake, the higher your score multiplier – and the greater your chance to win."
+        "description": "Entry from €1.00. The higher your stake, the higher your score multiplier and the greater your chance to win."
       },
       "step2": {
         "title": "Play FlappyStar",
-        "description": "Navigate through obstacles. Score as high as you can – your score is multiplied by your multiplier."
+        "description": "Navigate through obstacles. Score as high as you can. Your score is multiplied by your multiplier."
       },
       "step3": {
         "title": "Win €10,000",
-        "description": "Top 3 scores qualify for the live finale on Twitch. Whoever lasts longest wins €10,000 – via bank transfer or cash."
+        "description": "Top 3 scores qualify for the live finale on Twitch. Whoever lasts longest wins €10,000, via bank transfer or cash."
       }
     },
     "stats": {
@@ -69,7 +69,7 @@
       "title": "Frequently Asked Questions",
       "q1": {
         "question": "How do I enter the tournament?",
-        "answer": "Choose your stake (from €1.00, or €0.50 during the promo period), pay securely via Stripe and start playing immediately. The higher your stake, the higher your score multiplier – and the bigger your chance to reach the finale. After the game, enter your contact details and your final score (game score × multiplier) is saved to the leaderboard."
+        "answer": "Choose your stake (from €1.00, or €0.50 during the promo period), pay securely via Stripe and start playing immediately. The higher your stake, the higher your score multiplier and the bigger your chance to reach the finale. After the game, enter your contact details and your final score (game score × multiplier) is saved to the leaderboard."
       },
       "q2": {
         "question": "Can I play multiple times?",
@@ -77,15 +77,15 @@
       },
       "q3": {
         "question": "How does the score multiplier work?",
-        "answer": "The higher your stake, the higher your multiplier. Your game score is multiplied by your multiplier – e.g., 15 points × 3 = 45 ranked points."
+        "answer": "The higher your stake, the higher your multiplier. Your game score is multiplied by your multiplier, e.g. 15 points × 3 = 45 ranked points."
       },
       "q4": {
         "question": "How is the winner determined?",
-        "answer": "The three participants with the highest weighted scores (game score × multiplier) qualify for a live finale on Twitch. In the finale, all three compete – whoever lasts longest wins €10,000."
+        "answer": "The three participants with the highest weighted scores (game score × multiplier) qualify for a live finale on Twitch. In the finale, all three compete. Whoever lasts longest wins €10,000."
       },
       "q5": {
         "question": "How is the prize paid out?",
-        "answer": "The winner of the live finale on Twitch receives €10,000 – either via bank transfer (within 14 days) or in cash with personal pickup at our office in Kelkheim (Taunus), Germany."
+        "answer": "The winner of the live finale on Twitch receives €10,000, either via bank transfer (within 14 days) or in cash with personal pickup at our office in Kelkheim (Taunus), Germany."
       }
     }
   },

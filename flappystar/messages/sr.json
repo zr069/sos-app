@@ -41,15 +41,15 @@
       "title": "Kako funkcioniše",
       "step1": {
         "title": "Odaberi svoj ulog",
-        "description": "Ulaz od €1,00. Što veći ulog, veći je multiplikator rezultata – i veća je tvoja šansa za pobedu."
+        "description": "Ulaz od €1,00. Što veći ulog, veći je multiplikator rezultata i veća je tvoja šansa za pobedu."
       },
       "step2": {
         "title": "Igraj FlappyStar",
-        "description": "Izbegavaj prepreke. Postići što veći rezultat – tvoj rezultat se množi sa tvojim multiplikatorom."
+        "description": "Izbegavaj prepreke. Postići što veći rezultat. Tvoj rezultat se množi sa tvojim multiplikatorom."
       },
       "step3": {
         "title": "Osvoji €10.000",
-        "description": "Tri najbolja rezultata kvalifikuju se za finale uživo na Twitch-u. Ko najduže izdrži, osvaja €10.000 – transferom ili u gotovini."
+        "description": "Tri najbolja rezultata kvalifikuju se za finale uživo na Twitch-u. Ko najduže izdrži, osvaja €10.000, transferom ili u gotovini."
       }
     },
     "stats": {
@@ -69,7 +69,7 @@
       "title": "Često postavljana pitanja",
       "q1": {
         "question": "Kako da se prijavim na turnir?",
-        "answer": "Odaberi svoj ulog (od €1,00, ili €0,50 tokom promotivnog perioda), plati sigurno putem Stripe-a i odmah počni da igraš. Što je veći ulog, veći je multiplikator rezultata – i veća je tvoja šansa za finale. Nakon igre, unesi svoje kontakt podatke i tvoj konačni rezultat (rezultat igre × multiplikator) biće sačuvan na rang listi."
+        "answer": "Odaberi svoj ulog (od €1,00, ili €0,50 tokom promotivnog perioda), plati sigurno putem Stripe-a i odmah počni da igraš. Što je veći ulog, veći je multiplikator rezultata i veća je tvoja šansa za finale. Nakon igre, unesi svoje kontakt podatke i tvoj konačni rezultat (rezultat igre × multiplikator) biće sačuvan na rang listi."
       },
       "q2": {
         "question": "Mogu li da igram više puta?",
@@ -77,15 +77,15 @@
       },
       "q3": {
         "question": "Kako funkcioniše multiplikator rezultata?",
-        "answer": "Što veći ulog, veći je multiplikator. Tvoj rezultat igre se množi sa tvojim multiplikatorom – npr. 15 poena × 3 = 45 rangiranih poena."
+        "answer": "Što veći ulog, veći je multiplikator. Tvoj rezultat igre se množi sa tvojim multiplikatorom, npr. 15 poena × 3 = 45 rangiranih poena."
       },
       "q4": {
         "question": "Kako se određuje pobednik?",
-        "answer": "Tri učesnika sa najvećim ponderisanim rezultatima (rezultat igre × multiplikator) kvalifikuju se za finale uživo na Twitch-u. U finalu sva trojica se takmiče – ko najduže izdrži, osvaja €10.000."
+        "answer": "Tri učesnika sa najvećim ponderisanim rezultatima (rezultat igre × multiplikator) kvalifikuju se za finale uživo na Twitch-u. U finalu sva trojica se takmiče. Ko najduže izdrži, osvaja €10.000."
       },
       "q5": {
         "question": "Kako se isplaćuje nagrada?",
-        "answer": "Pobednik finala uživo na Twitch-u prima €10.000 – bankovnim transferom (u roku od 14 dana) ili u gotovini uz lično preuzimanje u našoj kancelariji u Kelkheim (Taunus), Nemačka."
+        "answer": "Pobednik finala uživo na Twitch-u prima €10.000, bankovnim transferom (u roku od 14 dana) ili u gotovini uz lično preuzimanje u našoj kancelariji u Kelkheim (Taunus), Nemačka."
       }
     }
   },
