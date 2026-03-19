@@ -77,7 +77,7 @@
       },
       "q3": {
         "question": "Comment fonctionne le multiplicateur de score ?",
-        "answer": "Plus votre mise est élevée, plus votre multiplicateur est élevé. Votre score de jeu est multiplié par votre multiplicateur – par ex., 15 points × 3x = 45 points classés."
+        "answer": "Plus votre mise est élevée, plus votre multiplicateur est élevé. Votre score de jeu est multiplié par votre multiplicateur – par ex., 15 points × 3 = 45 points classés."
       },
       "q4": {
         "question": "Comment le gagnant est-il déterminé ?",
