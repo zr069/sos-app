@@ -7,15 +7,6 @@ export async function generateMetadata() {
   };
 }
 
-// TODO marker component
-function Todo({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded font-medium">
-      {children}
-    </span>
-  );
-}
-
 export default async function AGBPage({
   params,
 }: {
@@ -38,8 +29,8 @@ export default async function AGBPage({
             § 1 Veranstalter
           </h2>
           <p className="text-text-muted">
-            Veranstalter des FlappyStar-Turniers ist DR. SARAFI Rechtsanwaltsgesellschaft mbH,{' '}
-            <Todo>[TODO: Adresse eintragen]</Todo>, <Todo>[TODO: PLZ Stadt eintragen]</Todo>.
+            Veranstalter des FlappyStar-Turniers ist DR. SARAFI Rechtsanwaltsgesellschaft mbH,
+            Frankfurter Str. 84, 65779 Kelkheim (Taunus).
           </p>
         </section>
 
@@ -260,8 +251,7 @@ export default async function AGBPage({
             § 11 Anwendbares Recht
           </h2>
           <p className="text-text-muted">
-            Es gilt ausschließlich deutsches Recht. Gerichtsstand ist{' '}
-            <Todo>[TODO: Stadt eintragen]</Todo>.
+            Es gilt ausschließlich deutsches Recht. Gerichtsstand ist Kelkheim (Taunus).
           </p>
         </section>
 
@@ -271,19 +261,10 @@ export default async function AGBPage({
             § 12 Kontakt
           </h2>
           <p className="text-text-muted">
-            Bei Fragen: <Todo>[TODO: E-Mail eintragen]</Todo>
+            Bei Fragen: <a href="mailto:info@flappystar.com" className="text-primary hover:underline">info@flappystar.com</a>
           </p>
         </section>
 
-        {/* Warning note */}
-        <div className="rounded-2xl p-6 bg-yellow-500/10 border-2 border-yellow-500/30">
-          <p className="text-yellow-400 font-medium">
-            Diese AGB wurden noch nicht abschließend rechtlich geprüft.
-          </p>
-          <p className="text-yellow-400/80 mt-2">
-            <Todo>[TODO: Vor Veröffentlichung prüfen lassen]</Todo>
-          </p>
-        </div>
       </div>
     </div>
   );
