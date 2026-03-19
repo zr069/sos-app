@@ -219,11 +219,11 @@ export async function POST(request: NextRequest) {
     const validMultiplier = [1, 2, 3, 5].includes(multiplier) ? multiplier : 1;
 
     // Apply multiplier to final score
-    const baseScore = validation.serverScore;
-    const finalScore = baseScore * validMultiplier;
+    const originalScore = validation.serverScore;
+    const finalScore = originalScore * validMultiplier;
 
     console.log('[validate-score] Accepting score:', {
-      baseScore,
+      originalScore,
       multiplier: validMultiplier,
       finalScore,
       flags: validation.flags,
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       valid: true,
       score: finalScore,
-      baseScore,
+      originalScore,
       multiplier: validMultiplier,
       rank: submissionResult.rank,
     });

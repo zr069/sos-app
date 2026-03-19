@@ -3,21 +3,38 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-// Must match lib/stripe.ts STAKE_TIERS
-const STAKE_TIERS = [
-  { id: 'basic', price: 50, multiplier: 1, label: '€0.50' },
-  { id: 'standard', price: 100, multiplier: 1, label: '€1.00' },
-  { id: 'premium', price: 500, multiplier: 2, label: '€5.00' },
-  { id: 'elite', price: 1000, multiplier: 3, label: '€10.00' },
-  { id: 'champion', price: 2500, multiplier: 5, label: '€25.00' },
-] as const;
+// Promo end date: April 20, 2026
+const PROMO_END = new Date('2026-04-20T23:59:59Z');
+
+interface StakeOption {
+  stake: number;
+  label: string;
+  multiplier: number;
+  icon?: string;
+  isPromo?: boolean;
+  originalPrice?: string;
+}
+
+const STAKE_OPTIONS: StakeOption[] = [
+  { stake: 50, label: '€0,50', multiplier: 1, isPromo: true, originalPrice: '€1,00' },
+  { stake: 100, label: '€1,00', multiplier: 1 },
+  { stake: 500, label: '€5,00', multiplier: 2, icon: '⚡' },
+  { stake: 1000, label: '€10,00', multiplier: 3, icon: '🏆' },
+  { stake: 2500, label: '€25,00', multiplier: 5, icon: '👑' },
+];
 
 interface StakeSelectorProps {
   locale: string;
 }
 
 export default function StakeSelector({ locale }: StakeSelectorProps) {
-  const [selectedStake, setSelectedStake] = useState<string>('basic');
+  // Calculate promo status
+  const now = Date.now();
+  const daysLeft = Math.max(0, Math.ceil((PROMO_END.getTime() - now) / 86400000));
+  const promoActive = daysLeft > 0;
+
+  // Default: promo card if active, otherwise standard
+  const [selectedStake, setSelectedStake] = useState<number>(promoActive ? 50 : 100);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,77 +70,96 @@ export default function StakeSelector({ locale }: StakeSelectorProps) {
     }
   };
 
-  const selectedTier = STAKE_TIERS.find(t => t.id === selectedStake) || STAKE_TIERS[0];
+  // Filter options: hide promo if not active
+  const visibleOptions = promoActive
+    ? STAKE_OPTIONS
+    : STAKE_OPTIONS.filter(opt => !opt.isPromo);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto">
       {/* Stake options grid */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3 mb-6">
-        {STAKE_TIERS.map((tier) => {
-          const isSelected = selectedStake === tier.id;
+      <div className={`grid gap-3 mb-6 ${
+        visibleOptions.length === 5
+          ? 'grid-cols-2 sm:grid-cols-5'
+          : 'grid-cols-2 sm:grid-cols-4'
+      }`}>
+        {visibleOptions.map((option) => {
+          const isSelected = selectedStake === option.stake;
+          const isPromoCard = option.isPromo && promoActive;
+
           return (
             <motion.button
-              key={tier.id}
-              onClick={() => setSelectedStake(tier.id)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              key={option.stake}
+              onClick={() => setSelectedStake(option.stake)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               className={`
-                relative p-3 sm:p-4 rounded-xl border-2 transition-all duration-200
+                relative p-4 rounded-xl border-2 transition-all duration-200 text-left
                 ${isSelected
                   ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20'
-                  : 'border-surface-border bg-surface/50 hover:border-primary/50'
+                  : isPromoCard
+                    ? 'border-primary/50 bg-primary/5'
+                    : 'border-surface-border bg-surface/50 hover:border-primary/50'
                 }
+                ${isPromoCard ? 'sm:col-span-1' : ''}
               `}
             >
-              {/* Multiplier badge for premium tiers */}
-              {tier.multiplier > 1 && (
-                <div className="absolute -top-2 -right-2 px-1.5 py-0.5 text-xs font-bold rounded-full bg-primary text-background">
-                  {tier.multiplier}x
+              {/* Promo badge */}
+              {isPromoCard && (
+                <div className="absolute -top-2 left-2 right-2 flex justify-center">
+                  <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-background whitespace-nowrap">
+                    🔥 PROMO - Noch {daysLeft} Tage!
+                  </span>
                 </div>
               )}
 
-              {/* Price */}
-              <div className={`text-lg sm:text-xl font-display font-bold ${isSelected ? 'text-primary' : 'text-white'}`}>
-                {tier.label}
-              </div>
-
-              {/* Multiplier text for non-premium */}
-              {tier.multiplier === 1 && (
-                <div className="text-xs text-text-muted mt-1">1x</div>
+              {/* Multiplier badge for 2x+ */}
+              {option.multiplier > 1 && (
+                <div className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-background">
+                  {option.multiplier}x
+                </div>
               )}
+
+              <div className={`${isPromoCard ? 'mt-3' : ''}`}>
+                {/* Card title with icon */}
+                <div className="text-xs text-text-muted mb-1">
+                  {option.isPromo ? 'Promo' :
+                   option.stake === 100 ? 'Standard' :
+                   option.stake === 500 ? `Pro ${option.icon}` :
+                   option.stake === 1000 ? `Elite ${option.icon}` :
+                   option.stake === 2500 ? `Champion ${option.icon}` : ''}
+                </div>
+
+                {/* Price */}
+                <div className="flex items-baseline gap-2">
+                  {isPromoCard && option.originalPrice && (
+                    <span className="text-sm text-text-muted line-through">
+                      {option.originalPrice}
+                    </span>
+                  )}
+                  <span className={`text-xl font-display font-bold ${isSelected ? 'text-primary' : 'text-white'}`}>
+                    {option.label}
+                  </span>
+                </div>
+
+                {/* Multiplier text */}
+                <div className={`text-sm mt-1 ${option.multiplier > 1 ? 'text-primary' : 'text-text-muted'}`}>
+                  {option.multiplier}x Score
+                </div>
+              </div>
             </motion.button>
           );
         })}
       </div>
 
-      {/* Selected tier info */}
-      <div className="glass-card rounded-xl p-4 mb-6 text-center">
-        <div className="flex items-center justify-center gap-4">
-          <div>
-            <span className="text-text-muted text-sm">Entry:</span>
-            <span className="text-white font-bold ml-2">{selectedTier.label}</span>
-          </div>
-          <div className="w-px h-6 bg-surface-border" />
-          <div>
-            <span className="text-text-muted text-sm">Score Multiplier:</span>
-            <span className={`font-bold ml-2 ${selectedTier.multiplier > 1 ? 'text-primary' : 'text-white'}`}>
-              {selectedTier.multiplier}x
-            </span>
-          </div>
-        </div>
-        {selectedTier.multiplier > 1 && (
-          <p className="text-primary/80 text-sm mt-2">
-            Your final score will be multiplied by {selectedTier.multiplier}!
-          </p>
-        )}
-      </div>
-
       {/* Enter button */}
-      <div className="flex flex-col items-center gap-2">
-        <button
+      <div className="flex flex-col items-center gap-3">
+        <motion.button
           onClick={handleCheckout}
           disabled={isLoading}
-          className="btn-primary min-w-[280px] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="btn-primary min-w-[280px] text-lg py-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
@@ -147,12 +183,13 @@ export default function StakeSelector({ locale }: StakeSelectorProps) {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              Loading...
+              Laden...
             </>
           ) : (
-            <>Enter Tournament — {selectedTier.label}</>
+            <>Jetzt spielen →</>
           )}
-        </button>
+        </motion.button>
+
         {error && (
           <p className="text-red-400 text-sm text-center max-w-xs">
             {error}

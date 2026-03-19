@@ -57,7 +57,7 @@ export default function ScoreForm({
   const [result, setResult] = useState<{
     rank: number;
     score: number;
-    baseScore?: number;
+    originalScore?: number;
     multiplier?: number;
   } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -124,7 +124,7 @@ export default function ScoreForm({
         setResult({
           rank: data.rank,
           score: data.score,
-          baseScore: data.baseScore,
+          originalScore: data.originalScore,
           multiplier: data.multiplier,
         });
         setShowConfetti(true);
@@ -235,23 +235,24 @@ export default function ScoreForm({
             transition={{ delay: 0.6 }}
             className="my-8"
           >
-            {result.multiplier && result.multiplier > 1 && result.baseScore ? (
+            {result.multiplier && result.multiplier > 1 && result.originalScore ? (
               <>
                 {/* Show multiplier calculation */}
-                <div className="text-2xl text-text-muted mb-2">
-                  {result.baseScore} <span className="text-primary">x{result.multiplier}</span>
-                </div>
+                <p className="text-xl text-text-muted mb-2">
+                  Dein Score: {result.originalScore} × <span className="text-primary">{result.multiplier}x</span> =
+                </p>
                 <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
                   {result.score}
                 </p>
-                <p className="text-xl text-text-muted mt-2">Punkte</p>
+                <p className="text-xl text-text-muted mt-2">Punkte! 🏆</p>
               </>
             ) : (
               <>
+                <p className="text-xl text-text-muted mb-2">Dein Score:</p>
                 <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
                   {result.score}
                 </p>
-                <p className="text-xl text-text-muted mt-2">Punkte</p>
+                <p className="text-xl text-text-muted mt-2">Punkte!</p>
               </>
             )}
           </motion.div>

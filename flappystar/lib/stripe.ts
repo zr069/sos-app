@@ -17,33 +17,34 @@ export function getStripe(): Stripe {
   return stripeInstance;
 }
 
-// Stake tiers configuration
-export const STAKE_TIERS = [
-  { id: 'basic', price: 50, multiplier: 1, label: '€0.50' },
-  { id: 'standard', price: 100, multiplier: 1, label: '€1.00' },
-  { id: 'premium', price: 500, multiplier: 2, label: '€5.00' },
-  { id: 'elite', price: 1000, multiplier: 3, label: '€10.00' },
-  { id: 'champion', price: 2500, multiplier: 5, label: '€25.00' },
-] as const;
+// Valid stake amounts in cents
+export const VALID_STAKES = [50, 100, 500, 1000, 2500] as const;
+export type StakeAmount = typeof VALID_STAKES[number];
 
-export type StakeTierId = typeof STAKE_TIERS[number]['id'];
-
-// Default stake (basic)
-export const DEFAULT_STAKE_ID: StakeTierId = 'basic';
 export const CURRENCY = 'eur';
 
-// Get stake tier by ID
-export function getStakeTier(stakeId: string) {
-  return STAKE_TIERS.find(t => t.id === stakeId) || STAKE_TIERS[0];
+// Get multiplier for a stake amount
+export function getMultiplier(stake: number): number {
+  if (stake === 50) return 1;
+  if (stake === 100) return 1;
+  if (stake === 500) return 2;
+  if (stake === 1000) return 3;
+  if (stake === 2500) return 5;
+  return 1;
+}
+
+// Validate stake amount
+export function isValidStake(stake: number): stake is StakeAmount {
+  return VALID_STAKES.includes(stake as StakeAmount);
 }
 
 // Create a checkout session for tournament entry
 export async function createCheckoutSession(
   locale: string = 'en',
-  stakeId: string = DEFAULT_STAKE_ID
+  stake: number = 50
 ): Promise<Stripe.Checkout.Session> {
   const stripe = getStripe();
-  const stakeTier = getStakeTier(stakeId);
+  const multiplier = getMultiplier(stake);
 
   // Hardcoded base URL
   const siteUrl = 'https://flappystar.com';
@@ -56,11 +57,11 @@ export async function createCheckoutSession(
   const successUrl = `${siteUrl}/${safeLocale}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${siteUrl}/${safeLocale}/payment/cancel`;
 
-  console.log('STRIPE CHECKOUT:', { siteUrl, safeLocale, successUrl, cancelUrl, stakeTier });
+  console.log('STRIPE CHECKOUT:', { siteUrl, safeLocale, successUrl, cancelUrl, stake, multiplier });
 
   // Build product description based on multiplier
-  const description = stakeTier.multiplier > 1
-    ? `One entry with ${stakeTier.multiplier}x score multiplier`
+  const description = multiplier > 1
+    ? `One entry with ${multiplier}x score multiplier`
     : 'One entry to compete for €10,000';
 
   const session = await stripe.checkout.sessions.create({
@@ -74,7 +75,7 @@ export async function createCheckoutSession(
             name: 'FlappyStar Tournament Entry',
             description,
           },
-          unit_amount: stakeTier.price,
+          unit_amount: stake,
         },
         quantity: 1,
       },
@@ -83,8 +84,8 @@ export async function createCheckoutSession(
     cancel_url: cancelUrl,
     metadata: {
       type: 'tournament_entry',
-      stake_id: stakeTier.id,
-      multiplier: stakeTier.multiplier.toString(),
+      stake: stake.toString(),
+      multiplier: multiplier.toString(),
     },
     locale: mapLocaleToStripe(locale),
   });
