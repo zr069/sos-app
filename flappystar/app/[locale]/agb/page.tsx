@@ -173,19 +173,23 @@ export default async function AGBPage({
           <h2 className="text-xl font-display font-bold text-white mb-4">
             § 7 Auszahlung des Preisgeldes
           </h2>
-          <ul className="text-text-muted space-y-3 list-disc list-inside">
-            <li>
+          <div className="text-text-muted space-y-3">
+            <p>
               Das Preisgeld von <span className="text-primary font-bold">€10.000</span> wird
-              ausschließlich an den Gewinner des Live-Finales ausgezahlt.
-            </li>
-            <li>
-              Die Auszahlung erfolgt binnen 14 Tagen nach dem Finale per Banküberweisung auf
-              das vom Gewinner angegebene Konto.
-            </li>
-            <li>
+              ausschließlich an den Gewinner des Live-Finales ausgezahlt. Die Auszahlung erfolgt wahlweise:
+            </p>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li>Per Banküberweisung binnen 14 Tagen nach dem Finale, oder</li>
+              <li>
+                In bar – der Gewinner kann das Preisgeld persönlich bei uns abholen:
+                <br />
+                <span className="text-white">Devory IT GmbH, Frankfurter Straße 84, 65779 Kelkheim (Taunus)</span>
+              </li>
+            </ul>
+            <p>
               Steuern und Abgaben, die auf den Gewinn anfallen, trägt der Gewinner selbst.
-            </li>
-          </ul>
+            </p>
+          </div>
         </section>
 
         {/* Section 8 */}

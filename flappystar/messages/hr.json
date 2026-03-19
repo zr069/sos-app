@@ -49,7 +49,7 @@
       },
       "step3": {
         "title": "Osvoji €10.000",
-        "description": "Tri najbolja rezultata kvalificiraju se za finale uživo na Twitchu. Tko najdulje izdrži, osvaja €10.000."
+        "description": "Tri najbolja rezultata kvalificiraju se za finale uživo na Twitchu. Tko najdulje izdrži, osvaja €10.000 – doznakom ili u gotovini."
       }
     },
     "stats": {
@@ -84,8 +84,8 @@
         "answer": "Tri sudionika s najvećim ponderiranim rezultatima (rezultat igre × multiplikator) kvalificiraju se za finale uživo na Twitchu. U finalu sva trojica se natječu – tko najdulje izdrži, osvaja €10.000."
       },
       "q5": {
-        "question": "Kako ću primiti nagradu?",
-        "answer": "Pobjednik će biti kontaktiran putem emaila unutar 48 sati od završetka turnira radi dogovora o isplati nagrade."
+        "question": "Kako se isplaćuje nagrada?",
+        "answer": "Pobjednik finala uživo na Twitchu prima €10.000 – bankovnom doznakom (u roku od 14 dana) ili u gotovini uz osobno preuzimanje u našem uredu u Kelkheim (Taunus), Njemačka."
       }
     }
   },

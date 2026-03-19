@@ -49,7 +49,7 @@
       },
       "step3": {
         "title": "Win €10,000",
-        "description": "Top 3 scores qualify for the live finale on Twitch. Whoever lasts longest wins €10,000."
+        "description": "Top 3 scores qualify for the live finale on Twitch. Whoever lasts longest wins €10,000 – via bank transfer or cash."
       }
     },
     "stats": {
@@ -84,8 +84,8 @@
         "answer": "The three participants with the highest weighted scores (game score × multiplier) qualify for a live finale on Twitch. In the finale, all three compete – whoever lasts longest wins €10,000."
       },
       "q5": {
-        "question": "How will I receive my prize?",
-        "answer": "The winner will be contacted via email within 48 hours of the tournament ending to arrange prize payment."
+        "question": "How is the prize paid out?",
+        "answer": "The winner of the live finale on Twitch receives €10,000 – either via bank transfer (within 14 days) or in cash with personal pickup at our office in Kelkheim (Taunus), Germany."
       }
     }
   },

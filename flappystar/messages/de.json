@@ -49,7 +49,7 @@
       },
       "step3": {
         "title": "Gewinne €10.000",
-        "description": "Die drei höchsten Scores qualifizieren sich für das Live-Finale auf Twitch. Wer dort am längsten durchhält, gewinnt €10.000."
+        "description": "Die drei höchsten Scores qualifizieren sich für das Live-Finale auf Twitch. Wer dort am längsten durchhält, gewinnt €10.000 – per Überweisung oder in bar."
       }
     },
     "stats": {
@@ -84,8 +84,8 @@
         "answer": "Die drei Teilnehmer mit den höchsten gewerteten Scores (Spielscore × Multiplikator) qualifizieren sich für ein Live-Finale auf Twitch. Im Finale spielen alle drei gegeneinander – wer am längsten durchhält, gewinnt €10.000."
       },
       "q5": {
-        "question": "Wie erhalte ich meinen Preis?",
-        "answer": "Der Gewinner wird innerhalb von 48 Stunden nach Turnierende per E-Mail kontaktiert, um die Preisauszahlung zu arrangieren."
+        "question": "Wie wird der Gewinn ausgezahlt?",
+        "answer": "Der Gewinner des Live-Finales auf Twitch erhält €10.000 – wahlweise per Banküberweisung (binnen 14 Tagen) oder in bar bei persönlicher Abholung bei uns in Kelkheim (Taunus)."
       }
     }
   },
