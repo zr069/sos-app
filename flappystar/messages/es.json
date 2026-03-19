@@ -76,8 +76,12 @@
         "answer": "Cada entrada de €0,50 te da una partida. Puedes participar varias veces, pero solo tu puntuación más alta cuenta para la clasificación."
       },
       "q3": {
+        "question": "¿Cómo funciona el multiplicador de puntuación?",
+        "answer": "Cuanto mayor sea tu apuesta, mayor será tu multiplicador. Tu puntuación del juego se multiplica por tu multiplicador – ej., 15 puntos × 3x = 45 puntos clasificados."
+      },
+      "q4": {
         "question": "¿Cómo se determina el ganador?",
-        "answer": "El jugador con la puntuación verificada más alta al final del torneo gana el premio de €10.000."
+        "answer": "Los tres participantes con las puntuaciones ponderadas más altas (puntuación del juego × multiplicador) se clasifican para una final en directo en Twitch. En la final, los tres compiten – quien aguante más tiempo gana €10.000."
       },
       "q5": {
         "question": "¿Cómo recibiré mi premio?",

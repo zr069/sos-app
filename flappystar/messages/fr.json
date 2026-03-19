@@ -76,8 +76,12 @@
         "answer": "Chaque entrée à €0,50 vous donne une partie. Vous pouvez participer plusieurs fois, mais seul votre meilleur score compte pour le classement."
       },
       "q3": {
+        "question": "Comment fonctionne le multiplicateur de score ?",
+        "answer": "Plus votre mise est élevée, plus votre multiplicateur est élevé. Votre score de jeu est multiplié par votre multiplicateur – par ex., 15 points × 3x = 45 points classés."
+      },
+      "q4": {
         "question": "Comment le gagnant est-il déterminé ?",
-        "answer": "Le joueur avec le score vérifié le plus élevé à la fin du tournoi remporte le prix de €10 000."
+        "answer": "Les trois participants avec les scores pondérés les plus élevés (score de jeu × multiplicateur) se qualifient pour une finale en direct sur Twitch. En finale, les trois s'affrontent – celui qui tient le plus longtemps gagne €10 000."
       },
       "q5": {
         "question": "Comment vais-je recevoir mon prix ?",

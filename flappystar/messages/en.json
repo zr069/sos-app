@@ -76,8 +76,12 @@
         "answer": "Each €0.50 entry gives you one game. You can enter multiple times, but only your highest score counts toward the leaderboard."
       },
       "q3": {
+        "question": "How does the score multiplier work?",
+        "answer": "The higher your stake, the higher your multiplier. Your game score is multiplied by your multiplier – e.g., 15 points × 3x = 45 ranked points."
+      },
+      "q4": {
         "question": "How is the winner determined?",
-        "answer": "The player with the highest verified score when the tournament ends wins the €10,000 prize."
+        "answer": "The three participants with the highest weighted scores (game score × multiplier) qualify for a live finale on Twitch. In the finale, all three compete – whoever lasts longest wins €10,000."
       },
       "q5": {
         "question": "How will I receive my prize?",

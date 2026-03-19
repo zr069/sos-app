@@ -73,11 +73,15 @@
       },
       "q2": {
         "question": "Kann ich mehrmals spielen?",
-        "answer": "Jeder €0,50-Eintritt gibt dir ein Spiel. Du kannst mehrmals teilnehmen, aber nur dein höchster Punktestand zählt für die Rangliste."
+        "answer": "Jeder Eintritt gibt dir ein Spiel. Du kannst mehrmals teilnehmen, aber nur dein höchster Punktestand zählt für die Rangliste."
       },
       "q3": {
+        "question": "Wie funktioniert der Score-Multiplikator?",
+        "answer": "Je höher dein Einsatz, desto höher dein Multiplikator. Dein Spielscore wird mit dem Multiplikator multipliziert – z.B. 15 Punkte × 3x = 45 gewertete Punkte."
+      },
+      "q4": {
         "question": "Wie wird der Gewinner ermittelt?",
-        "answer": "Der Spieler mit dem höchsten verifizierten Punktestand am Turnierende gewinnt den €10.000-Preis."
+        "answer": "Die drei Teilnehmer mit den höchsten gewerteten Scores (Spielscore × Multiplikator) qualifizieren sich für ein Live-Finale auf Twitch. Im Finale spielen alle drei gegeneinander – wer am längsten durchhält, gewinnt €10.000."
       },
       "q5": {
         "question": "Wie erhalte ich meinen Preis?",
