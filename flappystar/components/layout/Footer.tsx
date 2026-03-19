@@ -58,9 +58,6 @@ export default function Footer() {
           <div className="text-text-muted text-xs">
             🔒 SSL Encrypted
           </div>
-          <div className="text-text-muted text-xs">
-            🇪🇺 GDPR Compliant
-          </div>
         </div>
       </div>
     </footer>
