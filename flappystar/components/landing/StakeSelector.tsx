@@ -13,15 +13,25 @@ interface StakeOption {
   icon?: string;
   isPromo?: boolean;
   originalPrice?: string;
+  tierLabel: string;
 }
 
-const STAKE_OPTIONS: StakeOption[] = [
-  { stake: 50, label: '€0,50', multiplier: 1, isPromo: true, originalPrice: '€1,00' },
-  { stake: 100, label: '€1,00', multiplier: 1 },
-  { stake: 500, label: '€5,00', multiplier: 2, icon: '⚡' },
-  { stake: 1000, label: '€10,00', multiplier: 3, icon: '🏆' },
-  { stake: 2500, label: '€25,00', multiplier: 5, icon: '👑' },
+// Premium tiers (always available)
+const PREMIUM_TIERS: StakeOption[] = [
+  { stake: 500, label: '€5,00', multiplier: 2, icon: '⚡', tierLabel: 'Pro' },
+  { stake: 1000, label: '€10,00', multiplier: 3, icon: '🏆', tierLabel: 'Elite' },
+  { stake: 2500, label: '€25,00', multiplier: 5, icon: '👑', tierLabel: 'Champion' },
 ];
+
+// Promo tier (only during promo phase)
+const PROMO_TIER: StakeOption = {
+  stake: 50, label: '€0,50', multiplier: 1, isPromo: true, originalPrice: '€1,00', tierLabel: 'Promo'
+};
+
+// Standard tier (only after promo ends)
+const STANDARD_TIER: StakeOption = {
+  stake: 100, label: '€1,00', multiplier: 1, tierLabel: 'Standard'
+};
 
 interface StakeSelectorProps {
   locale: string;
@@ -70,19 +80,17 @@ export default function StakeSelector({ locale }: StakeSelectorProps) {
     }
   };
 
-  // Filter options: hide promo if not active
+  // Build visible options based on promo status
+  // During promo: €0.50 promo + premium tiers (4 cards)
+  // After promo: €1.00 standard + premium tiers (4 cards)
   const visibleOptions = promoActive
-    ? STAKE_OPTIONS
-    : STAKE_OPTIONS.filter(opt => !opt.isPromo);
+    ? [PROMO_TIER, ...PREMIUM_TIERS]
+    : [STANDARD_TIER, ...PREMIUM_TIERS];
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {/* Stake options grid */}
-      <div className={`grid gap-3 mb-6 ${
-        visibleOptions.length === 5
-          ? 'grid-cols-2 sm:grid-cols-5'
-          : 'grid-cols-2 sm:grid-cols-4'
-      }`}>
+      {/* Stake options grid - always 4 cards */}
+      <div className="grid gap-3 mb-6 grid-cols-2 sm:grid-cols-4">
         {visibleOptions.map((option) => {
           const isSelected = selectedStake === option.stake;
           const isPromoCard = option.isPromo && promoActive;
@@ -123,11 +131,7 @@ export default function StakeSelector({ locale }: StakeSelectorProps) {
               <div className={`${isPromoCard ? 'mt-3' : ''}`}>
                 {/* Card title with icon */}
                 <div className="text-xs text-text-muted mb-1">
-                  {option.isPromo ? 'Promo' :
-                   option.stake === 100 ? 'Standard' :
-                   option.stake === 500 ? `Pro ${option.icon}` :
-                   option.stake === 1000 ? `Elite ${option.icon}` :
-                   option.stake === 2500 ? `Champion ${option.icon}` : ''}
+                  {option.tierLabel} {option.icon || ''}
                 </div>
 
                 {/* Price */}
