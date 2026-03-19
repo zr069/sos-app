@@ -15,6 +15,7 @@ interface FlappyBirdProps {
   onGameOver?: (score: number) => void;
   onValidationComplete?: (result: ValidationResult) => void;
   disabled?: boolean;
+  multiplier?: number;
 }
 
 interface ValidationResult {
@@ -247,6 +248,7 @@ export default function FlappyBird({
   onGameOver,
   onValidationComplete,
   disabled = false,
+  multiplier = 1,
 }: FlappyBirdProps) {
   const t = useTranslations('game');
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1032,10 +1034,20 @@ export default function FlappyBird({
       ctx.shadowBlur = 10;
       ctx.shadowColor = '#FFD700';
 
-      // Score
+      // Score (offset left if multiplier shown)
       ctx.font = 'bold 48px Syne, sans-serif';
       ctx.fillStyle = '#FFD700';
-      ctx.fillText(scoreRef.current.toString(), canvasSize.width / 2, 60);
+      const scoreX = multiplier > 1 ? canvasSize.width / 2 - 25 : canvasSize.width / 2;
+      ctx.fillText(scoreRef.current.toString(), scoreX, 60);
+
+      // Multiplier badge (if > 1)
+      if (multiplier > 1) {
+        ctx.font = 'bold 28px Syne, sans-serif';
+        ctx.fillStyle = '#FF6600';
+        ctx.shadowColor = '#FF6600';
+        ctx.fillText(`×${multiplier}`, canvasSize.width / 2 + 35, 60);
+        ctx.shadowColor = '#FFD700';
+      }
 
       // Level indicator
       ctx.font = 'bold 16px Syne, sans-serif';

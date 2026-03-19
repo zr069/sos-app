@@ -29,6 +29,7 @@ function PlayContent() {
   const [gameOver, setGameOver] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
   const [gameData, setGameData] = useState<GameValidationData | null>(null);
+  const [multiplier, setMultiplier] = useState(1);
 
   // Redirect to homepage if no valid session_id
   useEffect(() => {
@@ -49,6 +50,7 @@ function PlayContent() {
 
           if (data.valid) {
             setIsValid(true);
+            setMultiplier(data.multiplier || 1);
           } else {
             setError(
               data.reason === 'Session already used'
@@ -136,6 +138,7 @@ function PlayContent() {
         score={finalScore}
         sessionId={sessionId}
         gameData={gameData}
+        multiplier={multiplier}
       />
     );
   }
@@ -148,6 +151,7 @@ function PlayContent() {
           stripeSessionId={sessionId}
           onValidationComplete={handleValidationComplete}
           disabled={!isValid}
+          multiplier={multiplier}
         />
       </div>
     </div>

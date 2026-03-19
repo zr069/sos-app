@@ -21,6 +21,7 @@ interface ScoreFormProps {
   sessionId: string;
   gameData: GameValidationData;
   tournamentEndDate?: string;
+  multiplier?: number;
 }
 
 interface FormData {
@@ -43,6 +44,7 @@ export default function ScoreForm({
   sessionId,
   gameData,
   tournamentEndDate = '17. September 2026',
+  multiplier = 1,
 }: ScoreFormProps) {
   const t = useTranslations('scoreForm');
 
@@ -357,11 +359,25 @@ export default function ScoreForm({
           <p className="text-text-muted text-sm">{t('subtitle')}</p>
 
           {/* Compact score display */}
-          <div className="mt-3 py-2 px-4 rounded-xl bg-primary/10 inline-block">
-            <p className="text-text-muted text-xs">Your Score</p>
-            <p className="text-3xl sm:text-4xl font-display font-bold gold-shimmer">
-              {score}
-            </p>
+          <div className="mt-3 py-3 px-5 rounded-xl bg-primary/10 inline-block">
+            <p className="text-text-muted text-xs mb-1">Dein Score</p>
+            {multiplier > 1 ? (
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-3xl sm:text-4xl font-display font-bold gold-shimmer">{score}</span>
+                <span className="text-xl sm:text-2xl font-bold text-orange-500">×{multiplier}</span>
+                <span className="text-xl text-text-muted">=</span>
+                <span className="text-3xl sm:text-4xl font-display font-bold gold-shimmer">{score * multiplier}</span>
+              </div>
+            ) : (
+              <p className="text-3xl sm:text-4xl font-display font-bold gold-shimmer">
+                {score}
+              </p>
+            )}
+            {multiplier > 1 && (
+              <p className="text-xs text-orange-500 mt-1 font-medium">
+                {multiplier === 2 ? 'Pro ⚡' : multiplier === 3 ? 'Elite 🏆' : multiplier === 5 ? 'Champion 👑' : ''} ×{multiplier}
+              </p>
+            )}
           </div>
         </div>
 

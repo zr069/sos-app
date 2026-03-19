@@ -88,7 +88,10 @@ export async function GET(request: NextRequest) {
       console.error('Database check error:', dbError);
     }
 
-    return NextResponse.json({ valid: true });
+    // Get multiplier from Stripe metadata
+    const multiplier = parseInt(stripeSession.metadata?.multiplier || '1', 10);
+
+    return NextResponse.json({ valid: true, multiplier });
   } catch (error) {
     console.error('Validate session error:', error);
     return NextResponse.json(
