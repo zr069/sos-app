@@ -145,15 +145,14 @@ export default function ScoreForm({
     if (!result) return;
 
     const nickname = formData.nickname.trim();
-    const shareUrl = `https://www.flappystar.com/score/${encodeURIComponent(nickname)}?score=${result.score}&rank=${result.rank}`;
-    const shareText = `Ich bin auf Platz #${result.rank} mit ${result.score} Punkten! Kannst du mich schlagen?`;
+    const shareUrl = `https://www.flappystar.com/?sharedBy=${encodeURIComponent(nickname)}&score=${result.score}&rank=${result.rank}`;
+    const shareText = `Ich bin Platz #${result.rank} mit ${result.score} Punkten bei FlappyStar! Kannst du mich schlagen?`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${nickname} - FlappyStar`,
+          title: 'FlappyStar',
           text: shareText,
-          url: shareUrl,
         });
       } catch {
         // User cancelled or error

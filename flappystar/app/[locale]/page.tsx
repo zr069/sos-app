@@ -5,6 +5,7 @@ import TournamentStats from '@/components/landing/TournamentStats';
 import Accordion from '@/components/ui/Accordion';
 import StakeSelector from '@/components/landing/StakeSelector';
 import DemoPreview from '@/components/landing/DemoPreview';
+import ShareModalWrapper from '@/components/ui/ShareModalWrapper';
 
 export async function generateMetadata({
   params,
@@ -44,6 +45,9 @@ export default async function HomePage({
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 sm:py-16">
+      {/* Share Modal (shown when URL has share params) */}
+      <ShareModalWrapper locale={locale} />
+
       {/* Hero Section */}
       <section id="tournament" className="text-center mb-16 sm:mb-24">
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold text-white mb-4">
