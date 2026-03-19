@@ -69,11 +69,11 @@
       "title": "Često postavljana pitanja",
       "q1": {
         "question": "Kako da se prijavim na turnir?",
-        "answer": "Klikni 'Pridruži se turniru', plati €0,50 putem Stripe-a i bićeš preusmeren na igru. Odigraj jednom i pošalji svoj rezultat sa kontakt podacima."
+        "answer": "Odaberi svoj ulog (od €1,00, ili €0,50 tokom promotivnog perioda), plati sigurno putem Stripe-a i odmah počni da igraš. Što je veći ulog, veći je multiplikator rezultata – i veća je tvoja šansa za finale. Nakon igre, unesi svoje kontakt podatke i tvoj konačni rezultat (rezultat igre × multiplikator) biće sačuvan na rang listi."
       },
       "q2": {
         "question": "Mogu li da igram više puta?",
-        "answer": "Svaka prijava od €0,50 daje ti jednu igru. Možeš učestvovati više puta, ali samo tvoj najveći rezultat računa se za rang listu."
+        "answer": "Svaka prijava (od €1,00) daje ti jednu igru. Možeš učestvovati više puta, ali samo tvoj najveći rezultat računa se za rang listu."
       },
       "q3": {
         "question": "Kako funkcioniše multiplikator rezultata?",

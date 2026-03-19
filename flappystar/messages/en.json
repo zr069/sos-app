@@ -69,11 +69,11 @@
       "title": "Frequently Asked Questions",
       "q1": {
         "question": "How do I enter the tournament?",
-        "answer": "Click 'Enter Tournament', pay €0.50 via Stripe, and you'll be taken to the game. Play once, submit your score with your contact details."
+        "answer": "Choose your stake (from €1.00, or €0.50 during the promo period), pay securely via Stripe and start playing immediately. The higher your stake, the higher your score multiplier – and the bigger your chance to reach the finale. After the game, enter your contact details and your final score (game score × multiplier) is saved to the leaderboard."
       },
       "q2": {
         "question": "Can I play multiple times?",
-        "answer": "Each €0.50 entry gives you one game. You can enter multiple times, but only your highest score counts toward the leaderboard."
+        "answer": "Each entry (from €1.00) gives you one game. You can enter multiple times, but only your highest score counts toward the leaderboard."
       },
       "q3": {
         "question": "How does the score multiplier work?",

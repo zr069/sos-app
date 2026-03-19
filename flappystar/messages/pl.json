@@ -69,11 +69,11 @@
       "title": "Często zadawane pytania",
       "q1": {
         "question": "Jak wziąć udział w turnieju?",
-        "answer": "Kliknij 'Dołącz do turnieju', zapłać €0,50 przez Stripe i zostaniesz przeniesiony do gry. Zagraj raz i prześlij swój wynik z danymi kontaktowymi."
+        "answer": "Wybierz swój zakład (od €1,00 lub €0,50 w okresie promocyjnym), zapłać bezpiecznie przez Stripe i natychmiast rozpocznij grę. Im wyższy zakład, tym wyższy mnożnik wyniku – i większa szansa na dotarcie do finału. Po grze wprowadź swoje dane kontaktowe, a Twój końcowy wynik (wynik gry × mnożnik) zostanie zapisany w rankingu."
       },
       "q2": {
         "question": "Czy mogę grać wiele razy?",
-        "answer": "Każdy wpis za €0,50 daje ci jedną grę. Możesz brać udział wielokrotnie, ale tylko twój najwyższy wynik liczy się do rankingu."
+        "answer": "Każdy wpis (od €1,00) daje ci jedną grę. Możesz brać udział wielokrotnie, ale tylko twój najwyższy wynik liczy się do rankingu."
       },
       "q3": {
         "question": "Jak działa mnożnik wyniku?",

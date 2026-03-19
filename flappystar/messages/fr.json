@@ -69,11 +69,11 @@
       "title": "Questions fréquentes",
       "q1": {
         "question": "Comment participer au tournoi ?",
-        "answer": "Cliquez sur 'Participer au tournoi', payez €0,50 via Stripe, et vous serez redirigé vers le jeu. Jouez une fois et soumettez votre score avec vos coordonnées."
+        "answer": "Choisissez votre mise (à partir de 1,00 €, ou 0,50 € pendant la période promo), payez en toute sécurité via Stripe et commencez à jouer immédiatement. Plus votre mise est élevée, plus votre multiplicateur de score est élevé – et plus grande est votre chance d'atteindre la finale. Après le jeu, entrez vos coordonnées et votre score final (score de jeu × multiplicateur) est enregistré dans le classement."
       },
       "q2": {
         "question": "Puis-je jouer plusieurs fois ?",
-        "answer": "Chaque entrée à €0,50 vous donne une partie. Vous pouvez participer plusieurs fois, mais seul votre meilleur score compte pour le classement."
+        "answer": "Chaque entrée (à partir de 1,00 €) vous donne une partie. Vous pouvez participer plusieurs fois, mais seul votre meilleur score compte pour le classement."
       },
       "q3": {
         "question": "Comment fonctionne le multiplicateur de score ?",

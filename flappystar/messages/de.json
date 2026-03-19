@@ -69,11 +69,11 @@
       "title": "Häufig gestellte Fragen",
       "q1": {
         "question": "Wie nehme ich am Turnier teil?",
-        "answer": "Klicke auf 'Am Turnier teilnehmen', zahle €0,50 über Stripe und du wirst zum Spiel weitergeleitet. Spiele einmal und reiche deine Punktzahl mit deinen Kontaktdaten ein."
+        "answer": "Wähle deinen Einsatz (ab €1,00, oder €0,50 in der Promo-Phase), zahle sicher über Stripe und spiele sofort los. Je höher dein Einsatz, desto höher dein Score-Multiplikator – und desto größer deine Chance auf das Finale. Nach dem Spiel gibst du deine Kontaktdaten ein und dein gewerteter Score (Spielscore × Multiplikator) wird in der Rangliste gespeichert."
       },
       "q2": {
         "question": "Kann ich mehrmals spielen?",
-        "answer": "Jeder Eintritt gibt dir ein Spiel. Du kannst mehrmals teilnehmen, aber nur dein höchster Punktestand zählt für die Rangliste."
+        "answer": "Jeder Eintritt (ab €1,00) gibt dir ein Spiel. Du kannst mehrmals teilnehmen, aber nur dein höchster Punktestand zählt für die Rangliste."
       },
       "q3": {
         "question": "Wie funktioniert der Score-Multiplikator?",

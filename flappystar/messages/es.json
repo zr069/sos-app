@@ -69,11 +69,11 @@
       "title": "Preguntas frecuentes",
       "q1": {
         "question": "¿Cómo participo en el torneo?",
-        "answer": "Haz clic en 'Participar en el torneo', paga €0,50 vía Stripe y serás redirigido al juego. Juega una vez y envía tu puntuación con tus datos de contacto."
+        "answer": "Elige tu apuesta (desde €1,00, o €0,50 durante el período promocional), paga de forma segura a través de Stripe y comienza a jugar de inmediato. Cuanto mayor sea tu apuesta, mayor será tu multiplicador de puntuación – y mayor será tu oportunidad de llegar a la final. Después del juego, ingresa tus datos de contacto y tu puntuación final (puntuación del juego × multiplicador) se guarda en la clasificación."
       },
       "q2": {
         "question": "¿Puedo jugar varias veces?",
-        "answer": "Cada entrada de €0,50 te da una partida. Puedes participar varias veces, pero solo tu puntuación más alta cuenta para la clasificación."
+        "answer": "Cada entrada (desde €1,00) te da una partida. Puedes participar varias veces, pero solo tu puntuación más alta cuenta para la clasificación."
       },
       "q3": {
         "question": "¿Cómo funciona el multiplicador de puntuación?",
