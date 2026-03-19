@@ -27,8 +27,7 @@
       "title": "Graj. Wygrywaj.",
       "prize": "€10 000",
       "subtitle": "Weź udział w największym turnieju FlappyStar. Prosta gra. Ogromna nagroda.",
-      "ctaEnter": "Dołącz do turnieju — €0,50",
-      "ctaFree": "Graj za darmo"
+      "ctaEnter": "Dołącz do turnieju — €0,50"
     },
     "countdown": {
       "title": "Turniej kończy się za",
@@ -79,10 +78,6 @@
       "q3": {
         "question": "Jak wyłaniany jest zwycięzca?",
         "answer": "Gracz z najwyższym zweryfikowanym wynikiem na koniec turnieju wygrywa nagrodę €10 000."
-      },
-      "q4": {
-        "question": "Czy darmowa gra różni się od turniejowej?",
-        "answer": "Darmowa gra pozwala ćwiczyć bez ograniczeń, ale twoje wyniki nie będą zapisywane i nie będziesz kwalifikować się do nagrody."
       },
       "q5": {
         "question": "Jak otrzymam nagrodę?",

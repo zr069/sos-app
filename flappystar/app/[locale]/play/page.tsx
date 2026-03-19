@@ -21,59 +21,57 @@ function PlayContent() {
   const router = useRouter();
   const t = useTranslations('errors');
 
-  const mode = (searchParams.get('mode') as 'free' | 'tournament') || 'free';
   const sessionId = searchParams.get('session_id');
 
-  const [isValidating, setIsValidating] = useState(mode === 'tournament');
+  const [isValidating, setIsValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
   const [gameData, setGameData] = useState<GameValidationData | null>(null);
 
-  const validateSession = async () => {
-    try {
-      const response = await fetch(
-        `/api/validate-session?session_id=${sessionId}`
-      );
-      const data = await response.json();
-
-      if (data.valid) {
-        setIsValid(true);
-      } else {
-        setError(
-          data.reason === 'Session already used'
-            ? t('sessionUsed')
-            : data.reason === 'Payment not completed'
-            ? t('paymentNotCompleted')
-            : t('sessionInvalid')
-        );
-      }
-    } catch {
-      setError(t('serverError'));
-    } finally {
-      setIsValidating(false);
+  // Redirect to homepage if no valid session_id
+  useEffect(() => {
+    if (!sessionId) {
+      router.replace('/');
     }
-  };
+  }, [sessionId, router]);
 
   // Validate session for tournament mode
   useEffect(() => {
-    if (mode === 'tournament' && sessionId) {
-      validateSession();
-    } else if (mode === 'tournament' && !sessionId) {
-      setError(t('sessionInvalid'));
-      setIsValidating(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, sessionId]);
+    if (sessionId) {
+      const validateSession = async () => {
+        try {
+          const response = await fetch(
+            `/api/validate-session?session_id=${sessionId}`
+          );
+          const data = await response.json();
 
-  const handleGameOver = (score: number) => {
-    setFinalScore(score);
-    // For free mode, just set game over
-    if (mode === 'free') {
-      setGameOver(true);
+          if (data.valid) {
+            setIsValid(true);
+          } else {
+            setError(
+              data.reason === 'Session already used'
+                ? t('sessionUsed')
+                : data.reason === 'Payment not completed'
+                ? t('paymentNotCompleted')
+                : t('sessionInvalid')
+            );
+          }
+        } catch {
+          setError(t('serverError'));
+        } finally {
+          setIsValidating(false);
+        }
+      };
+      validateSession();
     }
-  };
+  }, [sessionId, t]);
+
+  // Show nothing while redirecting
+  if (!sessionId) {
+    return null;
+  }
 
   const handleValidationComplete = (result: ValidationResult & { gameSessionToken?: string; inputs?: GameInput[]; gameDuration?: number }) => {
     setFinalScore(result.score);
@@ -88,7 +86,7 @@ function PlayContent() {
   };
 
   // Show loading state while validating
-  if (mode === 'tournament' && isValidating) {
+  if (isValidating) {
     return (
       <div className="max-w-lg mx-auto px-4 pt-4 text-center">
         <div className="glass-card rounded-2xl p-8">
@@ -100,7 +98,7 @@ function PlayContent() {
   }
 
   // Show error if validation failed
-  if (mode === 'tournament' && error) {
+  if (error) {
     return (
       <div className="max-w-lg mx-auto px-4 pt-4 text-center">
         <div className="glass-card rounded-2xl p-8">
@@ -131,8 +129,8 @@ function PlayContent() {
     );
   }
 
-  // Show score form after tournament game over (includes success screen after submission)
-  if (mode === 'tournament' && gameOver && sessionId && gameData) {
+  // Show score form after game over (includes success screen after submission)
+  if (gameOver && gameData) {
     return (
       <ScoreForm
         score={finalScore}
@@ -146,11 +144,10 @@ function PlayContent() {
     <div className="max-w-2xl mx-auto px-4 pt-2">
       <div className="h-[550px] sm:h-[650px]">
         <FlappyBird
-          mode={mode}
-          stripeSessionId={sessionId || undefined}
-          onGameOver={mode === 'free' ? handleGameOver : undefined}
-          onValidationComplete={mode === 'tournament' ? handleValidationComplete : undefined}
-          disabled={mode === 'tournament' && !isValid}
+          mode="tournament"
+          stripeSessionId={sessionId}
+          onValidationComplete={handleValidationComplete}
+          disabled={!isValid}
         />
       </div>
     </div>

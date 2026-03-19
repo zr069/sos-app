@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "FlappyStar - Win €10,000 Playing FlappyStar",
-    "description": "Enter the tournament for just €0.50. Play FlappyStar, score high, win €10,000. Free play available."
+    "description": "Enter the tournament for just €0.50. Play FlappyStar, score high, win €10,000. "
   },
   "common": {
     "loading": "Loading...",
@@ -27,8 +27,7 @@
       "title": "Play. Win.",
       "prize": "€10,000",
       "subtitle": "Enter the ultimate FlappyStar tournament. One simple game. One massive prize.",
-      "ctaEnter": "Enter Tournament — €0.50",
-      "ctaFree": "Play Free"
+      "ctaEnter": "Enter Tournament — €0.50"
     },
     "countdown": {
       "title": "Tournament Ends In",
@@ -79,10 +78,6 @@
       "q3": {
         "question": "How is the winner determined?",
         "answer": "The player with the highest verified score when the tournament ends wins the €10,000 prize."
-      },
-      "q4": {
-        "question": "Is free play different from tournament play?",
-        "answer": "Free play lets you practice unlimited times, but your scores won't be recorded and you won't be eligible for the prize."
       },
       "q5": {
         "question": "How will I receive my prize?",

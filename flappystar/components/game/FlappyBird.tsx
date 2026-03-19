@@ -10,7 +10,7 @@ import {
 } from '@/lib/gameConstants';
 
 interface FlappyBirdProps {
-  mode: 'free' | 'tournament' | 'demo';
+  mode: 'tournament' | 'demo';
   stripeSessionId?: string;
   onGameOver?: (score: number) => void;
   onValidationComplete?: (result: ValidationResult) => void;
@@ -1209,14 +1209,6 @@ export default function FlappyBird({
     }
   };
 
-  const handlePlayAgain = () => {
-    if (mode === 'free') {
-      resetGame();
-      setGameState('idle');
-      gameStateRef.current = 'idle';
-    }
-  };
-
   return (
     <div
       ref={containerRef}
@@ -1388,15 +1380,6 @@ export default function FlappyBird({
                       </p>
                     </div>
                   </div>
-                )}
-
-                {mode === 'free' && (
-                  <button
-                    onClick={handlePlayAgain}
-                    className="btn-primary w-full"
-                  >
-                    {t('playAgain')}
-                  </button>
                 )}
 
                 {mode === 'tournament' && !validationError && (

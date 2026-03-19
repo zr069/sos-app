@@ -27,8 +27,7 @@
       "title": "Igraj. Pobedi.",
       "prize": "€10.000",
       "subtitle": "Učestvuj u najvećem FlappyStar turniru. Jednostavna igra. Ogromna nagrada.",
-      "ctaEnter": "Pridruži se turniru — €0,50",
-      "ctaFree": "Igraj besplatno"
+      "ctaEnter": "Pridruži se turniru — €0,50"
     },
     "countdown": {
       "title": "Turnir se završava za",
@@ -79,10 +78,6 @@
       "q3": {
         "question": "Kako se određuje pobednik?",
         "answer": "Igrač sa najvećim verifikovanim rezultatom na kraju turnira osvaja nagradu od €10.000."
-      },
-      "q4": {
-        "question": "Da li je besplatno igranje različito od turnirskog?",
-        "answer": "Besplatno igranje ti omogućuje neograničenu vežbu, ali tvoji rezultati neće biti zabeleženi i nećeš biti kvalifikovan za nagradu."
       },
       "q5": {
         "question": "Kako ću primiti nagradu?",

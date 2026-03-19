@@ -1,5 +1,4 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import LiveWidget from '@/components/leaderboard/LiveWidget';
 import TournamentStats from '@/components/landing/TournamentStats';
@@ -46,7 +45,7 @@ export default async function HomePage({
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 sm:py-16">
       {/* Hero Section */}
-      <section className="text-center mb-16 sm:mb-24">
+      <section id="tournament" className="text-center mb-16 sm:mb-24">
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold text-white mb-4">
           {t('hero.title')}
           <br />
@@ -64,16 +63,10 @@ export default async function HomePage({
           <CountdownTimer targetDate={tournamentEndDate} />
         </div>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <EnterTournamentButton locale={locale}>
-            {t('hero.ctaEnter')}
-          </EnterTournamentButton>
-
-          <Link href="/play?mode=free" className="btn-secondary">
-            {t('hero.ctaFree')}
-          </Link>
-        </div>
+        {/* CTA */}
+        <EnterTournamentButton locale={locale}>
+          {t('hero.ctaEnter')}
+        </EnterTournamentButton>
       </section>
 
       {/* Live Game Demo */}

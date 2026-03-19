@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,13 +9,34 @@ import LocaleSwitcher from './LocaleSwitcher';
 export default function Header() {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  const locale = useLocale();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
   const navItems = [
-    { href: '/', label: t('home') },
-    { href: '/play', label: t('play') },
-    { href: '/leaderboard', label: t('leaderboard') },
+    { href: '/', label: t('home'), isCheckout: false },
+    { href: '/play', label: t('play'), isCheckout: true },
+    { href: '/leaderboard', label: t('leaderboard'), isCheckout: false },
   ];
+
+  const handleCheckout = async () => {
+    if (isCheckoutLoading) return;
+    setIsCheckoutLoading(true);
+    try {
+      const response = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locale }),
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setIsCheckoutLoading(false);
+    }
+  };
 
   const isActive = (href: string) => {
     if (href === '/') {
@@ -71,32 +92,45 @@ export default function Header() {
           }}
         >
           {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="relative px-5 py-2 text-sm font-medium transition-colors duration-200 group"
-            >
-              <span
-                className={`relative z-10 ${
-                  isActive(item.href)
-                    ? 'text-[#FFD700]'
-                    : 'text-white/60 hover:text-white'
-                }`}
+            item.isCheckout ? (
+              <button
+                key={item.href}
+                onClick={handleCheckout}
+                disabled={isCheckoutLoading}
+                className="relative px-5 py-2 text-sm font-medium transition-colors duration-200 group cursor-pointer"
               >
-                {item.label}
-              </span>
-              {/* Active indicator - glowing dot */}
-              {isActive(item.href) && (
-                <motion.span
-                  layoutId="activeIndicator"
-                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FFD700]"
-                  style={{
-                    boxShadow: '0 0 8px 2px rgba(255, 215, 0, 0.6)',
-                  }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-            </Link>
+                <span className="relative z-10 text-white/60 hover:text-white">
+                  {isCheckoutLoading ? '...' : item.label}
+                </span>
+              </button>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="relative px-5 py-2 text-sm font-medium transition-colors duration-200 group"
+              >
+                <span
+                  className={`relative z-10 ${
+                    isActive(item.href)
+                      ? 'text-[#FFD700]'
+                      : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </span>
+                {/* Active indicator - glowing dot */}
+                {isActive(item.href) && (
+                  <motion.span
+                    layoutId="activeIndicator"
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FFD700]"
+                    style={{
+                      boxShadow: '0 0 8px 2px rgba(255, 215, 0, 0.6)',
+                    }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </Link>
+            )
           ))}
         </nav>
 
@@ -161,25 +195,38 @@ export default function Header() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Link
-                    href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`relative flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-colors duration-200 ${
-                      isActive(item.href)
-                        ? 'text-[#FFD700]'
-                        : 'text-white/60 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {isActive(item.href) && (
-                      <span
-                        className="w-1.5 h-1.5 rounded-full bg-[#FFD700]"
-                        style={{
-                          boxShadow: '0 0 8px 2px rgba(255, 215, 0, 0.6)',
-                        }}
-                      />
-                    )}
-                    {item.label}
-                  </Link>
+                  {item.isCheckout ? (
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleCheckout();
+                      }}
+                      disabled={isCheckoutLoading}
+                      className="relative flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-colors duration-200 text-white/60 hover:text-white hover:bg-white/5 w-full text-left"
+                    >
+                      {isCheckoutLoading ? '...' : item.label}
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`relative flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-colors duration-200 ${
+                        isActive(item.href)
+                          ? 'text-[#FFD700]'
+                          : 'text-white/60 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {isActive(item.href) && (
+                        <span
+                          className="w-1.5 h-1.5 rounded-full bg-[#FFD700]"
+                          style={{
+                            boxShadow: '0 0 8px 2px rgba(255, 215, 0, 0.6)',
+                          }}
+                        />
+                      )}
+                      {item.label}
+                    </Link>
+                  )}
                 </motion.div>
               ))}
             </div>

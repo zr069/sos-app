@@ -27,8 +27,7 @@
       "title": "Gioca. Vinci.",
       "prize": "€10.000",
       "subtitle": "Partecipa al torneo definitivo di FlappyStar. Un gioco semplice. Un premio enorme.",
-      "ctaEnter": "Partecipa al torneo — €0,50",
-      "ctaFree": "Gioca gratis"
+      "ctaEnter": "Partecipa al torneo — €0,50"
     },
     "countdown": {
       "title": "Il torneo termina tra",
@@ -79,10 +78,6 @@
       "q3": {
         "question": "Come viene determinato il vincitore?",
         "answer": "Il giocatore con il punteggio verificato più alto alla fine del torneo vince il premio di €10.000."
-      },
-      "q4": {
-        "question": "La modalità gratuita è diversa dal torneo?",
-        "answer": "La modalità gratuita ti permette di allenarti senza limiti, ma i tuoi punteggi non verranno registrati e non sarai idoneo per il premio."
       },
       "q5": {
         "question": "Come riceverò il mio premio?",
