@@ -43,7 +43,7 @@ export default async function HomePage({
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-16">
+    <div className="max-w-6xl mx-auto px-4 pt-24 pb-8 sm:pt-28 sm:pb-16">
       {/* Share Modal (shown when URL has share params) */}
       <ShareModalWrapper />
 
