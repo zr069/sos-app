@@ -38,15 +38,14 @@ export async function POST(request: NextRequest) {
   if (Math.random() < 0.1) cleanupRateLimitRecords();
 
   try {
-    // SECURITY: Rate limit by IP - max 3 attempts per 10 minutes
-    const rateLimit = checkValidationRateLimit(ip);
-    if (!rateLimit.allowed) {
-      console.log('[validate-score] Rate limit exceeded for IP:', ip);
-      return NextResponse.json(
-        { error: 'Too many attempts. Please wait before trying again.' },
-        { status: 429 }
-      );
-    }
+    // SECURITY: Rate limit by IP - disabled (in-memory, ineffective on serverless)
+    // const rateLimit = checkValidationRateLimit(ip);
+    // if (!rateLimit.allowed) {
+    //   return NextResponse.json(
+    //     { error: 'Too many attempts. Please wait before trying again.' },
+    //     { status: 429 }
+    //   );
+    // }
 
     const body: ValidateScoreRequest = await request.json();
 
