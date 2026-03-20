@@ -175,28 +175,27 @@ export default function ScoreForm({
   // Show success screen after submission - full screen overlay
   if (result) {
     return (
-      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
+      <div className="fixed inset-0 z-50 bg-background overflow-y-auto">
         <Confetti active={showConfetti} />
 
-        <div className="max-w-lg mx-auto px-4 py-8 text-center">
-          {/* Animated Gold Star */}
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 15,
-              delay: 0.2
-            }}
-            className="mb-8"
-          >
-            <svg
-              width="120"
-              height="120"
-              viewBox="0 0 120 120"
-              className="mx-auto drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]"
+        <div className="min-h-screen flex flex-col justify-start pt-4 px-4 pb-24">
+          <div className="max-w-lg mx-auto text-center">
+            {/* Animated Gold Star */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 15,
+                delay: 0.2
+              }}
+              className="mb-4"
             >
+              <svg
+                viewBox="0 0 120 120"
+                className="w-16 h-16 sm:w-24 sm:h-24 mx-auto drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]"
+              >
               <defs>
                 <radialGradient id="successStarGrad" cx="50%" cy="30%" r="70%">
                   <stop offset="0%" stopColor="#FFF8DC" />
@@ -221,79 +220,79 @@ export default function ScoreForm({
             </svg>
           </motion.div>
 
-          {/* Success Message */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <h1 className="text-3xl sm:text-4xl font-display font-bold text-white mb-2">
-              🎉 Dein Score wurde eingetragen!
-            </h1>
-          </motion.div>
+            {/* Success Message */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h1 className="text-2xl sm:text-4xl font-display font-bold text-white mb-2">
+                🎉 Dein Score wurde eingetragen!
+              </h1>
+            </motion.div>
 
-          {/* Score Display */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.6 }}
-            className="my-8"
-          >
-            {result.multiplier && result.multiplier > 1 && result.originalScore ? (
-              <>
-                {/* Show multiplier calculation */}
-                <p className="text-xl text-text-muted mb-2">
-                  Dein Score: {result.originalScore} × <span className="text-primary">{result.multiplier}x</span> =
-                </p>
-                <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
-                  {result.score}
-                </p>
-                <p className="text-xl text-text-muted mt-2">Punkte! 🏆</p>
-              </>
-            ) : (
-              <>
-                <p className="text-xl text-text-muted mb-2">Dein Score:</p>
-                <p className="text-6xl sm:text-8xl font-display font-bold gold-shimmer">
-                  {result.score}
-                </p>
-                <p className="text-xl text-text-muted mt-2">Punkte!</p>
-              </>
-            )}
-          </motion.div>
+            {/* Score Display */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6 }}
+              className="my-4 sm:my-8"
+            >
+              {result.multiplier && result.multiplier > 1 && result.originalScore ? (
+                <>
+                  {/* Show multiplier calculation */}
+                  <p className="text-base sm:text-xl text-text-muted mb-1">
+                    Dein Score: {result.originalScore} × <span className="text-primary">{result.multiplier}x</span> =
+                  </p>
+                  <p className="text-5xl sm:text-7xl font-display font-bold gold-shimmer">
+                    {result.score}
+                  </p>
+                  <p className="text-base sm:text-xl text-text-muted mt-1">Punkte! 🏆</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-base sm:text-xl text-text-muted mb-1">Dein Score:</p>
+                  <p className="text-5xl sm:text-7xl font-display font-bold gold-shimmer">
+                    {result.score}
+                  </p>
+                  <p className="text-base sm:text-xl text-text-muted mt-1">Punkte!</p>
+                </>
+              )}
+            </motion.div>
 
-          {/* Rank */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mb-8"
-          >
-            <p className="text-2xl font-display text-white">
-              Du bist auf <span className="text-primary font-bold">Platz #{result.rank}</span>!
-            </p>
-          </motion.div>
+            {/* Rank */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="mb-4"
+            >
+              <p className="text-xl sm:text-2xl font-display text-white">
+                Du bist auf <span className="text-primary font-bold">Platz #{result.rank}</span>!
+              </p>
+            </motion.div>
 
-          {/* Tournament End Message */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.0 }}
-            className="mb-10 p-4 rounded-xl bg-white/[0.02] border border-surface-border"
-          >
-            <p className="text-text-muted">
-              Viel Glück! Der Gewinner wird am{' '}
-              <span className="text-white font-medium">{tournamentEndDate}</span>{' '}
-              bekannt gegeben.
-            </p>
-          </motion.div>
+            {/* Tournament End Message */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.0 }}
+              className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl bg-white/[0.02] border border-surface-border"
+            >
+              <p className="text-sm sm:text-base text-text-muted">
+                Viel Glück! Der Gewinner wird am{' '}
+                <span className="text-white font-medium">{tournamentEndDate}</span>{' '}
+                bekannt gegeben.
+              </p>
+            </motion.div>
 
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-            className="space-y-3"
-          >
+            {/* Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 }}
+              className="space-y-3"
+            >
             <Link href="/leaderboard" className="btn-primary w-full block text-center">
               Rangliste ansehen
             </Link>
@@ -340,7 +339,8 @@ export default function ScoreForm({
                 </>
               )}
             </button>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
     );
@@ -384,7 +384,20 @@ export default function ScoreForm({
         </div>
 
         {/* Form with reduced gaps and keyboard-friendly padding */}
-        <form onSubmit={handleSubmit} className="space-y-3 pb-32">
+        <form onSubmit={handleSubmit} className="space-y-3 pb-48">
+          {/* Country - first for better mobile keyboard flow */}
+          <div>
+            <label className="block text-sm font-medium text-white mb-1">
+              {t('country')}
+            </label>
+            <CountrySelect
+              value={formData.country}
+              onChange={(code) => setFormData({ ...formData, country: code })}
+              placeholder={t('countryPlaceholder')}
+              error={errors.country}
+            />
+          </div>
+
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium text-white mb-1">
@@ -427,20 +440,7 @@ export default function ScoreForm({
             )}
           </div>
 
-          {/* Country - moved up for better mobile keyboard flow */}
-          <div>
-            <label className="block text-sm font-medium text-white mb-1">
-              {t('country')}
-            </label>
-            <CountrySelect
-              value={formData.country}
-              onChange={(code) => setFormData({ ...formData, country: code })}
-              placeholder={t('countryPlaceholder')}
-              error={errors.country}
-            />
-          </div>
-
-          {/* Nickname - moved down */}
+          {/* Nickname */}
           <div>
             <label className="block text-sm font-medium text-white mb-1">
               {t('nickname')}
