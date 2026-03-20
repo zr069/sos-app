@@ -52,12 +52,6 @@
         "description": "Las 3 mejores puntuaciones se clasifican para la final en directo en Twitch. Quien aguante más tiempo gana €10.000, por transferencia o en efectivo."
       }
     },
-    "stats": {
-      "entries": "Total de participantes",
-      "daysLeft": "Días restantes",
-      "prize": "Bote del premio",
-      "countries": "Países"
-    },
     "leaderboard": {
       "title": "Clasificación en vivo",
       "rank": "Posición",

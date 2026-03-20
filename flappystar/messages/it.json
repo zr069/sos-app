@@ -52,12 +52,6 @@
         "description": "I 3 punteggi più alti si qualificano per la finale in diretta su Twitch. Chi resiste più a lungo vince €10.000, tramite bonifico o in contanti."
       }
     },
-    "stats": {
-      "entries": "Partecipanti totali",
-      "daysLeft": "Giorni rimanenti",
-      "prize": "Montepremi",
-      "countries": "Paesi"
-    },
     "leaderboard": {
       "title": "Classifica in tempo reale",
       "rank": "Posizione",

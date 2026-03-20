@@ -52,12 +52,6 @@
         "description": "Top 3 scores qualify for the live finale on Twitch. Whoever lasts longest wins €10,000, via bank transfer or cash."
       }
     },
-    "stats": {
-      "entries": "Total Entries",
-      "daysLeft": "Days Remaining",
-      "prize": "Prize Pool",
-      "countries": "Countries"
-    },
     "leaderboard": {
       "title": "Live Leaderboard",
       "rank": "Rank",

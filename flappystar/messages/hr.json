@@ -52,12 +52,6 @@
         "description": "Tri najbolja rezultata kvalificiraju se za finale uživo na Twitchu. Tko najdulje izdrži, osvaja €10.000, doznakom ili u gotovini."
       }
     },
-    "stats": {
-      "entries": "Ukupno sudionika",
-      "daysLeft": "Preostalo dana",
-      "prize": "Nagradni fond",
-      "countries": "Zemlje"
-    },
     "leaderboard": {
       "title": "Ljestvica uživo",
       "rank": "Rang",

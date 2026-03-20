@@ -52,12 +52,6 @@
         "description": "Die drei höchsten Scores qualifizieren sich für das Live-Finale auf Twitch. Wer dort am längsten durchhält, gewinnt €10.000, per Überweisung oder in bar."
       }
     },
-    "stats": {
-      "entries": "Teilnehmer gesamt",
-      "daysLeft": "Verbleibende Tage",
-      "prize": "Preispool",
-      "countries": "Länder"
-    },
     "leaderboard": {
       "title": "Live-Rangliste",
       "rank": "Rang",

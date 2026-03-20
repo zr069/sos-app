@@ -52,12 +52,6 @@
         "description": "前3名高分将晋级Twitch直播决赛。坚持最久的人赢得€10,000，银行转账或现金领取。"
       }
     },
-    "stats": {
-      "entries": "总参赛人数",
-      "daysLeft": "剩余天数",
-      "prize": "奖金池",
-      "countries": "参赛国家"
-    },
     "leaderboard": {
       "title": "实时排行榜",
       "rank": "排名",

@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import LiveWidget from '@/components/leaderboard/LiveWidget';
-import TournamentStats from '@/components/landing/TournamentStats';
 import Accordion from '@/components/ui/Accordion';
 import StakeSelector from '@/components/landing/StakeSelector';
 import DemoPreview from '@/components/landing/DemoPreview';
@@ -157,10 +156,9 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Live Leaderboard + Stats */}
-      <section className="grid lg:grid-cols-2 gap-6 mb-16 sm:mb-24">
+      {/* Live Leaderboard */}
+      <section className="max-w-2xl mx-auto mb-16 sm:mb-24">
         <LiveWidget />
-        <TournamentStats />
       </section>
 
       {/* FAQ */}
