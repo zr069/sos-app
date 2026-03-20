@@ -13,6 +13,7 @@ interface GameValidationData {
   gameSessionToken: string;
   inputs: GameInput[];
   gameDuration: number;
+  canvasWidth?: number;
   stripeSessionId?: string;
 }
 
@@ -113,6 +114,7 @@ export default function ScoreForm({
           claimedScore: score,
           gameDurationMs: gameData.gameDuration,
           inputs: gameData.inputs,
+          canvasWidth: gameData.canvasWidth,
           fullName: formData.fullName,
           email: formData.email,
           nickname: formData.nickname,

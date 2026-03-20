@@ -517,6 +517,7 @@ export default function FlappyBird({
         claimedScore: finalScore,
         gameDuration,
         inputs: inputsRef.current,
+        canvasWidth: canvasSize.width,
       };
 
       // Store validation data for later submission with player info
@@ -525,7 +526,7 @@ export default function FlappyBird({
           valid: true, // Preliminary - actual validation happens with player info
           score: finalScore,
           ...validationData,
-        } as ValidationResult & { gameSessionToken: string; inputs: GameInput[]; gameDuration: number });
+        } as ValidationResult & { gameSessionToken: string; inputs: GameInput[]; gameDuration: number; canvasWidth: number });
       }
 
       setGameState('gameover');

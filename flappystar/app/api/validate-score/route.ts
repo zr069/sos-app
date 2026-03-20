@@ -19,6 +19,7 @@ interface ValidateScoreRequest {
   claimedScore: number;
   gameDurationMs: number;
   inputs: GameInput[];
+  canvasWidth?: number;
   fullName: string;
   email: string;
   nickname: string;
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       claimedScore,
       gameDurationMs,
       inputs,
+      canvasWidth,
       fullName,
       email,
       nickname,
@@ -369,7 +371,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 4: Replay game to validate score
-    const validation = validateScore(inputs || [], gameDurationMs, claimedScore);
+    const validation = validateScore(inputs || [], gameDurationMs, claimedScore, canvasWidth);
 
     if (!validation.valid) {
       console.log('[validate-score] Validation failed:', validation.reason);

@@ -58,7 +58,8 @@ interface ReplayResult {
  */
 export function replayGame(
   inputs: GameInput[],
-  gameDurationMs: number
+  gameDurationMs: number,
+  canvasWidth?: number
 ): ReplayResult {
   // Fallback if gameDurationMs is undefined/invalid
   if (!gameDurationMs || gameDurationMs <= 0) {
@@ -79,7 +80,8 @@ export function replayGame(
   let inputIndex = 0;
 
   // Canvas dimensions for pipe spawning (matches client)
-  const canvasWidth = G.CANVAS_WIDTH;
+  // Use client-reported canvas width if provided (handles responsive layouts)
+  canvasWidth = (canvasWidth && canvasWidth > 0) ? Math.min(canvasWidth, 600) : G.CANVAS_WIDTH;
 
   // Simulate at 60fps
   const FRAME_MS = G.FRAME_MS; // ~16.67ms
@@ -223,7 +225,8 @@ export function replayGame(
 export function validateScore(
   inputs: GameInput[],
   gameDurationMs: number,
-  claimedScore: number
+  claimedScore: number,
+  canvasWidth?: number
 ): {
   valid: boolean;
   serverScore: number;
@@ -297,14 +300,27 @@ export function validateScore(
   //   };
   // }
 
-  // Replay disabled - canvas size mismatch between client and server
-  // Client uses variable canvasSize.width (300-500px), server uses hardcoded values
-  // Protected by: Stripe payment, one-time session token, input count checks, bot detection
-  console.log('[validate-score] Accepting score:', claimedScore, 'inputs:', inputs.length);
+  // Replay the game server-side to compute the real score
+  const replay = replayGame(inputs, gameDurationMs, canvasWidth);
+  const serverScore = replay.score;
+
+  // Allow a small tolerance (±2 points) for floating point timing differences
+  const tolerance = 2;
+  if (claimedScore > serverScore + tolerance) {
+    console.log('[validate-score] Replay mismatch:', { claimedScore, serverScore });
+    return {
+      valid: false,
+      serverScore,
+      reason: `Score mismatch: claimed ${claimedScore} but replay got ${serverScore}`,
+      flags: [...flags, `replay_mismatch_${claimedScore}_vs_${serverScore}`],
+    };
+  }
+
+  console.log('[validate-score] Replay accepted:', { claimedScore, serverScore, inputs: inputs.length });
 
   return {
     valid: true,
-    serverScore: claimedScore,
+    serverScore,
     flags,
   };
 }

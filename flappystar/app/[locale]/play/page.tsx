@@ -13,6 +13,7 @@ interface GameValidationData extends ValidationResult {
   gameSessionToken: string;
   inputs: GameInput[];
   gameDuration: number;
+  canvasWidth?: number;
   stripeSessionId?: string;
 }
 
@@ -75,13 +76,14 @@ function PlayContent() {
     return null;
   }
 
-  const handleValidationComplete = (result: ValidationResult & { gameSessionToken?: string; inputs?: GameInput[]; gameDuration?: number }) => {
+  const handleValidationComplete = (result: ValidationResult & { gameSessionToken?: string; inputs?: GameInput[]; gameDuration?: number; canvasWidth?: number }) => {
     setFinalScore(result.score);
     setGameData({
       ...result,
       gameSessionToken: result.gameSessionToken || '',
       inputs: result.inputs || [],
       gameDuration: result.gameDuration || 0,
+      canvasWidth: result.canvasWidth,
       stripeSessionId: sessionId || undefined,
     } as GameValidationData);
     setGameOver(true);
