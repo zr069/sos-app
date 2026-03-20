@@ -448,7 +448,7 @@ const validationAttemptsByIP = new Map<string, { count: number; resetAt: number 
 export function checkValidationRateLimit(ip: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const windowMs = 10 * 60 * 1000; // 10 minutes
-  const maxAttempts = 3;
+  const maxAttempts = 10;
 
   const record = validationAttemptsByIP.get(ip);
 
