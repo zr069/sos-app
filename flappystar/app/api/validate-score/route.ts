@@ -4,6 +4,9 @@ import {
   markGameSessionUsed,
   submitScore,
   logCheatAttempt,
+  hasExistingTournamentEntry,
+  checkValidationRateLimit,
+  cleanupRateLimitRecords,
 } from '@/lib/supabase';
 import { verifyStripeSession } from '@/lib/stripe';
 import { getClientIP } from '@/lib/ratelimit';
@@ -31,7 +34,20 @@ interface ValidateScoreRequest {
 export async function POST(request: NextRequest) {
   const ip = getClientIP(request);
 
+  // Cleanup old rate limit records occasionally
+  if (Math.random() < 0.1) cleanupRateLimitRecords();
+
   try {
+    // SECURITY: Rate limit by IP - max 3 attempts per 10 minutes
+    const rateLimit = checkValidationRateLimit(ip);
+    if (!rateLimit.allowed) {
+      console.log('[validate-score] Rate limit exceeded for IP:', ip);
+      return NextResponse.json(
+        { error: 'Too many attempts. Please wait before trying again.' },
+        { status: 429 }
+      );
+    }
+
     const body: ValidateScoreRequest = await request.json();
 
     const {
@@ -57,6 +73,16 @@ export async function POST(request: NextRequest) {
     if (!gameSessionToken || !stripeSessionId || claimedScore === undefined) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Check if score already submitted for this stripe session
+    const alreadySubmitted = await hasExistingTournamentEntry(stripeSessionId);
+    if (alreadySubmitted) {
+      console.log('[validate-score] Score already submitted for this payment:', stripeSessionId.slice(0, 20));
+      return NextResponse.json(
+        { error: 'Score already submitted for this payment' },
         { status: 400 }
       );
     }

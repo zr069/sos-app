@@ -3,7 +3,8 @@ import { getStripe } from '@/lib/stripe';
 import { GAME_CONSTANTS } from '@/lib/gameConstants';
 import {
   createServerClient,
-  getActiveGameSessionForStripe,
+  getAnyGameSessionForStripe,
+  getGameSessionRequestCount,
   deleteExpiredGameSessions,
 } from '@/lib/supabase';
 
@@ -75,17 +76,46 @@ export async function GET(request: NextRequest) {
     // Clean up expired sessions first
     await deleteExpiredGameSessions(stripeSessionId);
 
-    // FIX 1: Check if stripe session already has an active game token
-    const existingSession = await getActiveGameSessionForStripe(stripeSessionId);
-    if (existingSession) {
-      console.log('[game-session] Session already has active token:', {
-        existingToken: existingSession.token.slice(0, 8),
-        expiresAt: existingSession.expires_at,
+    // SECURITY: Rate limiting - max 2 requests per stripe session
+    const requestCount = await getGameSessionRequestCount(stripeSessionId);
+    if (requestCount >= 2) {
+      console.log('[game-session] Rate limit exceeded:', { stripeSessionId: stripeSessionId.slice(0, 20), requestCount });
+      return NextResponse.json(
+        { error: 'Too many requests for this payment' },
+        { status: 429 }
+      );
+    }
+
+    // SECURITY: Check if stripe session already has ANY token (used or unused)
+    const { session: existingSession, hasUsedSession } = await getAnyGameSessionForStripe(stripeSessionId);
+
+    if (hasUsedSession) {
+      // Payment already used - reject completely
+      console.log('[game-session] Payment already used:', {
+        stripeSessionId: stripeSessionId.slice(0, 20),
       });
       return NextResponse.json(
-        { error: 'Session already has active game token' },
-        { status: 409 }
+        { error: 'This payment has already been used' },
+        { status: 400 }
       );
+    }
+
+    if (existingSession) {
+      // Has unused token - check if still valid
+      const isExpired = new Date(existingSession.expires_at) < new Date();
+      if (!isExpired) {
+        // Return existing valid token instead of creating new one
+        console.log('[game-session] Returning existing token:', {
+          existingToken: existingSession.token.slice(0, 8),
+          expiresAt: existingSession.expires_at,
+        });
+        return NextResponse.json({
+          token: existingSession.token,
+          serverTime: Date.now(),
+          expiresAt: existingSession.expires_at,
+        });
+      }
+      // Token expired, will create new one below
     }
 
     // Generate token and store in database (REQUIRED)

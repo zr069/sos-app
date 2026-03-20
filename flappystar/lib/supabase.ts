@@ -366,6 +366,117 @@ export async function getActiveGameSessionForStripe(
 }
 
 /**
+ * SECURITY: Check if stripe session has ANY game session (used or unused)
+ * Prevents replay attacks where user tries to get multiple tokens
+ */
+export async function getAnyGameSessionForStripe(
+  stripeSessionId: string
+): Promise<{ session: GameSession | null; hasUsedSession: boolean }> {
+  const supabase = createServerClient();
+
+  // Get the most recent session for this stripe_session_id
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .select('*')
+    .eq('stripe_session_id', stripeSessionId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  if (!data) {
+    return { session: null, hasUsedSession: false };
+  }
+
+  return {
+    session: data,
+    hasUsedSession: data.used === true,
+  };
+}
+
+/**
+ * SECURITY: Check if tournament entry exists for this stripe session
+ */
+export async function hasExistingTournamentEntry(
+  stripeSessionId: string
+): Promise<boolean> {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from('tournament_entries')
+    .select('id')
+    .eq('stripe_session_id', stripeSessionId)
+    .limit(1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+
+  return !!data;
+}
+
+/**
+ * SECURITY: Get request count for a stripe session (rate limiting)
+ */
+export async function getGameSessionRequestCount(
+  stripeSessionId: string
+): Promise<number> {
+  const supabase = createServerClient();
+
+  const { count, error } = await supabase
+    .from('game_sessions')
+    .select('*', { count: 'exact', head: true })
+    .eq('stripe_session_id', stripeSessionId);
+
+  if (error) {
+    console.error('Failed to get request count:', error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
+/**
+ * SECURITY: Simple in-memory rate limiter for validation attempts by IP
+ */
+const validationAttemptsByIP = new Map<string, { count: number; resetAt: number }>();
+
+export function checkValidationRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const windowMs = 10 * 60 * 1000; // 10 minutes
+  const maxAttempts = 3;
+
+  const record = validationAttemptsByIP.get(ip);
+
+  if (!record || record.resetAt < now) {
+    // New window or expired
+    validationAttemptsByIP.set(ip, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: maxAttempts - 1 };
+  }
+
+  if (record.count >= maxAttempts) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  record.count += 1;
+  return { allowed: true, remaining: maxAttempts - record.count };
+}
+
+// Cleanup old entries periodically (call this occasionally)
+export function cleanupRateLimitRecords(): void {
+  const now = Date.now();
+  for (const [ip, record] of validationAttemptsByIP.entries()) {
+    if (record.resetAt < now) {
+      validationAttemptsByIP.delete(ip);
+    }
+  }
+}
+
+/**
  * Mark a game session as used with the validated score
  */
 export async function markGameSessionUsed(
