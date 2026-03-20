@@ -5,7 +5,6 @@ import {
   submitScore,
   logCheatAttempt,
   hasExistingTournamentEntry,
-  checkValidationRateLimit,
   cleanupRateLimitRecords,
 } from '@/lib/supabase';
 import { verifyStripeSession } from '@/lib/stripe';
