@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       const stddev = Math.sqrt(variance);
 
       // Only block VERY robotic timing with MANY inputs
-      if (stddev < 8 && intervals.length > 20) {
+      if (stddev < 5 && intervals.length > 20) {
         console.log('[validate-score] Robotic timing detected:', { stddev, mean, intervalsCount: intervals.length });
         await logCheatAttempt({
           stripe_session_id: stripeSessionId,
@@ -300,15 +300,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SECURITY: Check session timing - enough time must have passed to achieve the score
-    const sessionCreatedAt = new Date(gameSession.created_at).getTime();
-    const sessionAge = Date.now() - sessionCreatedAt;
+    // SECURITY: Check gameDurationMs is enough time to achieve the score
+    // gameDurationMs is the actual game duration, not time since session was created
+    // (session is created on page load, not when game starts)
     const minTimeRequired = claimedScore * 1000; // at least 1 second per point
 
-    if (claimedScore > 0 && sessionAge < minTimeRequired) {
+    if (claimedScore > 0 && gameDurationMs < minTimeRequired) {
       console.log('[validate-score] Impossible time:', {
         claimedScore,
-        sessionAge,
+        gameDurationMs,
         minTimeRequired,
       });
       await logCheatAttempt({
