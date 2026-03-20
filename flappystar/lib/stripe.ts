@@ -66,7 +66,6 @@ export async function createCheckoutSession(
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
-    automatic_payment_methods: { enabled: true },
     line_items: [
       {
         price_data: {
