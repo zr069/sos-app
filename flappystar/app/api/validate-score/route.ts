@@ -166,6 +166,86 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // SECURITY: Bot detection - analyze timing patterns
+    if (inputs && inputs.length > 5) {
+      const intervals: number[] = [];
+      for (let i = 1; i < inputs.length; i++) {
+        intervals.push(inputs[i].timestamp - inputs[i - 1].timestamp);
+      }
+
+      // Check minimum interval (human can't tap faster than 80ms)
+      const minInterval = Math.min(...intervals);
+      if (minInterval < 80) {
+        console.log('[validate-score] Superhuman tap speed:', { minInterval });
+        await logCheatAttempt({
+          stripe_session_id: stripeSessionId,
+          game_session_token: gameSessionToken,
+          ip_address: ip,
+          claimed_score: claimedScore,
+          server_score: 0,
+          reason: 'SUPERHUMAN_SPEED',
+          flags: [`min_interval_${minInterval}ms`],
+          inputs_count: inputs.length,
+          game_duration_ms: gameDurationMs || 0,
+        });
+        return NextResponse.json(
+          { error: 'Score could not be verified' },
+          { status: 400 }
+        );
+      }
+
+      // Calculate standard deviation of intervals
+      const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      const variance = intervals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / intervals.length;
+      const stddev = Math.sqrt(variance);
+
+      // Human players have stddev > 50ms, bots have ~0ms
+      if (stddev < 30 && intervals.length > 10) {
+        console.log('[validate-score] Robotic timing detected:', { stddev, mean, intervalsCount: intervals.length });
+        await logCheatAttempt({
+          stripe_session_id: stripeSessionId,
+          game_session_token: gameSessionToken,
+          ip_address: ip,
+          claimed_score: claimedScore,
+          server_score: 0,
+          reason: 'ROBOTIC_TIMING',
+          flags: [`stddev_${stddev.toFixed(1)}ms`],
+          inputs_count: inputs.length,
+          game_duration_ms: gameDurationMs || 0,
+        });
+        return NextResponse.json(
+          { error: 'Score could not be verified' },
+          { status: 400 }
+        );
+      }
+
+      // Check for perfectly repeating patterns (e.g., alternating 150ms and 1050ms)
+      // Round intervals to nearest 50ms and count unique values
+      const roundedIntervals = intervals.map((i) => Math.round(i / 50) * 50);
+      const uniqueIntervals = new Set(roundedIntervals);
+      if (uniqueIntervals.size <= 2 && intervals.length > 10) {
+        console.log('[validate-score] Pattern attack detected:', {
+          uniqueIntervals: Array.from(uniqueIntervals),
+          intervalsCount: intervals.length,
+        });
+        await logCheatAttempt({
+          stripe_session_id: stripeSessionId,
+          game_session_token: gameSessionToken,
+          ip_address: ip,
+          claimed_score: claimedScore,
+          server_score: 0,
+          reason: 'PATTERN_DETECTED',
+          flags: [`unique_intervals_${uniqueIntervals.size}`],
+          inputs_count: inputs.length,
+          game_duration_ms: gameDurationMs || 0,
+        });
+        return NextResponse.json(
+          { error: 'Score could not be verified' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Step 2: Validate game session token exists and not expired
     const gameSession = await getGameSession(gameSessionToken);
 
@@ -192,6 +272,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // SECURITY: Mark session as used IMMEDIATELY to prevent replay attacks
+    // Even if validation fails, token cannot be reused
+    await markGameSessionUsed(gameSessionToken, 0, ['validation_in_progress']);
 
     // FIX 3: Verify token was generated for this stripe session
     if (gameSession.stripe_session_id !== stripeSessionId) {
@@ -310,12 +394,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SECURITY: Additional tolerance check - server score must be at least 50% of claimed
-    if (claimedScore > 0 && validation.serverScore < claimedScore * 0.5) {
+    // SECURITY: Additional tolerance check - server score must be at least 30% of claimed
+    if (claimedScore > 5 && validation.serverScore < claimedScore * 0.3) {
       console.log('[validate-score] Replay mismatch:', {
         claimedScore,
         serverScore: validation.serverScore,
-        tolerance: '50%',
+        tolerance: '30%',
       });
       await logCheatAttempt({
         stripe_session_id: stripeSessionId,
@@ -324,7 +408,7 @@ export async function POST(request: NextRequest) {
         claimed_score: claimedScore,
         server_score: validation.serverScore,
         reason: 'REPLAY_MISMATCH',
-        flags: ['replay_mismatch', ...validation.flags],
+        flags: [`claimed_${claimedScore}_server_${validation.serverScore}`, ...validation.flags],
         inputs_count: inputs?.length || 0,
         game_duration_ms: gameDurationMs,
       });
@@ -349,8 +433,8 @@ export async function POST(request: NextRequest) {
       flags: validation.flags,
     });
 
-    // Step 5: Mark session as used
-    await markGameSessionUsed(gameSessionToken, finalScore, validation.flags);
+    // Step 5: Update session with final validated score
+    await markGameSessionUsed(gameSessionToken, finalScore, ['validated', ...validation.flags]);
 
     // Step 7: Submit score to tournament
     const submissionResult = await submitScore({
