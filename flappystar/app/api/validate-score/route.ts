@@ -199,8 +199,8 @@ export async function POST(request: NextRequest) {
       const variance = intervals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / intervals.length;
       const stddev = Math.sqrt(variance);
 
-      // Human players have stddev > 50ms, bots have ~0ms
-      if (stddev < 30 && intervals.length > 10) {
+      // Only block VERY robotic timing with MANY inputs
+      if (stddev < 8 && intervals.length > 20) {
         console.log('[validate-score] Robotic timing detected:', { stddev, mean, intervalsCount: intervals.length });
         await logCheatAttempt({
           stripe_session_id: stripeSessionId,
@@ -221,9 +221,10 @@ export async function POST(request: NextRequest) {
 
       // Check for perfectly repeating patterns (e.g., alternating 150ms and 1050ms)
       // Round intervals to nearest 50ms and count unique values
+      // Only block if MANY inputs with only 2 unique intervals
       const roundedIntervals = intervals.map((i) => Math.round(i / 50) * 50);
       const uniqueIntervals = new Set(roundedIntervals);
-      if (uniqueIntervals.size <= 2 && intervals.length > 10) {
+      if (uniqueIntervals.size <= 2 && intervals.length > 30) {
         console.log('[validate-score] Pattern attack detected:', {
           uniqueIntervals: Array.from(uniqueIntervals),
           intervalsCount: intervals.length,
@@ -273,9 +274,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SECURITY: Mark session as used IMMEDIATELY to prevent replay attacks
-    // Even if validation fails, token cannot be reused
-    await markGameSessionUsed(gameSessionToken, 0, ['validation_in_progress']);
+    // NOTE: Session is marked as used AFTER validation completes
+    // This allows legitimate players to retry if they have connection issues
 
     // FIX 3: Verify token was generated for this stripe session
     if (gameSession.stripe_session_id !== stripeSessionId) {
@@ -394,8 +394,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SECURITY: Additional tolerance check - server score must be at least 30% of claimed
-    if (claimedScore > 5 && validation.serverScore < claimedScore * 0.3) {
+    // SECURITY: Additional tolerance check - only reject if server gets less than 10% of claimed
+    // AND score is meaningful (> 10 points)
+    if (claimedScore > 10 && validation.serverScore < claimedScore * 0.1) {
       console.log('[validate-score] Replay mismatch:', {
         claimedScore,
         serverScore: validation.serverScore,
