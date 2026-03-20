@@ -469,11 +469,11 @@ export function checkValidationRateLimit(ip: string): { allowed: boolean; remain
 // Cleanup old entries periodically (call this occasionally)
 export function cleanupRateLimitRecords(): void {
   const now = Date.now();
-  for (const [ip, record] of validationAttemptsByIP.entries()) {
+  validationAttemptsByIP.forEach((record, ip) => {
     if (record.resetAt < now) {
       validationAttemptsByIP.delete(ip);
     }
-  }
+  });
 }
 
 /**
