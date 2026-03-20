@@ -78,26 +78,26 @@ export default function CountdownTimer({
   ];
 
   return (
-    <div className={className}>
-      <p className="text-text-muted text-sm mb-3 text-center">{t('title')}</p>
-      <div className="flex items-center justify-center gap-2 sm:gap-4">
+    <div className={`w-full px-4 max-w-lg mx-auto ${className}`}>
+      <p className="text-text-muted text-xs sm:text-sm mb-3 text-center">{t('title')}</p>
+      <div className="flex items-center justify-center gap-2 sm:gap-3">
         {timeUnits.map((unit, index) => (
-          <div key={unit.label} className="flex items-center gap-2 sm:gap-4">
+          <div key={unit.label} className="flex items-center gap-1 sm:gap-2">
             <motion.div
               key={`${unit.label}-${unit.value}`}
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
-              className="glass-card px-3 sm:px-4 py-2 sm:py-3 rounded-lg min-w-[60px] sm:min-w-[80px] text-center"
+              className="glass-card p-2 sm:p-4 rounded-lg min-w-[52px] sm:min-w-[72px] text-center"
             >
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white">
+              <div className="text-2xl sm:text-4xl font-display font-bold text-white">
                 {unit.value.toString().padStart(2, '0')}
               </div>
-              <div className="text-xs text-text-muted uppercase tracking-wider">
+              <div className="text-[10px] sm:text-sm text-text-muted uppercase tracking-wider">
                 {unit.label}
               </div>
             </motion.div>
             {index < timeUnits.length - 1 && (
-              <span className="text-2xl sm:text-3xl font-bold text-text-muted">
+              <span className="text-xl sm:text-3xl font-bold text-text-muted">
                 :
               </span>
             )}
