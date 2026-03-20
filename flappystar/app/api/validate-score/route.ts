@@ -116,10 +116,52 @@ export async function POST(request: NextRequest) {
     //   );
     // }
 
-    // Step 1: Check score is valid range (0-999)
-    if (claimedScore < 0 || claimedScore >= 1000) {
+    // SECURITY: Hard cap score at 500 (realistic max)
+    if (claimedScore < 0 || claimedScore > 500) {
+      console.log('[validate-score] Score out of range:', claimedScore);
       return NextResponse.json(
-        { error: 'Invalid score' },
+        { error: 'Score could not be verified' },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Check gameDurationMs is realistic (at least 800ms per point)
+    if (claimedScore > 0 && (!gameDurationMs || gameDurationMs < claimedScore * 800)) {
+      console.log('[validate-score] Invalid duration:', { claimedScore, gameDurationMs, minRequired: claimedScore * 800 });
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: 0,
+        reason: 'INVALID_DURATION',
+        flags: ['invalid_duration'],
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs || 0,
+      });
+      return NextResponse.json(
+        { error: 'Score could not be verified' },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Check inputs array has reasonable count (at least 0.3 inputs per point)
+    const minInputsRequired = Math.max(1, Math.floor(claimedScore * 0.3));
+    if (claimedScore > 0 && (!inputs || inputs.length < minInputsRequired)) {
+      console.log('[validate-score] Insufficient inputs:', { claimedScore, inputsCount: inputs?.length, minRequired: minInputsRequired });
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: 0,
+        reason: 'INSUFFICIENT_INPUTS',
+        flags: ['insufficient_inputs'],
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs || 0,
+      });
+      return NextResponse.json(
+        { error: 'Score could not be verified' },
         { status: 400 }
       );
     }
@@ -170,6 +212,34 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json(
         { error: 'Invalid game session' },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Check session timing - enough time must have passed to achieve the score
+    const sessionCreatedAt = new Date(gameSession.created_at).getTime();
+    const sessionAge = Date.now() - sessionCreatedAt;
+    const minTimeRequired = claimedScore * 1000; // at least 1 second per point
+
+    if (claimedScore > 0 && sessionAge < minTimeRequired) {
+      console.log('[validate-score] Impossible time:', {
+        claimedScore,
+        sessionAge,
+        minTimeRequired,
+      });
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: 0,
+        reason: 'IMPOSSIBLE_TIME',
+        flags: ['impossible_time'],
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs,
+      });
+      return NextResponse.json(
+        { error: 'Score could not be verified' },
         { status: 400 }
       );
     }
@@ -235,7 +305,31 @@ export async function POST(request: NextRequest) {
       });
 
       return NextResponse.json(
-        { error: 'Score validation failed', reason: validation.reason },
+        { error: 'Score could not be verified' },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Additional tolerance check - server score must be at least 50% of claimed
+    if (claimedScore > 0 && validation.serverScore < claimedScore * 0.5) {
+      console.log('[validate-score] Replay mismatch:', {
+        claimedScore,
+        serverScore: validation.serverScore,
+        tolerance: '50%',
+      });
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: validation.serverScore,
+        reason: 'REPLAY_MISMATCH',
+        flags: ['replay_mismatch', ...validation.flags],
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs,
+      });
+      return NextResponse.json(
+        { error: 'Score could not be verified' },
         { status: 400 }
       );
     }
