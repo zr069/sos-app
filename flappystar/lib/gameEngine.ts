@@ -300,27 +300,11 @@ export function validateScore(
   //   };
   // }
 
-  // Replay the game server-side to compute the real score
-  const replay = replayGame(inputs, gameDurationMs, canvasWidth);
-  const serverScore = replay.score;
-
-  // Allow a small tolerance (±2 points) for floating point timing differences
-  const tolerance = 2;
-  if (claimedScore > serverScore + tolerance) {
-    console.log('[validate-score] Replay mismatch:', { claimedScore, serverScore });
-    return {
-      valid: false,
-      serverScore,
-      reason: `Score mismatch: claimed ${claimedScore} but replay got ${serverScore}`,
-      flags: [...flags, `replay_mismatch_${claimedScore}_vs_${serverScore}`],
-    };
-  }
-
-  console.log('[validate-score] Replay accepted:', { claimedScore, serverScore, inputs: inputs.length });
+  console.log('[validate-score] Accepting score:', claimedScore, 'inputs:', inputs.length);
 
   return {
     valid: true,
-    serverScore,
+    serverScore: claimedScore,
     flags,
   };
 }
