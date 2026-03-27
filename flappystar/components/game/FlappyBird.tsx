@@ -406,6 +406,12 @@ export default function FlappyBird({
     if (mode !== 'tournament') return;
 
     const timestamp = performance.now() - gameStartTimeRef.current;
+
+    // Deduplicate: ignore if last input was less than 50ms ago
+    // Mobile fires touchstart + pointerdown simultaneously (0ms interval)
+    const lastInput = inputsRef.current[inputsRef.current.length - 1];
+    if (lastInput && timestamp - lastInput.timestamp < 50) return;
+
     inputsRef.current.push({ type: 'flap', timestamp });
   }, [mode]);
 

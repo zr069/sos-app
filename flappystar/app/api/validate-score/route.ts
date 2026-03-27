@@ -167,15 +167,22 @@ export async function POST(request: NextRequest) {
     }
 
     // SECURITY: Bot detection - analyze timing patterns
-    if (inputs && inputs.length > 5) {
+    // First, filter duplicate inputs caused by simultaneous touch events on mobile
+    // (touchstart + pointerdown fire at the same time, producing 0ms intervals)
+    const filteredInputs = inputs ? inputs.filter((input, i) => {
+      if (i === 0) return true;
+      return input.timestamp - inputs[i - 1].timestamp >= 50;
+    }) : [];
+
+    if (filteredInputs.length > 5) {
       const intervals: number[] = [];
-      for (let i = 1; i < inputs.length; i++) {
-        intervals.push(inputs[i].timestamp - inputs[i - 1].timestamp);
+      for (let i = 1; i < filteredInputs.length; i++) {
+        intervals.push(filteredInputs[i].timestamp - filteredInputs[i - 1].timestamp);
       }
 
-      // Check minimum interval (human can't tap faster than 80ms)
+      // Check minimum interval (human can't tap faster than 50ms, after dedup filtering)
       const minInterval = Math.min(...intervals);
-      if (minInterval < 80) {
+      if (minInterval < 50) {
         console.log('[validate-score] Superhuman tap speed:', { minInterval });
         await logCheatAttempt({
           stripe_session_id: stripeSessionId,
