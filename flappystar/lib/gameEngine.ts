@@ -226,6 +226,7 @@ export function validateScore(
   inputs: GameInput[],
   gameDurationMs: number,
   claimedScore: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canvasWidth?: number
 ): {
   valid: boolean;
