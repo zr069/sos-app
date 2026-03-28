@@ -125,9 +125,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SECURITY: Check gameDurationMs is realistic (at least 800ms per point)
-    if (claimedScore > 0 && (!gameDurationMs || gameDurationMs < claimedScore * 800)) {
-      console.log('[validate-score] Invalid duration:', { claimedScore, gameDurationMs, minRequired: claimedScore * 800 });
+    // SECURITY: Check gameDurationMs is realistic (at least 1500ms per point)
+    // Real game: pipes spawn every ~1.5s at base speed, gets faster at higher scores
+    if (claimedScore > 0 && (!gameDurationMs || gameDurationMs < claimedScore * 1500)) {
+      console.log('[validate-score] Invalid duration:', { claimedScore, gameDurationMs, minRequired: claimedScore * 1500 });
       await logCheatAttempt({
         stripe_session_id: stripeSessionId,
         game_session_token: gameSessionToken,
@@ -145,10 +146,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SECURITY: Check inputs array has reasonable count (at least 0.3 inputs per point)
-    const minInputsRequired = Math.max(1, Math.floor(claimedScore * 0.3));
-    if (claimedScore > 0 && (!inputs || inputs.length < minInputsRequired)) {
-      console.log('[validate-score] Insufficient inputs:', { claimedScore, inputsCount: inputs?.length, minRequired: minInputsRequired });
+    // SECURITY: Check inputs array has reasonable count (at least 1.5 flap inputs per point)
+    // Real gameplay needs ~2 flaps per pipe to navigate gaps
+    const flapCount = inputs ? inputs.filter(i => i.type === 'flap').length : 0;
+    const minInputsRequired = Math.max(1, Math.floor(claimedScore * 1.5));
+    if (claimedScore > 0 && flapCount < minInputsRequired) {
+      console.log('[validate-score] Insufficient flap inputs:', { claimedScore, flapCount, minRequired: minInputsRequired });
       await logCheatAttempt({
         stripe_session_id: stripeSessionId,
         game_session_token: gameSessionToken,
@@ -335,35 +338,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Server-side timestamp check - disabled for now
-    // const gameStartTime = new Date(gameSession.game_start_server_time).getTime();
-    // const now = Date.now();
-    // const elapsedMs = now - gameStartTime;
-    // const minimumRequiredMs = claimedScore * 1200; // 1.2 seconds per point
-    //
-    // if (claimedScore > 0 && elapsedMs < minimumRequiredMs) {
-    //   console.log('[validate-score] Score achieved too fast:', {
-    //     claimedScore,
-    //     elapsedMs,
-    //     minimumRequiredMs,
-    //     gameStartServerTime: gameSession.game_start_server_time,
-    //   });
-    //   await logCheatAttempt({
-    //     stripe_session_id: stripeSessionId,
-    //     game_session_token: gameSessionToken,
-    //     ip_address: ip,
-    //     claimed_score: claimedScore,
-    //     server_score: 0,
-    //     reason: `Score achieved too fast: ${elapsedMs}ms < ${minimumRequiredMs}ms required`,
-    //     flags: ['timestamp_hack'],
-    //     inputs_count: inputs?.length || 0,
-    //     game_duration_ms: gameDurationMs,
-    //   });
-    //   return NextResponse.json(
-    //     { error: 'Invalid game timing' },
-    //     { status: 400 }
-    //   );
-    // }
+    // SECURITY: Server-side wall-clock check
+    // The time between session creation and score submission must be >= claimed game duration
+    // A cheater who grabs a token and immediately submits can't fake this
+    const gameStartTime = new Date(gameSession.game_start_server_time).getTime();
+    const now = Date.now();
+    const elapsedMs = now - gameStartTime;
+    // Allow 5 seconds grace for network latency + page load before clicking play
+    const minimumElapsed = Math.max(0, gameDurationMs - 5000);
+
+    if (claimedScore > 0 && elapsedMs < minimumElapsed) {
+      console.log('[validate-score] Wall-clock mismatch:', {
+        claimedScore,
+        elapsedMs,
+        gameDurationMs,
+        minimumElapsed,
+      });
+      await logCheatAttempt({
+        stripe_session_id: stripeSessionId,
+        game_session_token: gameSessionToken,
+        ip_address: ip,
+        claimed_score: claimedScore,
+        server_score: 0,
+        reason: `Wall-clock mismatch: ${elapsedMs}ms elapsed but claimed ${gameDurationMs}ms game`,
+        flags: ['wallclock_hack'],
+        inputs_count: inputs?.length || 0,
+        game_duration_ms: gameDurationMs,
+      });
+      return NextResponse.json(
+        { error: 'Score could not be verified' },
+        { status: 400 }
+      );
+    }
 
     // Step 3: Verify Stripe payment is paid
     const stripeSession = await verifyStripeSession(stripeSessionId);
@@ -395,31 +401,6 @@ export async function POST(request: NextRequest) {
         game_duration_ms: gameDurationMs,
       });
 
-      return NextResponse.json(
-        { error: 'Score could not be verified' },
-        { status: 400 }
-      );
-    }
-
-    // SECURITY: Additional tolerance check - only reject if server gets less than 10% of claimed
-    // AND score is meaningful (> 10 points)
-    if (claimedScore > 10 && validation.serverScore < claimedScore * 0.1) {
-      console.log('[validate-score] Replay mismatch:', {
-        claimedScore,
-        serverScore: validation.serverScore,
-        tolerance: '30%',
-      });
-      await logCheatAttempt({
-        stripe_session_id: stripeSessionId,
-        game_session_token: gameSessionToken,
-        ip_address: ip,
-        claimed_score: claimedScore,
-        server_score: validation.serverScore,
-        reason: 'REPLAY_MISMATCH',
-        flags: [`claimed_${claimedScore}_server_${validation.serverScore}`, ...validation.flags],
-        inputs_count: inputs?.length || 0,
-        game_duration_ms: gameDurationMs,
-      });
       return NextResponse.json(
         { error: 'Score could not be verified' },
         { status: 400 }
