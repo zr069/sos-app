@@ -490,23 +490,37 @@
       .nav-desktop { display: none; }
       .burger-btn { display: block; }
 
-      .hero { min-height: auto; padding: 6rem 0 3rem; }
-      .hero-content { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
-      .hero-text { max-width: 100%; margin: 0 auto; order: 1; }
+      .hero { min-height: auto; padding: 4.5rem 0 2.5rem; }
+      .hero-content {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        text-align: center;
+        align-items: center;
+      }
+      .hero-text { max-width: 100%; margin: 0 auto; order: 1; text-align: center; }
       .hero h1 { font-size: 2rem; }
       .hero-description { font-size: 1rem; margin-left: auto; margin-right: auto; }
-      .hero-ctas { flex-direction: column; gap: 0.75rem; align-items: stretch; width: 100%; }
+      .hero-ctas { flex-direction: column; gap: 0.75rem; align-items: stretch; width: 100%; justify-content: center; }
       .hero-ctas .btn-primary { width: 100%; justify-content: center; }
       .hero-ctas .text-link { justify-content: center; }
 
-      /* Phone visual: simplified, no extra devices */
-      .hero-visual { order: 2; min-height: auto; margin-top: 0; padding: 0; }
+      /* Phone visual: ALWAYS FIRST on mobile */
+      .hero-visual {
+        order: -1;
+        min-height: auto;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        padding: 0;
+        width: 100%;
+      }
       .network-wrapper {
         width: 100%; height: auto; transform: none;
         display: flex; justify-content: center; align-items: center;
       }
       .main-phone { position: static; transform: none; }
-      .phone-frame { width: 220px; height: 470px; }
+      .phone-frame { width: 180px; height: 385px; }
       .contact-device,
       .police-device,
       .connection-canvas { display: none; }
@@ -537,14 +551,14 @@
     @media (max-width: 480px) {
       html { font-size: 14px; }
 
-      .hero { padding: 5rem 0 2rem; }
+      .hero { padding: 4rem 0 2rem; }
       .hero h1 { font-size: 1.75rem; line-height: 1.2; }
       .hero-eyebrow { font-size: 0.75rem; margin-bottom: 1rem; }
       .hero-description { font-size: 0.9rem; margin-bottom: 1.5rem; }
 
-      .phone-frame { width: 200px; height: 420px; }
-      .sos-button { width: 120px; height: 120px; }
-      .sos-button-text { font-size: 22px; }
+      .phone-frame { width: 160px; height: 340px; }
+      .sos-button { width: 100px; height: 100px; }
+      .sos-button-text { font-size: 18px; }
       
       .section-eyebrow { font-size: 0.7rem; }
       .section-title { font-size: 1.5rem; }
