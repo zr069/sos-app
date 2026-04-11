@@ -361,6 +361,9 @@
     /* Canvas */
     .connection-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
 
+    /* Mobile-only animated network (hidden on desktop) */
+    .mobile-network { display: none; }
+
     /* Contact Devices */
     .contact-device {
       position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 50;
@@ -490,7 +493,7 @@
       .nav-desktop { display: none; }
       .burger-btn { display: block; }
 
-      .hero { min-height: auto; padding: 4.5rem 0 2.5rem; }
+      .hero { min-height: auto; padding: 7rem 0 2.5rem; }
       .hero-content {
         display: flex;
         flex-direction: column;
@@ -514,16 +517,231 @@
         margin-bottom: 0.5rem;
         padding: 0;
         width: 100%;
+        overflow: visible;
       }
       .network-wrapper {
-        width: 100%; height: auto; transform: none;
-        display: flex; justify-content: center; align-items: center;
+        position: relative;
+        width: 100%;
+        max-width: 360px;
+        height: 420px;
+        margin: 0 auto;
+        transform: none;
+        display: block;
       }
-      .main-phone { position: static; transform: none; }
-      .phone-frame { width: 180px; height: 385px; }
+
+      /* Hide desktop canvas/contact/police animation on mobile */
       .contact-device,
       .police-device,
-      .connection-canvas { display: none; }
+      .connection-canvas { display: none !important; }
+
+      /* Main phone: absolute center, shifts left on animation */
+      .main-phone {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .phone-frame { width: 170px; height: 360px; }
+
+      /* Mobile network: 3 contact phones + connecting lines */
+      .mobile-network {
+        display: block;
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .mobile-lines {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+      .mobile-lines .mline {
+        fill: none;
+        stroke: rgba(196, 30, 58, 0.85);
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-dasharray: 260;
+        stroke-dashoffset: 260;
+        filter: drop-shadow(0 0 6px rgba(196, 30, 58, 0.45));
+        transition: stroke 0.4s;
+      }
+
+      .mobile-contact {
+        position: absolute;
+        right: 12px;
+        width: 72px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        opacity: 0;
+        transform: translateX(40px);
+        transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .mobile-contact[data-id="1"] { top: 16px; }
+      .mobile-contact[data-id="2"] { top: 50%; transform: translate(40px, -50%); }
+      .mobile-contact[data-id="3"] { bottom: 16px; }
+
+      .mc-phone {
+        width: 54px;
+        height: 96px;
+        background: #fff;
+        border-radius: 11px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        transition: background 0.4s, box-shadow 0.4s;
+      }
+      .mc-phone::before {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 16px;
+        height: 3px;
+        background: var(--gray-200);
+        border-radius: 2px;
+      }
+      .mc-phone svg {
+        width: 22px;
+        height: 22px;
+        stroke: var(--gray-300);
+        stroke-width: 1.5;
+        fill: none;
+        transition: stroke 0.4s;
+      }
+      .mc-check {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 22px;
+        height: 22px;
+        background: #10b981;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0);
+        transition: opacity 0.4s, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.5);
+      }
+      .mc-check svg {
+        width: 12px;
+        height: 12px;
+        stroke: #fff;
+        stroke-width: 3;
+        fill: none;
+      }
+      .mc-name {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--gray-500);
+        transition: color 0.3s;
+      }
+
+      /* PHASE 1 - Shift main phone left, fade contacts in */
+      .network-wrapper.mphase-shift .main-phone {
+        transform: translate(-92%, -50%);
+      }
+      .network-wrapper.mphase-shift .mobile-contact[data-id="1"],
+      .network-wrapper.mphase-shift .mobile-contact[data-id="3"] {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .network-wrapper.mphase-shift .mobile-contact[data-id="2"] {
+        opacity: 1;
+        transform: translate(0, -50%);
+      }
+      .network-wrapper.mphase-shift .mobile-contact[data-id="1"] { transition-delay: 0.1s; }
+      .network-wrapper.mphase-shift .mobile-contact[data-id="2"] { transition-delay: 0.2s; }
+      .network-wrapper.mphase-shift .mobile-contact[data-id="3"] { transition-delay: 0.3s; }
+
+      /* PHASE 2 - Draw connecting lines (staggered) */
+      .network-wrapper.mphase-connect .mline-1 {
+        animation: mDrawLine 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
+      }
+      .network-wrapper.mphase-connect .mline-2 {
+        animation: mDrawLine 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+      }
+      .network-wrapper.mphase-connect .mline-3 {
+        animation: mDrawLine 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+      }
+      @keyframes mDrawLine {
+        0% { stroke-dashoffset: 260; opacity: 0.6; }
+        100% { stroke-dashoffset: 0; opacity: 1; }
+      }
+
+      /* Moving pulse dot along each line */
+      .mpulse {
+        fill: #fff;
+        stroke: var(--red);
+        stroke-width: 2;
+        opacity: 0;
+        filter: drop-shadow(0 0 8px rgba(196, 30, 58, 0.9));
+      }
+      .network-wrapper.mphase-connect .mpulse-1 {
+        animation: mPulseTravel1 0.8s ease-out 0.1s forwards;
+      }
+      .network-wrapper.mphase-connect .mpulse-2 {
+        animation: mPulseTravel2 0.8s ease-out 0.3s forwards;
+      }
+      .network-wrapper.mphase-connect .mpulse-3 {
+        animation: mPulseTravel3 0.8s ease-out 0.5s forwards;
+      }
+      @keyframes mPulseTravel1 {
+        0%   { opacity: 0; cx: 195; cy: 210; }
+        15%  { opacity: 1; }
+        85%  { opacity: 1; }
+        100% { opacity: 0; cx: 312; cy: 64; }
+      }
+      @keyframes mPulseTravel2 {
+        0%   { opacity: 0; cx: 195; cy: 210; }
+        15%  { opacity: 1; }
+        85%  { opacity: 1; }
+        100% { opacity: 0; cx: 312; cy: 210; }
+      }
+      @keyframes mPulseTravel3 {
+        0%   { opacity: 0; cx: 195; cy: 210; }
+        15%  { opacity: 1; }
+        85%  { opacity: 1; }
+        100% { opacity: 0; cx: 312; cy: 336; }
+      }
+
+      /* PHASE 3 - Success: contacts glow green + checkmarks */
+      .network-wrapper.mphase-success .mline {
+        stroke: rgba(16, 185, 129, 0.9);
+        filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.55));
+      }
+      .network-wrapper.mphase-success .mobile-contact .mc-phone {
+        background: #10b981;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45), 0 0 25px rgba(16, 185, 129, 0.35);
+      }
+      .network-wrapper.mphase-success .mobile-contact .mc-phone::before {
+        background: rgba(255, 255, 255, 0.4);
+      }
+      .network-wrapper.mphase-success .mobile-contact .mc-phone svg {
+        stroke: #fff;
+      }
+      .network-wrapper.mphase-success .mobile-contact .mc-check {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .network-wrapper.mphase-success .mobile-contact .mc-name {
+        color: #10b981;
+        font-weight: 600;
+      }
+      .network-wrapper.mphase-success .mobile-contact[data-id="1"] .mc-check { transition-delay: 0s; }
+      .network-wrapper.mphase-success .mobile-contact[data-id="2"] .mc-check { transition-delay: 0.12s; }
+      .network-wrapper.mphase-success .mobile-contact[data-id="3"] .mc-check { transition-delay: 0.24s; }
 
       .container { padding: 0 1rem; }
       section { padding: 4rem 0; }
@@ -551,14 +769,17 @@
     @media (max-width: 480px) {
       html { font-size: 14px; }
 
-      .hero { padding: 4rem 0 2rem; }
+      .hero { padding: 6.5rem 0 2rem; }
       .hero h1 { font-size: 1.75rem; line-height: 1.2; }
       .hero-eyebrow { font-size: 0.75rem; margin-bottom: 1rem; }
       .hero-description { font-size: 0.9rem; margin-bottom: 1.5rem; }
 
-      .phone-frame { width: 160px; height: 340px; }
-      .sos-button { width: 100px; height: 100px; }
+      .network-wrapper { max-width: 320px; height: 390px; }
+      .phone-frame { width: 155px; height: 330px; }
+      .sos-button { width: 95px; height: 95px; }
       .sos-button-text { font-size: 18px; }
+      .mobile-contact { width: 64px; right: 8px; }
+      .mc-phone { width: 48px; height: 86px; }
       
       .section-eyebrow { font-size: 0.7rem; }
       .section-title { font-size: 1.5rem; }
@@ -663,6 +884,42 @@
                 <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               </div>
               <span class="police-name">Polizei 110</span>
+            </div>
+
+            <!-- Mobile-only animated network (hidden on desktop via CSS) -->
+            <div class="mobile-network" id="mobileNetwork" aria-hidden="true">
+              <svg class="mobile-lines" viewBox="0 0 360 420" preserveAspectRatio="none">
+                <path class="mline mline-1" d="M 195 210 Q 255 130 312 64"/>
+                <path class="mline mline-2" d="M 195 210 L 312 210"/>
+                <path class="mline mline-3" d="M 195 210 Q 255 285 312 336"/>
+                <circle class="mpulse mpulse-1" r="4" cx="195" cy="210"/>
+                <circle class="mpulse mpulse-2" r="4" cx="195" cy="210"/>
+                <circle class="mpulse mpulse-3" r="4" cx="195" cy="210"/>
+              </svg>
+
+              <div class="mobile-contact" data-id="1">
+                <div class="mc-phone">
+                  <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <div class="mc-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+                <span class="mc-name">Mama</span>
+              </div>
+
+              <div class="mobile-contact" data-id="2">
+                <div class="mc-phone">
+                  <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <div class="mc-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+                <span class="mc-name">Papa</span>
+              </div>
+
+              <div class="mobile-contact" data-id="3">
+                <div class="mc-phone">
+                  <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <div class="mc-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+                <span class="mc-name">Partner</span>
+              </div>
             </div>
 
             <div class="main-phone">
@@ -822,6 +1079,8 @@
     const phoneStatus = document.getElementById('phoneStatus');
     const policeToggle = document.getElementById('policeToggle');
     const policeDevice = document.getElementById('policeDevice');
+    const networkWrapper = document.querySelector('.network-wrapper');
+    const mobileQuery = window.matchMedia('(max-width: 768px)');
     const contacts = [
       document.getElementById('contact1'),
       document.getElementById('contact2'),
@@ -892,6 +1151,25 @@
       sosStatus.classList.add('active');
       phoneStatus.textContent = 'Verbinde...';
       phoneStatus.classList.add('visible');
+
+      if (mobileQuery.matches) {
+        // ===== MOBILE ANIMATION =====
+        await sleep(300);
+        // Phase 1: Shift main phone left, fade in contacts
+        networkWrapper.classList.add('mphase-shift');
+        await sleep(750);
+        // Phase 2: Draw connecting lines with pulse dots
+        phoneStatus.textContent = 'Sende Alarm...';
+        networkWrapper.classList.add('mphase-connect');
+        await sleep(1400);
+        // Phase 3: Success glow + checkmarks
+        networkWrapper.classList.add('mphase-success');
+        await sleep(400);
+        showSuccess();
+        return;
+      }
+
+      // ===== DESKTOP ANIMATION =====
       await sleep(400);
       contacts.forEach((c, i) => {
         setTimeout(() => {
@@ -966,6 +1244,7 @@
       phoneStatus.classList.remove('visible');
       contacts.forEach(c => c.classList.remove('visible', 'alerted'));
       policeDevice.classList.remove('visible', 'alerted');
+      networkWrapper.classList.remove('mphase-shift', 'mphase-connect', 'mphase-success');
       lines = [];
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       isAnimating = false;
