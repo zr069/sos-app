@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datenschutz – SOS App</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --white: #FFFFFF;
+      --off-white: #FAFAF9;
+      --cream: #F5F5F0;
+      --black: #0D0D0D;
+      --gray-900: #1A1A1A;
+      --gray-700: #404040;
+      --gray-500: #737373;
+      --gray-400: #999999;
+      --gray-100: #E8E8E8;
+      --red: #C41E3A;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--off-white);
+      color: var(--gray-900);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== GLOBAL HEADER - IDENTICAL ON ALL PAGES ========== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.25rem 0;
+      background: rgba(250, 250, 249, 0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--black);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .back-link {
+      color: var(--gray-500);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--black); }
+
+    /* Content */
+    main {
+      flex: 1;
+      padding: 7rem 0 4rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      color: var(--black);
+    }
+
+    h1 em {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .last-updated {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--black);
+      margin: 2.5rem 0 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--gray-100);
+    }
+
+    h2:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--gray-700);
+    }
+
+    ul {
+      margin: 0.75rem 0 1rem 1.5rem;
+      color: var(--gray-700);
+    }
+
+    li { margin-bottom: 0.5rem; }
+
+    a {
+      color: var(--red);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+
+    .contact-box {
+      background: var(--cream);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin: 1.5rem 0;
+    }
+
+    .contact-box p { margin-bottom: 0.25rem; }
+
+    /* Footer */
+    footer {
+      padding: 2rem 0;
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+    }
+
+    .footer-copy {
+      font-size: 0.8125rem;
+      color: var(--gray-400);
+    }
+
+    @media (max-width: 768px) {
+      .footer-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-mark">SOS</span> SOS App</a>
+      <a href="index.html" class="back-link">← Zurück zur Startseite</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1>Datenschutzerklärung</h1>
+      <p class="last-updated">Stand: April 2026</p>
+
+      <h2>I. Verantwortlicher gemäß Art. 4 Nr. 7 DSGVO</h2>
+      
+      <div class="contact-box">
+        <p><strong>Devory IT GmbH</strong></p>
+        <p>Frankfurter Straße 84</p>
+        <p>65779 Kelkheim (Taunus)</p>
+        <p>Deutschland</p>
+        <p style="margin-top: 1rem;">Telefon: +49 6195 9199670</p>
+        <p>E-Mail: <a href="mailto:info@devory.it">info@devory.it</a></p>
+      </div>
+
+      <h2>II. Allgemeines zur Datenverarbeitung</h2>
+      
+      <h3>1. Umfang der Datenverarbeitung</h3>
+      <p>Die Verarbeitung personenbezogener Daten erfolgt grundsätzlich nur, um die Bereitstellung einer funktionsfähigen Internetseite unter SOS-App.io sowie der SOS App zu ermöglichen. Im Notfall werden Daten an die von Ihnen hinterlegten Notfallkontakte übermittelt – dies ist der Kernzweck der App.</p>
+
+      <h3>2. Rechtsgrundlagen</h3>
+      <p>Die Verarbeitung Ihrer Daten erfolgt auf Grundlage von:</p>
+      <ul>
+        <li>Art. 6 Abs. 1 lit. a DSGVO (Einwilligung)</li>
+        <li>Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)</li>
+        <li>Art. 6 Abs. 1 lit. c DSGVO (rechtliche Verpflichtung)</li>
+        <li>Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)</li>
+        <li>Art. 6 Abs. 1 lit. d DSGVO (lebenswichtige Interessen – im Notfall)</li>
+      </ul>
+
+      <h3>3. Datenlöschung und Speicherdauer</h3>
+      <p>Personenbezogene Daten werden gelöscht, sobald der Speicherungszweck entfällt. Notfall-Protokolle werden 30 Tage aufbewahrt.</p>
+
+      <h2>III. Nutzung der Webseite SOS-App.io</h2>
+
+      <h3>1. Server-Logfiles</h3>
+      <p>Beim Aufruf unserer Internetseite erfasst unser System automatisiert Informationen vom Computersystem des aufrufenden Rechners. Es werden nur anonymisierte IP-Adressen gespeichert. Backups werden 14 Tage verschlüsselt aufbewahrt.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).</em></p>
+
+      <h3>2. Cookies</h3>
+      <p>Zur Darstellung unserer Website können technisch notwendige Cookies eingesetzt werden. Wir setzen keine Cookies zu Werbezwecken ein.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</em></p>
+
+      <h3>3. Hosting</h3>
+      <p>Die Website wird bei Vercel Inc. gehostet. Vercel kann Daten in den USA verarbeiten. Es besteht ein Angemessenheitsbeschluss der EU-Kommission.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</em></p>
+
+      <h3>4. Schriftarten</h3>
+      <p>Schriftarten werden über Google Fonts geladen. Dabei wird Ihre IP-Adresse an Google übermittelt. Weitere Informationen finden Sie in der <a href="https://policies.google.com/privacy" target="_blank">Google Datenschutzerklärung</a>.</p>
+
+      <h2>IV. Nutzung der SOS App</h2>
+
+      <h3>1. Erhobene Daten bei Kontoerstellung</h3>
+      
+      <p><strong>a) Kontodaten</strong></p>
+      <p>E-Mail-Adresse oder Anmeldung über Google-/Apple-Account zur Erstellung und Verwaltung des Benutzerkontos.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).</em></p>
+
+      <p><strong>b) Name und Foto</strong></p>
+      <p>Ihr Name und ein Foto werden erhoben, damit Sie im Notfall von Ihren Kontakten und ggf. Rettungskräften identifiziert werden können.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO sowie Art. 6 Abs. 1 lit. d DSGVO (lebenswichtige Interessen).</em></p>
+
+      <p><strong>c) Notfallkontakte</strong></p>
+      <p>Sie hinterlegen die Telefonnummern Ihrer Notfallkontakte. Diese Personen erhalten im Notfall eine Benachrichtigung mit Ihrem Standort.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</em></p>
+
+      <h3>2. Standortdaten (GPS)</h3>
+      <p>Bei Auslösen eines Notfalls wird Ihr GPS-Standort erfasst und an Ihre Notfallkontakte übermittelt. Der Live-Standort wird während eines aktiven Notfalls kontinuierlich aktualisiert.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) sowie Art. 6 Abs. 1 lit. d DSGVO (lebenswichtige Interessen im Notfall).</em></p>
+
+      <h3>3. Polizei-Option</h3>
+      <p>Wenn aktiviert, werden im Notfall Ihre Daten (Name, Foto, Standort) für einen vorbereiteten Notruf bereitgestellt. Es erfolgt keine automatische Übermittlung an die Polizei – der Anruf muss von Ihnen bestätigt werden.</p>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).</em></p>
+
+      <h3>4. Premium-Funktionen</h3>
+      <p>Bei Nutzung von Premium-Funktionen können zusätzliche Daten erhoben werden:</p>
+      <ul>
+        <li><strong>Crash Detection:</strong> Bewegungsdaten des Beschleunigungssensors (lokal verarbeitet)</li>
+        <li><strong>Flüster-Modus:</strong> Audio wird lokal transkribiert und als Text versendet</li>
+        <li><strong>Cloud-Historie:</strong> Vergangene Notfälle werden verschlüsselt gespeichert</li>
+      </ul>
+      <p><em>Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).</em></p>
+
+      <h3>5. Datenspeicherung</h3>
+      <p>Die erhobenen Daten werden auf Servern der Hetzner Online GmbH in Deutschland gespeichert. Es besteht ein Auftragsverarbeitungsvertrag gemäß Art. 28 DSGVO. Die Daten verlassen nicht die Europäische Union.</p>
+
+      <h3>6. Zahlungsabwicklung</h3>
+      <p>Die Zahlungsabwicklung erfolgt über Apple (App Store) bzw. Google (Play Store). Wir erhalten keine Zahlungsdaten wie Kreditkartennummern.</p>
+
+      <h3>7. Kontolöschung</h3>
+      <p>Sie können Ihr Konto jederzeit in der App unter Einstellungen → Konto löschen entfernen. Ihre Daten werden nach 30 Tagen endgültig gelöscht. Innerhalb dieser Frist kann die Löschung durch erneute Anmeldung abgebrochen werden.</p>
+
+      <h2>V. Ihre Rechte</h2>
+      <p>Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:</p>
+      <ul>
+        <li><strong>Auskunftsrecht</strong> (Art. 15 DSGVO)</li>
+        <li><strong>Recht auf Berichtigung</strong> (Art. 16 DSGVO)</li>
+        <li><strong>Recht auf Löschung</strong> (Art. 17 DSGVO)</li>
+        <li><strong>Recht auf Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO)</li>
+        <li><strong>Recht auf Datenübertragbarkeit</strong> (Art. 20 DSGVO)</li>
+        <li><strong>Widerspruchsrecht</strong> (Art. 21 DSGVO)</li>
+        <li><strong>Recht auf Widerruf der Einwilligung</strong></li>
+        <li><strong>Recht auf Beschwerde bei einer Aufsichtsbehörde</strong></li>
+      </ul>
+
+      <p>Zur Ausübung Ihrer Rechte kontaktieren Sie uns unter <a href="mailto:info@devory.it">info@devory.it</a>.</p>
+
+      <h2>VI. Änderungen dieser Datenschutzerklärung</h2>
+      <p>Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf anzupassen, um sie an geänderte Rechtslagen oder Änderungen der App anzupassen. Die aktuelle Version finden Sie stets auf dieser Seite.</p>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="kontakt.html">Kontakt</a>
+      </div>
+      <p class="footer-copy">© 2026 SOS-App.io – Devory IT GmbH</p>
+    </div>
+  </footer>
+
+</body>
+</html>

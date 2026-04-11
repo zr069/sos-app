@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontakt – SOS App</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --white: #FFFFFF;
+      --off-white: #FAFAF9;
+      --cream: #F5F5F0;
+      --black: #0D0D0D;
+      --gray-900: #1A1A1A;
+      --gray-700: #404040;
+      --gray-500: #737373;
+      --gray-400: #999999;
+      --gray-300: #B3B3B3;
+      --gray-200: #D4D4D4;
+      --gray-100: #E8E8E8;
+      --red: #C41E3A;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--off-white);
+      color: var(--gray-900);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== GLOBAL HEADER - IDENTICAL ON ALL PAGES ========== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.25rem 0;
+      background: rgba(250, 250, 249, 0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--black);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .back-link {
+      color: var(--gray-500);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--black); }
+
+    /* Content */
+    main {
+      flex: 1;
+      padding: 8rem 0 5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .contact-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 4rem;
+    }
+
+    .contact-header h1 {
+      font-size: 2.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      color: var(--black);
+    }
+
+    .contact-header h1 em {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .contact-header p {
+      font-size: 1.125rem;
+      color: var(--gray-500);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .info-card {
+      background: var(--white);
+      padding: 1.75rem;
+      border-radius: 16px;
+      border: 1px solid var(--gray-100);
+      transition: all 0.3s;
+    }
+
+    .info-card:hover {
+      border-color: var(--gray-200);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+    }
+
+    .info-card-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--cream);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .info-card-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--gray-700);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .info-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--black);
+      margin-bottom: 0.5rem;
+    }
+
+    .info-card p {
+      color: var(--gray-500);
+      font-size: 0.9375rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-card a {
+      color: var(--red);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .info-card a:hover { color: var(--black); }
+
+    .contact-form-wrapper {
+      background: var(--white);
+      padding: 2.5rem;
+      border-radius: 20px;
+      border: 1px solid var(--gray-100);
+    }
+
+    .contact-form-wrapper h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--black);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      background: var(--off-white);
+      color: var(--gray-900);
+      transition: all 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--black);
+      background: var(--white);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--gray-300);
+    }
+
+    .form-group textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 500;
+      font-family: inherit;
+      text-decoration: none;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: var(--gray-700);
+      transform: translateY(-1px);
+    }
+
+    .form-note {
+      font-size: 0.8125rem;
+      color: var(--gray-400);
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .form-note a { color: var(--gray-500); }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+
+    .form-success.show { display: block; }
+
+    .form-success svg {
+      width: 64px;
+      height: 64px;
+      stroke: #10b981;
+      stroke-width: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-success h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--black);
+    }
+
+    .form-success p { color: var(--gray-500); }
+
+    /* Footer */
+    footer {
+      padding: 2rem 0;
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      text-decoration: none;
+    }
+
+    .footer-copy {
+      font-size: 0.8125rem;
+      color: var(--gray-400);
+    }
+
+    @media (max-width: 900px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .contact-info { order: 2; }
+      .contact-form-wrapper { order: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .footer-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      .form-row { grid-template-columns: 1fr; }
+      .contact-header h1 { font-size: 2.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo"><span class="logo-mark">SOS</span> SOS App</a>
+      <a href="index.html" class="back-link">← Zurück zur Startseite</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="contact-header">
+        <h1>Schreib uns <em>gerne</em></h1>
+        <p>Hast du Fragen, Feedback oder brauchst du Hilfe? Wir sind für dich da und antworten in der Regel innerhalb von 24 Stunden.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="info-card">
+            <div class="info-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <h3>E-Mail</h3>
+            <p>Für allgemeine Anfragen</p>
+            <a href="mailto:info@devory.it">info@devory.it</a>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            </div>
+            <h3>Telefon</h3>
+            <p>Mo–Fr, 9–17 Uhr</p>
+            <a href="tel:+4961959199670">+49 6195 9199670</a>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <h3>Adresse</h3>
+            <p>Devory IT GmbH</p>
+            <p>Frankfurter Straße 84</p>
+            <p>65779 Kelkheim (Taunus)</p>
+          </div>
+        </div>
+
+        <div class="contact-form-wrapper">
+          <form id="contactForm">
+            <h2>Nachricht senden</h2>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Dein Name" required>
+              </div>
+              <div class="form-group">
+                <label for="email">E-Mail</label>
+                <input type="email" id="email" name="email" placeholder="deine@email.de" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="subject">Betreff</label>
+              <select id="subject" name="subject" required>
+                <option value="" disabled selected>Wähle ein Thema</option>
+                <option value="general">Allgemeine Anfrage</option>
+                <option value="support">Technischer Support</option>
+                <option value="feedback">Feedback zur App</option>
+                <option value="premium">Premium / Abonnement</option>
+                <option value="press">Presse / Kooperationen</option>
+                <option value="privacy">Datenschutz</option>
+                <option value="other">Sonstiges</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="message">Nachricht</label>
+              <textarea id="message" name="message" placeholder="Wie können wir dir helfen?" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Nachricht senden</button>
+
+            <p class="form-note">Mit dem Absenden stimmst du unserer <a href="datenschutz.html">Datenschutzerklärung</a> zu.</p>
+          </form>
+
+          <div class="form-success" id="formSuccess">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+            <h3>Nachricht gesendet!</h3>
+            <p>Vielen Dank für deine Nachricht. Wir melden uns schnellstmöglich bei dir.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="kontakt.html">Kontakt</a>
+      </div>
+      <p class="footer-copy">© 2026 SOS-App.io – Devory IT GmbH</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      this.style.display = 'none';
+      document.getElementById('formSuccess').classList.add('show');
+    });
+  </script>
+
+</body>
+</html>
