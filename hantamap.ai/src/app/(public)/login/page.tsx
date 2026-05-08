@@ -4,6 +4,7 @@ import { LoginForm } from './login-form'
 export const metadata: Metadata = {
   title: 'Login',
   description: 'Sign in to HantaMap.ai for personalized outbreak tracking, saved regions and preparedness checklists.',
+  robots: 'noindex',
 }
 
 export default function LoginPage() {

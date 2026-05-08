@@ -19,6 +19,38 @@ Rules you must follow:
 - Use calm, precise language.
 - Do not use em dashes. Use commas, colons or simple hyphens instead.`
 
+// Simple in-memory rate limiter: max 20 requests per user per minute
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT_WINDOW = 60_000
+const RATE_LIMIT_MAX = 20
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitMap.get(userId)
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW })
+    return true
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false
+  }
+
+  entry.count++
+  return true
+}
+
+// Periodically clean up expired entries to prevent memory leaks
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, entry] of rateLimitMap) {
+    if (now > entry.resetAt) {
+      rateLimitMap.delete(key)
+    }
+  }
+}, 5 * 60_000)
+
 export async function POST(request: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json(
@@ -35,9 +67,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Authentication required.' }, { status: 401 })
     }
 
-    const { messages } = await request.json()
+    // Rate limiting
+    if (!checkRateLimit(user.id)) {
+      return NextResponse.json(
+        { message: 'Too many requests. Please wait a moment before trying again.' },
+        { status: 429 }
+      )
+    }
 
-    // Fetch some context from the database
+    const body = await request.json()
+    const { messages } = body
+
+    // Input validation
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ message: 'Invalid request.' }, { status: 400 })
+    }
+
+    // Limit message history and message length
+    const sanitizedMessages = messages
+      .slice(-10)
+      .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+      .map((m: any) => ({
+        role: m.role as string,
+        content: typeof m.content === 'string' ? m.content.slice(0, 2000) : '',
+      }))
+
+    if (sanitizedMessages.length === 0) {
+      return NextResponse.json({ message: 'Invalid request.' }, { status: 400 })
+    }
+
+    // Fetch outbreak context from the database
     let context = ''
     try {
       const [outbreaksRes, updatesRes] = await Promise.all([
@@ -76,7 +135,7 @@ export async function POST(request: NextRequest) {
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT + context },
-          ...messages.slice(-10),
+          ...sanitizedMessages,
         ],
         max_tokens: 1000,
         temperature: 0.3,
