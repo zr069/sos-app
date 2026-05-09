@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { type Report } from '@/lib/types'
+import { type VerificationStatus, type Source } from '@/lib/types'
 
 const statusColors: Record<string, string> = {
   confirmed: '#dc2626',
@@ -12,8 +12,37 @@ const statusColors: Record<string, string> = {
   retracted: '#94a3b8',
 }
 
+const verificationColors: Record<VerificationStatus, string> = {
+  verified: '#059669',
+  probable: '#d97706',
+  suspected: '#ea580c',
+  disputed: '#dc2626',
+  retracted: '#94a3b8',
+  awaiting_source: '#64748b',
+}
+
+interface MapViewReport {
+  id: string
+  status: string
+  confirmed_cases: number | null
+  deaths: number | null
+  verification_status: VerificationStatus
+  editor_note: string | null
+  report_date: string | null
+  location: {
+    latitude: number
+    longitude: number
+    country: string
+    region?: string | null
+    city?: string | null
+    precision?: string | null
+  }
+  outbreak?: { name: string }
+  sources?: Source[]
+}
+
 interface MapViewProps {
-  reports?: (Report & { location: { latitude: number; longitude: number; country: string; region?: string; city?: string } })[]
+  reports?: MapViewReport[]
   height?: string
   interactive?: boolean
 }
@@ -72,17 +101,34 @@ export function MapView({ reports = [], height = '500px', interactive = true }: 
       }).addTo(map)
 
       const locationParts = [report.location.city, report.location.region, report.location.country].filter(Boolean)
-      const cases = report.confirmed_cases !== null ? `Confirmed cases: ${report.confirmed_cases}` : 'Cases: Unknown'
+      const casesText = report.confirmed_cases !== null ? String(report.confirmed_cases) : 'Unknown'
+      const deathsText = report.deaths !== null ? String(report.deaths) : 'Unknown'
+      const verificationColor = verificationColors[report.verification_status] || '#64748b'
+      const sourceCount = report.sources?.length ?? 0
 
-      marker.bindPopup(`
-        <div style="font-family: system-ui; font-size: 13px; line-height: 1.5;">
-          <strong>${locationParts.join(', ')}</strong><br/>
-          <span style="color: #64748b;">${report.outbreak?.name || 'Unknown outbreak'}</span><br/>
-          ${cases}<br/>
-          <span style="text-transform: capitalize; color: ${color};">${report.verification_status}</span>
-          ${report.editor_note ? `<br/><em style="color: #94a3b8; font-size: 11px;">${report.editor_note}</em>` : ''}
-        </div>
-      `)
+      let popupHtml = `
+        <div style="font-family: system-ui; font-size: 13px; line-height: 1.6; min-width: 180px;">
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 2px;">${report.outbreak?.name || 'Unknown outbreak'}</div>
+          <div style="color: #64748b; margin-bottom: 6px;">${locationParts.join(', ')}</div>
+          <div style="display: inline-block; font-size: 11px; font-weight: 600; color: ${verificationColor}; border: 1px solid ${verificationColor}; border-radius: 4px; padding: 1px 6px; margin-bottom: 6px; text-transform: capitalize;">${report.verification_status.replace('_', ' ')}</div>
+          <div style="margin-bottom: 2px;"><span style="color: #64748b;">Confirmed cases:</span> <strong>${casesText}</strong></div>
+          <div style="margin-bottom: 4px;"><span style="color: #64748b;">Deaths:</span> <strong>${deathsText}</strong></div>`
+
+      if (report.editor_note) {
+        popupHtml += `<div style="font-style: italic; color: #94a3b8; font-size: 11px; margin-top: 4px;">${report.editor_note}</div>`
+      }
+
+      if (report.location.precision === 'approximate') {
+        popupHtml += `<div style="color: #d97706; font-size: 11px; margin-top: 4px;">Location is approximate</div>`
+      }
+
+      if (sourceCount > 0) {
+        popupHtml += `<div style="color: #94a3b8; font-size: 11px; margin-top: 4px;">${sourceCount} source${sourceCount === 1 ? '' : 's'}</div>`
+      }
+
+      popupHtml += `</div>`
+
+      marker.bindPopup(popupHtml)
     })
   }, [reports])
 

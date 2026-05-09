@@ -23,6 +23,7 @@ export function LocationForm() {
       city: form.get('city') as string || null,
       latitude: form.get('latitude') ? parseFloat(form.get('latitude') as string) : null,
       longitude: form.get('longitude') ? parseFloat(form.get('longitude') as string) : null,
+      precision: form.get('precision') as string,
     })
 
     if (err) { setError(err.message); setSaving(false); return }
@@ -56,6 +57,15 @@ export function LocationForm() {
           <label className="block text-xs font-medium text-slate-700 mb-1">Longitude</label>
           <input name="longitude" type="number" step="any" className="w-full border border-slate-200 rounded px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-slate-400" placeholder="e.g. 2.3522" />
         </div>
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-slate-700 mb-1">Precision</label>
+        <select name="precision" defaultValue="unknown" className="w-full border border-slate-200 rounded px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-slate-400 bg-white">
+          <option value="exact">Exact</option>
+          <option value="approximate">Approximate</option>
+          <option value="country_level">Country level</option>
+          <option value="unknown">Unknown</option>
+        </select>
       </div>
 
       {error && <p className="text-xs text-red-600">{error}</p>}

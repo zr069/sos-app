@@ -49,8 +49,9 @@ export default async function AdminReportsPage() {
                         {r.published ? 'Published' : 'Draft'}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 space-x-2">
                       <Link href={`/admin/reports/${r.id}`} className="text-xs text-slate-500 hover:text-slate-900">Edit</Link>
+                      <Link href={`/admin/reports/${r.id}/preview`} className="text-xs text-slate-400 hover:text-slate-700">Preview</Link>
                     </td>
                   </tr>
                 ))}

@@ -1,4 +1,5 @@
 export type VerificationStatus = 'verified' | 'probable' | 'suspected' | 'disputed' | 'retracted' | 'awaiting_source'
+export type LocationPrecision = 'exact' | 'approximate' | 'country_level' | 'unknown'
 export type OutbreakStatus = 'monitoring' | 'active' | 'escalating' | 'declining' | 'resolved'
 export type SourceType = 'who' | 'ecdc' | 'cdc' | 'national_ministry' | 'regional_authority' | 'scientific' | 'media' | 'other'
 export type AlertFrequency = 'immediate' | 'daily' | 'weekly'
@@ -44,6 +45,7 @@ export interface Location {
   city: string | null
   latitude: number | null
   longitude: number | null
+  precision: LocationPrecision
   created_at: string
 }
 
