@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { DynamicMap as MapView } from '@/components/map/dynamic-map'
 import Link from 'next/link'
 
@@ -10,266 +10,320 @@ interface MapPageClientProps {
   lastChecked: string | null
 }
 
+// ── Helpers ──
+
+function fmtDate(iso: string | null) {
+  if (!iso) return null
+  const d = new Date(iso)
+  return isNaN(d.getTime()) ? null : d
+}
+
+function dayStr(d: Date) {
+  return d.toISOString().slice(0, 10)
+}
+
+const REPORT_LABELS: Record<string, string> = {
+  outbreak_origin: 'Cluster origin',
+  confirmed_case_location: 'Confirmed case',
+  probable_case_location: 'Probable case',
+  suspected_case_location: 'Suspected case',
+  treatment_location: 'Treatment location',
+  monitoring_location: 'Monitoring',
+  evacuation_location: 'Evacuation',
+  response_location: 'Response location',
+  media_signal: 'Media signal',
+}
+
+const CLUSTER_LABELS: Record<string, string> = {
+  linked_to_mv_hondius: 'Linked to MV Hondius',
+  separate_hantavirus_case: 'Separate signal',
+}
+
+// ── Component ──
+
 export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClientProps) {
-  const hasOfficial = reports.length > 0
-  const hasMedia = mediaItems.length > 0
   const [showOfficial, setShowOfficial] = useState(true)
   const [showMedia, setShowMedia] = useState(true)
-  const [selectedReport, setSelectedReport] = useState<any>(null)
+  const [selected, setSelected] = useState<any>(null)
+  const [timelineOpen, setTimelineOpen] = useState(false)
+  const [playbackDay, setPlaybackDay] = useState<string | null>(null)
+  const [playing, setPlaying] = useState(false)
 
-  const visibleReports = showOfficial ? reports : []
-  const visibleMedia = showMedia ? mediaItems : []
+  // ── Timeline range from real data ──
+  const allDates = useMemo(() => {
+    const dates: Date[] = []
+    reports.forEach((r: any) => { const d = fmtDate(r.report_date || r.created_at); if (d) dates.push(d) })
+    mediaItems.forEach((m: any) => { const d = fmtDate(m.published_at); if (d) dates.push(d) })
+    dates.sort((a, b) => a.getTime() - b.getTime())
+    return dates
+  }, [reports, mediaItems])
 
-  const caseReports = reports.filter((r: any) => r.counts_as_case !== false)
-  const totalConfirmed = caseReports.reduce((sum: number, r: any) => sum + (r.confirmed_cases || 0), 0)
-  const totalDeaths = caseReports.reduce((sum: number, r: any) => sum + (r.deaths || 0), 0)
-  const hasConfirmedData = caseReports.some((r: any) => r.confirmed_cases !== null)
-  const hasDeathData = caseReports.some((r: any) => r.deaths !== null)
+  const minDate = allDates.length > 0 ? allDates[0] : new Date()
+  const maxDate = allDates.length > 0 ? allDates[allDates.length - 1] : new Date()
+  // Build list of unique day strings
+  const dayList = useMemo(() => {
+    const days: string[] = []
+    const cur = new Date(minDate)
+    while (cur <= maxDate) {
+      days.push(dayStr(cur))
+      cur.setDate(cur.getDate() + 1)
+    }
+    if (days.length === 0) days.push(dayStr(new Date()))
+    return days
+  }, [minDate, maxDate])
 
-  const handleReset = useCallback(() => {
-    setSelectedReport(null)
-  }, [])
+  const currentDayIdx = playbackDay ? dayList.indexOf(playbackDay) : dayList.length - 1
+  const effectiveDay = playbackDay || dayList[dayList.length - 1]
+
+  // Filter data by playback date
+  const filteredReports = useMemo(() => {
+    if (!playbackDay) return reports
+    return reports.filter((r: any) => {
+      const d = r.report_date || r.created_at
+      return d && d.slice(0, 10) <= playbackDay
+    })
+  }, [reports, playbackDay])
+
+  const filteredMedia = useMemo(() => {
+    if (!playbackDay) return mediaItems
+    return mediaItems.filter((m: any) => {
+      return m.published_at && m.published_at.slice(0, 10) <= playbackDay
+    })
+  }, [mediaItems, playbackDay])
+
+  const visibleReports = showOfficial ? filteredReports : []
+  const visibleMedia = showMedia ? filteredMedia : []
+
+  // Metrics from visible data
+  const caseReports = filteredReports.filter((r: any) => r.counts_as_case !== false)
+  const totalConfirmed = caseReports.reduce((s: number, r: any) => s + (r.confirmed_cases || 0), 0)
+  const totalDeaths = caseReports.reduce((s: number, r: any) => s + (r.deaths || 0), 0)
+  const hasConfirmed = caseReports.some((r: any) => r.confirmed_cases !== null)
+  const hasDeaths = caseReports.some((r: any) => r.deaths !== null)
+
+  // Playback controls
+  const stepDay = useCallback((dir: number) => {
+    const idx = Math.max(0, Math.min(dayList.length - 1, currentDayIdx + dir))
+    setPlaybackDay(dayList[idx])
+  }, [currentDayIdx, dayList])
+
+  const handleSlider = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const idx = parseInt(e.target.value)
+    setPlaybackDay(dayList[idx])
+  }, [dayList])
+
+  // Auto-play
+  const togglePlay = useCallback(() => {
+    if (playing) { setPlaying(false); return }
+    setPlaying(true)
+    if (currentDayIdx >= dayList.length - 1) setPlaybackDay(dayList[0])
+  }, [playing, currentDayIdx, dayList])
+
+  // Play tick
+  useState(() => {
+    if (!playing) return
+    const interval = setInterval(() => {
+      setPlaybackDay(prev => {
+        const idx = prev ? dayList.indexOf(prev) : 0
+        if (idx >= dayList.length - 1) { setPlaying(false); return dayList[dayList.length - 1] }
+        return dayList[idx + 1]
+      })
+    }, 600)
+    return () => clearInterval(interval)
+  })
+
+  const handleMarkerSelect = useCallback((r: any) => { setSelected(r) }, [])
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{ background: '#02090b', zIndex: 10 }}>
 
-      {/* Map: fills entire viewport */}
-      <div className="absolute inset-0" style={{ zIndex: 0 }}>
-        <MapView
-          reports={visibleReports}
-          mediaItems={visibleMedia}
-          height="100%"
-          interactive={true}
-          showMedia={showMedia}
-          captureScroll={true}
-          onMarkerSelect={setSelectedReport}
-        />
+      {/* Map */}
+      <div className="absolute inset-0">
+        <MapView reports={visibleReports} mediaItems={visibleMedia} height="100%" interactive={true} showMedia={showMedia} captureScroll={true} onMarkerSelect={handleMarkerSelect} />
       </div>
 
-      {/* All overlays */}
+      {/* Overlays */}
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1000 }}>
 
-        {/* Top bar */}
+        {/* ── Top command bar ── */}
         <div className="absolute top-0 left-0 right-0 pointer-events-auto">
-          <div className="flex items-center justify-between h-14 px-4" style={{ background: 'linear-gradient(to bottom, rgba(2,9,11,0.85) 0%, rgba(2,9,11,0.4) 80%, transparent 100%)' }}>
+          <div className="flex items-center justify-between h-12 px-4" style={{ background: 'linear-gradient(to bottom, rgba(2,9,11,0.9), transparent)' }}>
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[#28d7c2] flex items-center justify-center">
-                  <span className="text-[#02090b] text-xs font-black">H</span>
-                </div>
-                <span className="text-sm font-bold text-[#f2f7f8] tracking-tight hidden sm:block">HantaMap</span>
+                <div className="w-6 h-6 rounded-md bg-[#28d7c2] flex items-center justify-center"><span className="text-[#02090b] text-[10px] font-black">H</span></div>
+                <span className="text-xs font-bold text-white/90 tracking-tight hidden sm:block">HantaMap</span>
               </Link>
-              <Link href="/" className="flex items-center gap-1 text-[11px] text-[#5a7078] hover:text-[#9fb0b7] transition-colors">
+              <Link href="/" className="text-[10px] text-white/40 hover:text-white/70 transition-colors flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 Overview
               </Link>
             </div>
             <div className="flex items-center gap-3">
-              {lastChecked && (
-                <span className="text-[10px] text-[#5a7078] hidden sm:block font-mono">
-                  {new Date(lastChecked).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} UTC
-                </span>
-              )}
-              <Link href="/login" className="text-[11px] text-[#5a7078] hover:text-[#9fb0b7] transition-colors">
-                Sign in
-              </Link>
+              <button onClick={() => setTimelineOpen(!timelineOpen)} className={`text-[10px] font-medium px-2.5 py-1 rounded-full transition-colors ${timelineOpen ? 'bg-[#28d7c2]/20 text-[#28d7c2] border border-[#28d7c2]/30' : 'text-white/40 hover:text-white/70 border border-white/[0.06]'}`}>
+                Timeline
+              </button>
+              {lastChecked && <span className="text-[9px] text-white/30 font-mono hidden sm:block">{new Date(lastChecked).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>}
+              <Link href="/login" className="text-[10px] text-white/40 hover:text-white/70 transition-colors">Sign in</Link>
             </div>
           </div>
         </div>
 
-        {/* Left: layer toggles */}
-        <div className="absolute top-16 left-4 flex flex-col gap-2 pointer-events-auto">
-          <button
-            onClick={() => setShowOfficial(!showOfficial)}
-            className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-2 rounded-full backdrop-blur-xl transition-all ${
-              showOfficial ? 'bg-[#ff4d57]/20 text-[#ff4d57] border border-[#ff4d57]/30' : 'bg-[#0b2026]/80 text-[#5a7078] border border-white/[0.08]'
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-[#ff4d57]" />
-            Official
-          </button>
-          <button
-            onClick={() => setShowMedia(!showMedia)}
-            className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-2 rounded-full backdrop-blur-xl transition-all ${
-              showMedia ? 'bg-[#ffb240]/20 text-[#ffb240] border border-[#ffb240]/30' : 'bg-[#0b2026]/80 text-[#5a7078] border border-white/[0.08]'
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-[#ffb240]" />
-            Media
-          </button>
-
+        {/* ── Left: layers + legend ── */}
+        <div className="absolute top-14 left-3 flex flex-col gap-2 pointer-events-auto">
+          <div className="flex flex-col gap-1.5">
+            <button onClick={() => setShowOfficial(!showOfficial)} className={`flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-full backdrop-blur-xl transition-all ${showOfficial ? 'bg-[#ff4d57]/15 text-[#ff4d57] border border-[#ff4d57]/25' : 'bg-white/[0.04] text-white/30 border border-white/[0.06]'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff4d57]" />Official
+            </button>
+            <button onClick={() => setShowMedia(!showMedia)} className={`flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-full backdrop-blur-xl transition-all ${showMedia ? 'bg-[#ffb240]/15 text-[#ffb240] border border-[#ffb240]/25' : 'bg-white/[0.04] text-white/30 border border-white/[0.06]'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ffb240]" />Media
+            </button>
+          </div>
           {/* Legend */}
-          <div className="mt-2 bg-[#0b2026]/80 border border-white/[0.06] rounded-2xl p-3 backdrop-blur-xl hidden sm:block">
-            <p className="text-[9px] text-[#5a7078] uppercase tracking-widest mb-2">Legend</p>
+          <div className="bg-[#0b1a1f]/90 border border-white/[0.06] rounded-xl p-2.5 backdrop-blur-xl hidden sm:block mt-1">
+            <p className="text-[8px] text-white/30 uppercase tracking-widest mb-1.5">Legend</p>
             {[
-              { color: '#ff4d57', label: 'Official case' },
-              { color: '#38d48b', label: 'Treatment' },
-              { color: '#60a5fa', label: 'Response' },
-              { color: '#a78bfa', label: 'Evacuation' },
-              { color: '#ffb240', label: 'Media signal' },
-            ].map(l => (
-              <div key={l.label} className="flex items-center gap-2 py-0.5">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: l.color }} />
-                <span className="text-[10px] text-[#9fb0b7]">{l.label}</span>
+              { c: '#ff4d57', l: 'Confirmed / origin' },
+              { c: '#ffb240', l: 'Media reported' },
+              { c: '#38bdf8', l: 'Treatment / response' },
+              { c: '#a78bfa', l: 'Evacuation' },
+            ].map(i => (
+              <div key={i.l} className="flex items-center gap-1.5 py-[2px]">
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: i.c }} />
+                <span className="text-[9px] text-white/50">{i.l}</span>
               </div>
             ))}
-            <div className="flex items-center gap-2 py-0.5 mt-1 border-t border-white/[0.04] pt-1.5">
-              <span className="w-2 h-2 rounded-full flex-shrink-0 border border-dashed border-[#ff4d57]/40" />
-              <span className="text-[10px] text-[#9fb0b7]">Approximate</span>
+            <div className="flex items-center gap-1.5 py-[2px] mt-0.5 border-t border-white/[0.04] pt-1">
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 border border-dashed border-white/30" />
+              <span className="text-[9px] text-white/50">Approximate</span>
             </div>
           </div>
         </div>
 
-        {/* Media-only banner */}
-        {!hasOfficial && hasMedia && (
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 pointer-events-auto">
-            <div className="bg-[#ffb240]/10 border border-[#ffb240]/20 rounded-full px-4 py-1.5 backdrop-blur-xl">
-              <p className="text-[10px] text-[#ffb240] font-medium">Media monitoring active. Awaiting official confirmation.</p>
-            </div>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!hasOfficial && !hasMedia && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-            <div className="bg-[#0b2026]/90 border border-white/[0.08] rounded-3xl px-8 py-6 backdrop-blur-xl text-center max-w-xs">
-              <p className="text-sm font-medium text-[#f2f7f8]">Monitoring active</p>
-              <p className="text-xs text-[#5a7078] mt-1">No Hantavirus reports published yet.</p>
-            </div>
-          </div>
-        )}
-
-        {/* Right panel: selected report or overview */}
-        <div className="absolute top-16 right-4 bottom-20 hidden sm:block pointer-events-auto" style={{ width: '300px' }}>
-          {selectedReport ? (
-            <div className="bg-[#0b2026]/95 border border-white/[0.08] rounded-[20px] p-5 backdrop-blur-xl">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-bold text-[#f2f7f8] leading-tight">{selectedReport.outbreak?.name || 'Report'}</h3>
-                  {selectedReport.outbreak?.pathogen_name && (
-                    <p className="text-[11px] text-[#5a7078] mt-0.5">{selectedReport.outbreak.pathogen_name}</p>
+        {/* ── Selected marker panel (single, right on desktop, bottom on mobile) ── */}
+        {selected && (
+          <>
+            {/* Desktop: right panel */}
+            <div className="absolute top-14 right-3 hidden sm:block pointer-events-auto" style={{ width: '280px' }}>
+              <div className="bg-[#0b1a1f]/95 border border-white/[0.08] rounded-2xl p-4 backdrop-blur-xl">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-sm font-bold text-white/90 leading-tight pr-2">{selected.outbreak?.name || selected.title || 'Signal'}</h3>
+                  <button onClick={() => setSelected(null)} className="text-white/30 hover:text-white/70 p-0.5 flex-shrink-0">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/40 mb-3">{[selected.location?.city, selected.location?.region, selected.location?.country].filter(Boolean).join(', ')}</p>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ color: selected.counts_as_case !== false ? '#ff4d57' : '#38bdf8', background: selected.counts_as_case !== false ? 'rgba(255,77,87,0.12)' : 'rgba(56,189,248,0.12)', border: `1px solid ${selected.counts_as_case !== false ? 'rgba(255,77,87,0.2)' : 'rgba(56,189,248,0.2)'}` }}>
+                    {REPORT_LABELS[selected.report_type] || 'Report'}
+                  </span>
+                  {selected.cluster_relation && CLUSTER_LABELS[selected.cluster_relation] && (
+                    <span className="text-[8px] text-white/30 px-2 py-0.5 rounded-full border border-white/[0.06]">{CLUSTER_LABELS[selected.cluster_relation]}</span>
                   )}
                 </div>
-                <button onClick={handleReset} className="text-[#5a7078] hover:text-[#f2f7f8] p-1 -mr-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#38d48b]/15 text-[#38d48b] border border-[#38d48b]/20">{selectedReport.verification_status}</span>
-                <span className="text-[11px] text-[#5a7078]">{[selectedReport.location?.city, selectedReport.location?.country].filter(Boolean).join(', ')}</span>
-              </div>
-              {selectedReport.counts_as_case !== false ? (
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  <div className="bg-white/[0.03] rounded-lg p-3">
-                    <div className="text-[9px] text-[#5a7078] uppercase tracking-wider">Confirmed</div>
-                    <div className="text-xl font-bold text-[#f2f7f8] tabular-nums mt-0.5">{selectedReport.confirmed_cases !== null ? selectedReport.confirmed_cases : 'Unknown'}</div>
+                {selected.counts_as_case !== false ? (
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="bg-white/[0.03] rounded-lg p-2.5">
+                      <div className="text-[8px] text-white/30 uppercase tracking-wider">Confirmed</div>
+                      <div className="text-lg font-bold text-white/90 tabular-nums">{selected.confirmed_cases ?? 'Unknown'}</div>
+                    </div>
+                    <div className="bg-white/[0.03] rounded-lg p-2.5">
+                      <div className="text-[8px] text-white/30 uppercase tracking-wider">Deaths</div>
+                      <div className="text-lg font-bold text-white/90 tabular-nums">{selected.deaths ?? 'Unknown'}</div>
+                    </div>
                   </div>
-                  <div className="bg-white/[0.03] rounded-lg p-3">
-                    <div className="text-[9px] text-[#5a7078] uppercase tracking-wider">Deaths</div>
-                    <div className="text-xl font-bold text-[#f2f7f8] tabular-nums mt-0.5">{selectedReport.deaths !== null ? selectedReport.deaths : 'Unknown'}</div>
+                ) : (
+                  <p className="text-[10px] text-white/30 mb-3">Does not count toward confirmed case totals.</p>
+                )}
+                {selected.location?.precision === 'approximate' && <p className="text-[9px] text-[#ffb240] mb-2">Approximate location</p>}
+                {selected.editor_note && <p className="text-[9px] text-white/25 italic mb-3 line-clamp-3">{selected.editor_note}</p>}
+                {selected.outbreak?.slug && (
+                  <Link href={`/outbreaks/${selected.outbreak.slug}`} className="block text-center text-[10px] font-medium py-2 rounded-full bg-white/[0.05] text-white/50 hover:bg-white/[0.08] hover:text-white/70 transition-colors">Open full report</Link>
+                )}
+              </div>
+            </div>
+            {/* Mobile: bottom sheet */}
+            <div className="absolute bottom-16 left-3 right-3 sm:hidden pointer-events-auto safe-bottom">
+              <div className="bg-[#0b1a1f]/95 border border-white/[0.08] rounded-2xl p-4 backdrop-blur-xl">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-sm font-bold text-white/90">{selected.outbreak?.name || selected.title || 'Signal'}</h3>
+                  <button onClick={() => setSelected(null)} className="text-white/30 hover:text-white/70 p-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ color: selected.counts_as_case !== false ? '#ff4d57' : '#38bdf8', background: selected.counts_as_case !== false ? 'rgba(255,77,87,0.12)' : 'rgba(56,189,248,0.12)' }}>{REPORT_LABELS[selected.report_type] || 'Report'}</span>
+                  <span className="text-[10px] text-white/30">{[selected.location?.city, selected.location?.country].filter(Boolean).join(', ')}</span>
+                </div>
+                {selected.counts_as_case !== false && (
+                  <div className="flex gap-4 mb-2">
+                    <div><span className="text-[8px] text-white/30 uppercase">Confirmed </span><span className="text-sm font-bold text-white/90 tabular-nums">{selected.confirmed_cases ?? '?'}</span></div>
+                    <div><span className="text-[8px] text-white/30 uppercase">Deaths </span><span className="text-sm font-bold text-white/90 tabular-nums">{selected.deaths ?? '?'}</span></div>
+                  </div>
+                )}
+                {selected.location?.precision === 'approximate' && <p className="text-[9px] text-[#ffb240] mb-2">Approximate location</p>}
+                {selected.outbreak?.slug && <Link href={`/outbreaks/${selected.outbreak.slug}`} className="block text-center text-[10px] font-medium py-2 rounded-full bg-white/[0.05] text-white/50">Open full report</Link>}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── Bottom rail ── */}
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-auto safe-bottom">
+          <div className="px-3 pb-3">
+            {/* Timeline player */}
+            {timelineOpen && dayList.length > 1 && (
+              <div className="mb-2 sm:mr-[296px]">
+                <div className="bg-[#0b1a1f]/90 border border-white/[0.06] rounded-xl px-3 py-2 backdrop-blur-xl">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => stepDay(-1)} className="text-white/40 hover:text-white/70 p-0.5"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg></button>
+                    <button onClick={togglePlay} className="w-6 h-6 rounded-full bg-[#28d7c2]/20 text-[#28d7c2] flex items-center justify-center hover:bg-[#28d7c2]/30 transition-colors">
+                      {playing
+                        ? <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
+                        : <svg className="w-3 h-3 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      }
+                    </button>
+                    <button onClick={() => stepDay(1)} className="text-white/40 hover:text-white/70 p-0.5"><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg></button>
+                    <input type="range" min={0} max={dayList.length - 1} value={currentDayIdx >= 0 ? currentDayIdx : dayList.length - 1} onChange={handleSlider} className="flex-1 h-1 accent-[#28d7c2] bg-white/[0.06] rounded-full cursor-pointer" />
+                    <span className="text-[10px] text-white/50 font-mono tabular-nums w-20 text-right">{effectiveDay}</span>
+                    <button onClick={() => { setPlaybackDay(null); setPlaying(false) }} className="text-[9px] text-white/30 hover:text-white/50 px-1.5 py-0.5 rounded border border-white/[0.06]">Live</button>
                   </div>
                 </div>
-              ) : (
-                <p className="text-[10px] text-[#5a7078] mb-4">This location does not count toward confirmed case totals.</p>
-              )}
-              {selectedReport.location?.precision === 'approximate' && <p className="text-[10px] text-[#ffb240] mb-3">Approximate marker, not verified exact position</p>}
-              {selectedReport.report_type && !['outbreak_origin', 'confirmed_case_location'].includes(selectedReport.report_type) && (
-                <p className="text-[10px] text-[#9fb0b7] mb-3 capitalize">{selectedReport.report_type.replace(/_/g, ' ')}</p>
-              )}
-              {selectedReport.outbreak?.slug && (
-                <Link href={`/outbreaks/${selectedReport.outbreak.slug}`} className="block text-center text-xs font-medium py-2.5 rounded-full bg-white/[0.06] text-[#9fb0b7] hover:bg-white/10 hover:text-[#f2f7f8] transition-colors">View full report</Link>
-              )}
-            </div>
-          ) : (
-            <div className="bg-[#0b2026]/90 border border-white/[0.06] rounded-[20px] p-5 backdrop-blur-xl">
-              <h3 className="text-sm font-bold text-[#f2f7f8] mb-4">Hantavirus overview</h3>
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <div className="text-[9px] text-[#5a7078] uppercase tracking-wider">Official reports</div>
-                  <div className="text-xl font-bold text-[#ff4d57] tabular-nums mt-0.5">{caseReports.length}</div>
+              </div>
+            )}
+            {/* Metrics bar */}
+            <div className="sm:mr-[296px]">
+              <div className="bg-[#0b1a1f]/90 border border-white/[0.06] rounded-xl backdrop-blur-xl overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2">
+                  <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto">
+                    {[
+                      { v: hasConfirmed ? totalConfirmed : '-', l: 'Confirmed', c: '#ff4d57' },
+                      { v: hasDeaths ? totalDeaths : '-', l: 'Deaths', c: 'rgba(255,255,255,0.85)' },
+                      { v: filteredReports.length, l: 'Locations', c: '#38bdf8' },
+                      { v: filteredMedia.length, l: 'Media', c: '#ffb240' },
+                    ].map((m, i) => (
+                      <div key={i} className="text-center flex-shrink-0">
+                        <div className="text-sm font-bold tabular-nums" style={{ color: m.c }}>{m.v}</div>
+                        <div className="text-[7px] text-white/25 uppercase tracking-widest">{m.l}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <div className="text-[9px] text-[#5a7078] uppercase tracking-wider">Media signals</div>
-                  <div className="text-xl font-bold text-[#ffb240] tabular-nums mt-0.5">{mediaItems.length}</div>
-                </div>
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <div className="text-[9px] text-[#5a7078] uppercase tracking-wider">Confirmed cases</div>
-                  <div className="text-xl font-bold text-[#f2f7f8] tabular-nums mt-0.5">{hasConfirmedData ? totalConfirmed : '-'}</div>
-                </div>
-                <div className="bg-white/[0.03] rounded-lg p-3">
-                  <div className="text-[9px] text-[#5a7078] uppercase tracking-wider">Official deaths</div>
-                  <div className="text-xl font-bold text-[#f2f7f8] tabular-nums mt-0.5">{hasDeathData ? totalDeaths : '-'}</div>
+                <div className="border-t border-white/[0.03] px-3 py-1 flex items-center justify-between">
+                  <p className="text-[8px] text-white/20">Sources: WHO, ECDC, CDC, media. Media signals are not confirmed cases.</p>
+                  {lastChecked && <p className="text-[8px] text-white/20 hidden sm:block font-mono">{new Date(lastChecked).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</p>}
                 </div>
               </div>
-              <p className="text-[9px] text-[#5a7078]">Media signals are not confirmed cases. Select a marker for details.</p>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Mobile: selected report bottom sheet */}
-        {selectedReport && (
-          <div className="absolute bottom-20 left-4 right-4 sm:hidden pointer-events-auto safe-bottom">
-            <div className="bg-[#0b2026]/95 border border-white/[0.08] rounded-[20px] p-4 backdrop-blur-xl">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-sm font-bold text-[#f2f7f8]">{selectedReport.outbreak?.name || 'Report'}</h3>
-                <button onClick={handleReset} className="text-[#5a7078] hover:text-[#f2f7f8] p-1 -mr-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#38d48b]/15 text-[#38d48b] border border-[#38d48b]/20">{selectedReport.verification_status}</span>
-                <span className="text-[10px] text-[#5a7078]">{[selectedReport.location?.city, selectedReport.location?.country].filter(Boolean).join(', ')}</span>
-              </div>
-              {selectedReport.counts_as_case !== false && (
-                <div className="flex gap-4 mb-3">
-                  <div><span className="text-[9px] text-[#5a7078] uppercase">Confirmed</span><span className="text-base font-bold text-[#f2f7f8] ml-2 tabular-nums">{selectedReport.confirmed_cases ?? 'Unknown'}</span></div>
-                  <div><span className="text-[9px] text-[#5a7078] uppercase">Deaths</span><span className="text-base font-bold text-[#f2f7f8] ml-2 tabular-nums">{selectedReport.deaths ?? 'Unknown'}</span></div>
-                </div>
-              )}
-              {selectedReport.location?.precision === 'approximate' && <p className="text-[10px] text-[#ffb240] mb-2">Approximate location</p>}
-              {selectedReport.outbreak?.slug && (
-                <Link href={`/outbreaks/${selectedReport.outbreak.slug}`} className="block text-center text-xs font-medium py-2 rounded-full bg-white/[0.06] text-[#9fb0b7]">View full report</Link>
-              )}
+        {/* Empty state */}
+        {filteredReports.length === 0 && filteredMedia.length === 0 && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+            <div className="bg-[#0b1a1f]/90 border border-white/[0.08] rounded-2xl px-6 py-5 backdrop-blur-xl text-center max-w-xs">
+              <p className="text-sm font-medium text-white/80">Monitoring active</p>
+              <p className="text-[10px] text-white/30 mt-1">{playbackDay ? `No reports before ${playbackDay}` : 'No Hantavirus reports published yet.'}</p>
             </div>
           </div>
         )}
-
-        {/* Bottom status rail */}
-        <div className="absolute bottom-0 left-0 right-0 pointer-events-auto safe-bottom">
-          <div className="px-4 pb-3 sm:pb-4">
-            <div className="sm:ml-0 sm:mr-[320px]">
-              <div className="bg-[#0b2026]/90 border border-white/[0.06] rounded-2xl backdrop-blur-xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2.5">
-                  <div className="flex items-center gap-4 overflow-x-auto">
-                    <div className="text-center flex-shrink-0">
-                      <div className="text-base font-bold text-[#ff4d57] tabular-nums">{hasConfirmedData ? totalConfirmed : '-'}</div>
-                      <div className="text-[8px] text-[#5a7078] uppercase tracking-widest">Confirmed</div>
-                    </div>
-                    <div className="w-px h-7 bg-white/[0.06]" />
-                    <div className="text-center flex-shrink-0">
-                      <div className="text-base font-bold text-[#f2f7f8] tabular-nums">{hasDeathData ? totalDeaths : '-'}</div>
-                      <div className="text-[8px] text-[#5a7078] uppercase tracking-widest">Deaths</div>
-                    </div>
-                    <div className="w-px h-7 bg-white/[0.06]" />
-                    <div className="text-center flex-shrink-0">
-                      <div className="text-base font-bold text-[#38d48b] tabular-nums">{reports.length}</div>
-                      <div className="text-[8px] text-[#5a7078] uppercase tracking-widest">Locations</div>
-                    </div>
-                    <div className="w-px h-7 bg-white/[0.06]" />
-                    <div className="text-center flex-shrink-0">
-                      <div className="text-base font-bold text-[#ffb240] tabular-nums">{mediaItems.length}</div>
-                      <div className="text-[8px] text-[#5a7078] uppercase tracking-widest">Media</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="border-t border-white/[0.04] px-4 py-1.5 flex items-center justify-between">
-                  <p className="text-[9px] text-[#5a7078]">Sources: WHO, ECDC, CDC, media. Media signals are not confirmed cases.</p>
-                  {lastChecked && <p className="text-[9px] text-[#5a7078] hidden sm:block">{new Date(lastChecked).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} UTC</p>}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
