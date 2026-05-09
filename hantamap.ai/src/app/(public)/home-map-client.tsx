@@ -19,10 +19,14 @@ export function HomeMapClient({ reports, updates, mediaItems, lastChecked }: Hom
 
   const hasOfficial = reports.length > 0
   const hasMedia = mediaItems.length > 0
-  const totalConfirmed = reports.reduce((s: number, r: any) => s + (r.confirmed_cases || 0), 0)
-  const totalDeaths = reports.reduce((s: number, r: any) => s + (r.deaths || 0), 0)
-  const hasConfirmedData = reports.some((r: any) => r.confirmed_cases !== null)
-  const hasDeathData = reports.some((r: any) => r.deaths !== null)
+
+  // Split metrics by report type: only count reports where counts_as_case is true
+  const caseReports = reports.filter((r: any) => r.counts_as_case !== false)
+  const nonCaseReports = reports.filter((r: any) => r.counts_as_case === false)
+  const totalConfirmed = caseReports.reduce((s: number, r: any) => s + (r.confirmed_cases || 0), 0)
+  const totalDeaths = caseReports.reduce((s: number, r: any) => s + (r.deaths || 0), 0)
+  const hasConfirmedData = caseReports.some((r: any) => r.confirmed_cases !== null)
+  const hasDeathData = caseReports.some((r: any) => r.deaths !== null)
 
   return (
     <div className="relative w-full bg-[var(--bg-primary)]" style={{ height: '100svh' }}>
@@ -77,8 +81,8 @@ export function HomeMapClient({ reports, updates, mediaItems, lastChecked }: Hom
           href="/map"
           className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-2 rounded-full backdrop-blur-xl bg-[var(--bg-panel)]/80 text-[var(--text-secondary)] border border-white/[0.08] hover:bg-[var(--bg-panel)] transition-all"
         >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-          Expand
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+          Full map
         </Link>
       </div>
 
@@ -111,25 +115,25 @@ export function HomeMapClient({ reports, updates, mediaItems, lastChecked }: Hom
         <div className="mx-auto max-w-3xl">
           <div className="bg-[var(--bg-panel)]/90 border border-white/[0.08] rounded-2xl backdrop-blur-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-5 overflow-x-auto">
+              <div className="flex items-center gap-4 sm:gap-5 overflow-x-auto">
                 <div className="text-center flex-shrink-0">
-                  <div className="text-lg font-bold text-[var(--text-primary)] tabular-nums">{reports.length}</div>
-                  <div className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Verified</div>
-                </div>
-                <div className="w-px h-8 bg-white/[0.06]" />
-                <div className="text-center flex-shrink-0">
-                  <div className="text-lg font-bold text-[var(--text-primary)] tabular-nums">{mediaItems.length}</div>
-                  <div className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Media</div>
-                </div>
-                <div className="w-px h-8 bg-white/[0.06]" />
-                <div className="text-center flex-shrink-0">
-                  <div className="text-lg font-bold text-[var(--text-primary)] tabular-nums">{hasConfirmedData ? totalConfirmed : '-'}</div>
-                  <div className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Cases</div>
+                  <div className="text-lg font-bold text-[var(--accent-red)] tabular-nums">{hasConfirmedData ? totalConfirmed : '-'}</div>
+                  <div className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Confirmed</div>
                 </div>
                 <div className="w-px h-8 bg-white/[0.06]" />
                 <div className="text-center flex-shrink-0">
                   <div className="text-lg font-bold text-[var(--text-primary)] tabular-nums">{hasDeathData ? totalDeaths : '-'}</div>
                   <div className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Deaths</div>
+                </div>
+                <div className="w-px h-8 bg-white/[0.06]" />
+                <div className="text-center flex-shrink-0">
+                  <div className="text-lg font-bold text-[var(--accent-green)] tabular-nums">{nonCaseReports.length}</div>
+                  <div className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Response</div>
+                </div>
+                <div className="w-px h-8 bg-white/[0.06]" />
+                <div className="text-center flex-shrink-0">
+                  <div className="text-lg font-bold text-[var(--accent-amber)] tabular-nums">{mediaItems.length}</div>
+                  <div className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Media</div>
                 </div>
               </div>
               <div className="text-[8px] text-[var(--text-muted)] flex-shrink-0 hidden sm:block pl-4">
@@ -138,8 +142,8 @@ export function HomeMapClient({ reports, updates, mediaItems, lastChecked }: Hom
             </div>
             {/* Source strip */}
             <div className="border-t border-white/[0.04] px-4 py-1.5 flex items-center justify-between">
-              <p className="text-[9px] text-[var(--text-muted)]">Sources: WHO, ECDC, CDC, media monitoring</p>
-              <p className="text-[9px] text-[var(--text-muted)]">Not medical advice</p>
+              <p className="text-[9px] text-[var(--text-muted)]">Sources: WHO, ECDC, CDC, media. Media signals are not confirmed cases.</p>
+              <p className="text-[9px] text-[var(--text-muted)] hidden sm:block">Not medical advice</p>
             </div>
           </div>
         </div>

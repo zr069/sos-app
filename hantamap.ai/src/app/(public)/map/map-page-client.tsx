@@ -20,10 +20,12 @@ export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClien
   const visibleReports = showOfficial ? reports : []
   const visibleMedia = showMedia ? mediaItems : []
 
-  const totalConfirmed = reports.reduce((sum: number, r: any) => sum + (r.confirmed_cases || 0), 0)
-  const totalDeaths = reports.reduce((sum: number, r: any) => sum + (r.deaths || 0), 0)
-  const hasConfirmedData = reports.some((r: any) => r.confirmed_cases !== null)
-  const hasDeathData = reports.some((r: any) => r.deaths !== null)
+  const caseReports = reports.filter((r: any) => r.counts_as_case !== false)
+  const nonCaseReports = reports.filter((r: any) => r.counts_as_case === false)
+  const totalConfirmed = caseReports.reduce((sum: number, r: any) => sum + (r.confirmed_cases || 0), 0)
+  const totalDeaths = caseReports.reduce((sum: number, r: any) => sum + (r.deaths || 0), 0)
+  const hasConfirmedData = caseReports.some((r: any) => r.confirmed_cases !== null)
+  const hasDeathData = caseReports.some((r: any) => r.deaths !== null)
 
   return (
     <div className="relative h-[calc(100vh-56px)] bg-[var(--bg-primary)] -mt-14 pt-14">
@@ -35,12 +37,22 @@ export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClien
           height="100%"
           interactive={true}
           showMedia={showMedia}
+          autoFit={true}
           onMarkerSelect={setSelectedReport}
         />
       </div>
 
-      {/* Layer controls - floating top left under header */}
+      {/* Back to overview + Layer controls */}
       <div className="absolute top-[72px] left-4 z-[1000] flex gap-2">
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-full backdrop-blur-xl bg-[var(--bg-panel)]/80 text-[var(--text-secondary)] border border-white/[0.06] hover:bg-[var(--bg-panel)] transition-all"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          Overview
+        </Link>
+      </div>
+      <div className="absolute top-[72px] left-[120px] z-[1000] flex gap-2">
         <button
           onClick={() => setShowOfficial(!showOfficial)}
           className={`flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-full backdrop-blur-xl transition-all ${
