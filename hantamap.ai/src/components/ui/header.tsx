@@ -49,12 +49,14 @@ export function Header() {
                 >
                   Sign in
                 </Link>
-                <Link
-                  href="/map"
-                  className="text-xs font-semibold px-4 py-2 rounded-full bg-[var(--accent-teal)] text-[var(--bg-primary)] hover:brightness-110 transition-all hidden sm:block"
-                >
-                  Open Map
-                </Link>
+                {pathname !== '/' && pathname !== '/map' && (
+                  <Link
+                    href="/map"
+                    className="text-xs font-semibold px-4 py-2 rounded-full bg-[var(--accent-teal)] text-[var(--bg-primary)] hover:brightness-110 transition-all hidden sm:block"
+                  >
+                    Open Map
+                  </Link>
+                )}
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="md:hidden p-2 text-[var(--text-secondary)]"
