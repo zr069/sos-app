@@ -19,7 +19,6 @@ export function LoginForm() {
     setError('')
     setMessage('')
 
-    // Timeout safety: never spin longer than 15 seconds
     const timeout = setTimeout(() => {
       setLoading(false)
       setError('Request timed out. Please check your connection and try again.')
@@ -31,9 +30,7 @@ export function LoginForm() {
       if (mode === 'magic') {
         const { error: err } = await supabase.auth.signInWithOtp({
           email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
         })
         if (err) throw err
         setMessage('Check your email for a login link.')
@@ -44,17 +41,12 @@ export function LoginForm() {
         const { data, error: err } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
         })
         if (err) throw err
-
-        // Check if email confirmation is required
         if (data.user && !data.session) {
           setMessage('Check your email to confirm your account.')
         } else if (data.session) {
-          // Auto-confirmed: redirect to app
           router.push('/app')
           router.refresh()
         } else {
@@ -63,28 +55,17 @@ export function LoginForm() {
         return
       }
 
-      // Login mode
-      const { error: err } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error: err } = await supabase.auth.signInWithPassword({ email, password })
       if (err) throw err
       router.push('/app')
       router.refresh()
     } catch (err: any) {
       const msg = err?.message || 'An error occurred. Please try again.'
-      // Make common Supabase errors more readable
-      if (msg.includes('Invalid login credentials')) {
-        setError('Invalid email or password.')
-      } else if (msg.includes('Email not confirmed')) {
-        setError('Your email has not been confirmed yet. Check your inbox for a confirmation link.')
-      } else if (msg.includes('User already registered')) {
-        setError('An account with this email already exists. Try signing in instead.')
-      } else if (msg.includes('rate limit')) {
-        setError('Too many attempts. Please wait a moment and try again.')
-      } else {
-        setError(msg)
-      }
+      if (msg.includes('Invalid login credentials')) setError('Invalid email or password.')
+      else if (msg.includes('Email not confirmed')) setError('Email not confirmed yet. Check your inbox.')
+      else if (msg.includes('User already registered')) setError('Account already exists. Try signing in.')
+      else if (msg.includes('rate limit')) setError('Too many attempts. Wait a moment.')
+      else setError(msg)
     } finally {
       clearTimeout(timeout)
       setLoading(false)
@@ -93,48 +74,33 @@ export function LoginForm() {
 
   return (
     <div>
-      <div className="flex border border-slate-200 rounded mb-6 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => { setMode('login'); setError(''); setMessage('') }}
-          className={`flex-1 text-xs font-medium py-2 transition-colors ${
-            mode === 'login' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-        >
-          Sign in
-        </button>
-        <button
-          type="button"
-          onClick={() => { setMode('signup'); setError(''); setMessage('') }}
-          className={`flex-1 text-xs font-medium py-2 transition-colors ${
-            mode === 'signup' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-        >
-          Create account
-        </button>
-        <button
-          type="button"
-          onClick={() => { setMode('magic'); setError(''); setMessage('') }}
-          className={`flex-1 text-xs font-medium py-2 transition-colors ${
-            mode === 'magic' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'
-          }`}
-        >
-          Magic link
-        </button>
+      <div className="flex bg-white/[0.04] rounded-[var(--radius-pill)] p-0.5 mb-6">
+        {(['login', 'signup', 'magic'] as const).map(m => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => { setMode(m); setError(''); setMessage('') }}
+            className={`flex-1 text-xs font-medium py-2 rounded-[10px] transition-all ${
+              mode === m
+                ? 'bg-[var(--accent-teal)] text-[var(--bg-primary)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            }`}
+          >
+            {m === 'login' ? 'Sign in' : m === 'signup' ? 'Create' : 'Magic link'}
+          </button>
+        ))}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-xs font-medium text-slate-700 mb-1">
-            Email
-          </label>
+          <label htmlFor="email" className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Email</label>
           <input
             id="email"
             type="email"
             required
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full border border-slate-200 rounded px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-teal)]/50 transition-colors"
             placeholder="you@example.com"
             disabled={loading}
           />
@@ -142,17 +108,15 @@ export function LoginForm() {
 
         {mode !== 'magic' && (
           <div>
-            <label htmlFor="password" className="block text-xs font-medium text-slate-700 mb-1">
-              Password
-            </label>
+            <label htmlFor="password" className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Password</label>
             <input
               id="password"
               type="password"
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full border border-slate-200 rounded px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
-              placeholder={mode === 'signup' ? 'Choose a password (min. 6 characters)' : 'Your password'}
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-teal)]/50 transition-colors"
+              placeholder={mode === 'signup' ? 'Min. 6 characters' : 'Your password'}
               minLength={6}
               disabled={loading}
             />
@@ -160,29 +124,23 @@ export function LoginForm() {
         )}
 
         {error && (
-          <div className="border border-red-200 rounded p-3 bg-red-50">
-            <p className="text-xs text-red-700">{error}</p>
+          <div className="bg-[var(--accent-red)]/10 border border-[var(--accent-red)]/20 rounded-[var(--radius-sm)] p-3">
+            <p className="text-xs text-[var(--accent-red)]">{error}</p>
           </div>
         )}
 
         {message && (
-          <div className="border border-emerald-200 rounded p-3 bg-emerald-50">
-            <p className="text-xs text-emerald-700">{message}</p>
+          <div className="bg-[var(--accent-green)]/10 border border-[var(--accent-green)]/20 rounded-[var(--radius-sm)] p-3">
+            <p className="text-xs text-[var(--accent-green)]">{message}</p>
           </div>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-slate-900 text-white text-sm font-medium py-2.5 rounded hover:bg-slate-800 transition-colors disabled:opacity-50"
+          className="w-full bg-[var(--accent-teal)] text-[var(--bg-primary)] text-sm font-semibold py-2.5 rounded-full hover:brightness-110 transition-all disabled:opacity-50"
         >
-          {loading
-            ? 'Loading...'
-            : mode === 'login'
-            ? 'Sign in'
-            : mode === 'signup'
-            ? 'Create account'
-            : 'Send magic link'}
+          {loading ? 'Loading...' : mode === 'login' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send magic link'}
         </button>
       </form>
     </div>
