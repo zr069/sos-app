@@ -54,15 +54,18 @@ create trigger trg_enforce_update_source
 -- ============================================================
 
 -- Prevent users from setting their own role to admin
+-- Allows service_role operations for initial admin setup
 create or replace function public.prevent_role_escalation()
 returns trigger as $$
 begin
-  -- Only allow role changes if the current user is already an admin
   if NEW.role <> OLD.role then
-    if not exists (
-      select 1 from public.profiles
-      where user_id = auth.uid() and role = 'admin'
-    ) then
+    -- Allow service_role operations (admin setup, migrations)
+    if current_setting('request.jwt.claim.role', true) = 'service_role' then
+      return NEW;
+    end if;
+
+    -- Block non-admin users from changing roles
+    if not public.is_admin(auth.uid()) then
       raise exception 'Only admins can change user roles.';
     end if;
   end if;

@@ -19,30 +19,74 @@ export function LoginForm() {
     setError('')
     setMessage('')
 
-    const supabase = createClient()
+    // Timeout safety: never spin longer than 15 seconds
+    const timeout = setTimeout(() => {
+      setLoading(false)
+      setError('Request timed out. Please check your connection and try again.')
+    }, 15000)
 
     try {
+      const supabase = createClient()
+
       if (mode === 'magic') {
-        const { error } = await supabase.auth.signInWithOtp({ email })
-        if (error) throw error
+        const { error: err } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        })
+        if (err) throw err
         setMessage('Check your email for a login link.')
         return
       }
 
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({ email, password })
-        if (error) throw error
-        setMessage('Check your email to confirm your account.')
+        const { data, error: err } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        })
+        if (err) throw err
+
+        // Check if email confirmation is required
+        if (data.user && !data.session) {
+          setMessage('Check your email to confirm your account.')
+        } else if (data.session) {
+          // Auto-confirmed: redirect to app
+          router.push('/app')
+          router.refresh()
+        } else {
+          setMessage('Account created. Check your email to confirm.')
+        }
         return
       }
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
+      // Login mode
+      const { error: err } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (err) throw err
       router.push('/app')
       router.refresh()
     } catch (err: any) {
-      setError(err.message || 'An error occurred. Please try again.')
+      const msg = err?.message || 'An error occurred. Please try again.'
+      // Make common Supabase errors more readable
+      if (msg.includes('Invalid login credentials')) {
+        setError('Invalid email or password.')
+      } else if (msg.includes('Email not confirmed')) {
+        setError('Your email has not been confirmed yet. Check your inbox for a confirmation link.')
+      } else if (msg.includes('User already registered')) {
+        setError('An account with this email already exists. Try signing in instead.')
+      } else if (msg.includes('rate limit')) {
+        setError('Too many attempts. Please wait a moment and try again.')
+      } else {
+        setError(msg)
+      }
     } finally {
+      clearTimeout(timeout)
       setLoading(false)
     }
   }
@@ -51,7 +95,8 @@ export function LoginForm() {
     <div>
       <div className="flex border border-slate-200 rounded mb-6 overflow-hidden">
         <button
-          onClick={() => setMode('login')}
+          type="button"
+          onClick={() => { setMode('login'); setError(''); setMessage('') }}
           className={`flex-1 text-xs font-medium py-2 transition-colors ${
             mode === 'login' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'
           }`}
@@ -59,7 +104,8 @@ export function LoginForm() {
           Sign in
         </button>
         <button
-          onClick={() => setMode('signup')}
+          type="button"
+          onClick={() => { setMode('signup'); setError(''); setMessage('') }}
           className={`flex-1 text-xs font-medium py-2 transition-colors ${
             mode === 'signup' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'
           }`}
@@ -67,7 +113,8 @@ export function LoginForm() {
           Create account
         </button>
         <button
-          onClick={() => setMode('magic')}
+          type="button"
+          onClick={() => { setMode('magic'); setError(''); setMessage('') }}
           className={`flex-1 text-xs font-medium py-2 transition-colors ${
             mode === 'magic' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'
           }`}
@@ -89,6 +136,7 @@ export function LoginForm() {
             onChange={e => setEmail(e.target.value)}
             className="w-full border border-slate-200 rounded px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
             placeholder="you@example.com"
+            disabled={loading}
           />
         </div>
 
@@ -104,8 +152,9 @@ export function LoginForm() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               className="w-full border border-slate-200 rounded px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
-              placeholder={mode === 'signup' ? 'Choose a password' : 'Your password'}
+              placeholder={mode === 'signup' ? 'Choose a password (min. 6 characters)' : 'Your password'}
               minLength={6}
+              disabled={loading}
             />
           </div>
         )}
