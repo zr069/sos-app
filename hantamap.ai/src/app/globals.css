@@ -192,6 +192,76 @@ div.leaflet-container {
   animation: media-pulse 3s ease-out infinite;
 }
 
+/* MapLibre GL popup styling */
+.hm-gl-popup .maplibregl-popup-content {
+  background: #0b1a1f !important;
+  color: #f2f7f8 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(40, 215, 194, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  padding: 14px 16px !important;
+}
+
+.hm-gl-popup .maplibregl-popup-tip {
+  border-top-color: #0b1a1f !important;
+  border-bottom-color: #0b1a1f !important;
+}
+
+.hm-gl-popup .maplibregl-popup-close-button {
+  color: rgba(255, 255, 255, 0.3) !important;
+  font-size: 18px !important;
+  padding: 4px 8px !important;
+  right: 4px !important;
+  top: 4px !important;
+}
+
+.hm-gl-popup .maplibregl-popup-close-button:hover {
+  color: rgba(255, 255, 255, 0.7) !important;
+  background: transparent !important;
+}
+
+.maplibregl-ctrl-attrib {
+  background: rgba(2, 9, 11, 0.6) !important;
+  color: rgba(255, 255, 255, 0.2) !important;
+  font-size: 9px !important;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.maplibregl-ctrl-group {
+  background: rgba(6, 19, 23, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px);
+}
+
+.maplibregl-ctrl-group button {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.maplibregl-ctrl-group button span {
+  filter: invert(1) brightness(0.5) !important;
+}
+
+.maplibregl-ctrl-group button:hover span {
+  filter: invert(1) brightness(0.8) !important;
+}
+
+@media (max-width: 640px) {
+  .hm-gl-popup .maplibregl-popup-content {
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+  }
+}
+
 /* Safe area spacing */
 .safe-bottom {
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);

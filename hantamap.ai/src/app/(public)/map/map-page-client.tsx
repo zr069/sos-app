@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { DynamicMap as MapView } from '@/components/map/dynamic-map'
+import { DynamicIntelMap } from '@/components/map/dynamic-intel-map'
 import Link from 'next/link'
 
 interface MapPageClientProps {
@@ -98,9 +98,9 @@ export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClien
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{ background: '#02090b', zIndex: 10 }}>
 
-      {/* Map */}
+      {/* Map: MapLibre GL vector map */}
       <div className="absolute inset-0">
-        <MapView reports={visibleReports} mediaItems={visibleMedia} height="100%" interactive={true} showMedia={showMedia} captureScroll={true} />
+        <DynamicIntelMap reports={visibleReports} mediaItems={visibleMedia} />
       </div>
 
       {/* Vignette overlay for depth */}
