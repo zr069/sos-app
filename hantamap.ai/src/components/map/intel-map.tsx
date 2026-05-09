@@ -157,9 +157,20 @@ export function IntelMap({ reports = [], mediaItems = [], onMarkerSelect }: Inte
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
 
+    // Resize after load to ensure canvas fills container
+    map.on('load', () => map.resize())
+    // Also resize after a frame in case layout settles late
+    requestAnimationFrame(() => map.resize())
+    setTimeout(() => map.resize(), 200)
+
+    // Resize on window resize
+    const onResize = () => map.resize()
+    window.addEventListener('resize', onResize)
+
     mapRef.current = map
 
     return () => {
+      window.removeEventListener('resize', onResize)
       map.remove()
       mapRef.current = null
     }
@@ -226,6 +237,6 @@ export function IntelMap({ reports = [], mediaItems = [], onMarkerSelect }: Inte
   }, [reports, mediaItems, handleSelect])
 
   return (
-    <div ref={containerRef} className="absolute inset-0" />
+    <div ref={containerRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' }} />
   )
 }
