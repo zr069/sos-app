@@ -49,7 +49,7 @@ export function Header() {
                 >
                   Sign in
                 </Link>
-                {pathname !== '/' && pathname !== '/map' && (
+                {pathname !== '/map' && (
                   <Link
                     href="/map"
                     className="text-xs font-semibold px-4 py-2 rounded-full bg-[var(--accent-teal)] text-[var(--bg-primary)] hover:brightness-110 transition-all hidden sm:block"
