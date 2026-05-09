@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ingest:who": "tsx scripts/ingest-who-don.ts",
+    "ingest:who-emergencies": "tsx scripts/ingest-who-emergencies.ts",
+    "ingest:cdc": "tsx scripts/ingest-cdc-travel-notices.ts",
+    "ingest:reliefweb": "tsx scripts/ingest-reliefweb.ts",
+    "ingest:all": "tsx scripts/ingest-all.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
@@ -29,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

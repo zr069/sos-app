@@ -158,3 +158,24 @@ export interface Product {
   created_at: string
   updated_at: string
 }
+
+export type ReviewStatus = 'pending' | 'reviewed' | 'ignored'
+
+export interface SourceCandidate {
+  id: string
+  source_provider: string
+  external_id: string
+  title: string
+  url: string | null
+  publisher: string
+  published_at: string | null
+  fetched_at: string
+  raw_payload: any
+  extracted_summary: string | null
+  detected_keywords: string[] | null
+  detected_countries: string[] | null
+  review_status: ReviewStatus
+  linked_source_id: string | null
+  created_at: string
+  updated_at: string
+}
