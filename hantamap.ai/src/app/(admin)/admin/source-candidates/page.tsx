@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Admin: Source Review Queue' }
 export default async function SourceCandidatesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; provider?: string }>
+  searchParams: Promise<{ status?: string; provider?: string; type?: string }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
@@ -25,6 +25,13 @@ export default async function SourceCandidatesPage({
 
   if (params.provider) {
     query = query.eq('source_provider', params.provider)
+  }
+
+  const filterType = params.type || ''
+  if (filterType === 'official') {
+    query = query.eq('source_type', 'official')
+  } else if (filterType === 'media') {
+    query = query.in('source_type', ['media', 'aggregator'])
   }
 
   const { data: candidates } = await query
@@ -76,18 +83,40 @@ export default async function SourceCandidatesPage({
         ))}
       </div>
 
+      {/* Source type filter */}
+      <div className="flex gap-2 mb-3">
+        {[
+          { key: '', label: 'All types' },
+          { key: 'official', label: 'Official' },
+          { key: 'media', label: 'Media monitoring' },
+        ].map(t => (
+          <Link
+            key={t.key}
+            href={`/admin/source-candidates?status=${filterStatus}${params.provider ? `&provider=${params.provider}` : ''}${t.key ? `&type=${t.key}` : ''}`}
+            className={`text-xs px-2 py-1 rounded border transition-colors ${
+              filterType === t.key
+                ? 'bg-slate-100 border-slate-300 text-slate-800'
+                : 'text-slate-500 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
+
       {/* Provider filter */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {[
           { key: '', label: 'All providers' },
           { key: 'who-don', label: 'WHO DON' },
           { key: 'who-emergencies', label: 'WHO Emergencies' },
           { key: 'cdc-travel', label: 'CDC Travel' },
           { key: 'reliefweb', label: 'ReliefWeb' },
+          { key: 'google-news', label: 'Google News' },
         ].map(p => (
           <Link
             key={p.key}
-            href={`/admin/source-candidates?status=${filterStatus}${p.key ? `&provider=${p.key}` : ''}`}
+            href={`/admin/source-candidates?status=${filterStatus}${p.key ? `&provider=${p.key}` : ''}${filterType ? `&type=${filterType}` : ''}`}
             className={`text-xs px-2 py-1 rounded border transition-colors ${
               (params.provider || '') === p.key
                 ? 'bg-slate-100 border-slate-300 text-slate-800'
@@ -111,7 +140,16 @@ export default async function SourceCandidatesPage({
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-900 leading-snug">{c.title}</p>
                   <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                    <span className="text-xs text-slate-400">{c.publisher}</span>
+                    {c.source_type === 'media' && (
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">Media</span>
+                    )}
+                    {c.confidence_level === 'high' && (
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">High confidence</span>
+                    )}
+                    {c.is_public && (
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">Public</span>
+                    )}
+                    <span className="text-xs text-slate-400">{c.original_publisher || c.publisher}</span>
                     <span className="text-xs text-slate-300">|</span>
                     <span className="text-xs text-slate-400 uppercase">{c.source_provider}</span>
                     {c.published_at && (

@@ -22,39 +22,40 @@ import { ingestWhoDon } from './ingest-who-don'
 import { ingestWhoEmergencies } from './ingest-who-emergencies'
 import { ingestCdcTravel } from './ingest-cdc-travel-notices'
 import { ingestReliefWeb } from './ingest-reliefweb'
+import { ingestGoogleNews } from './ingest-google-news'
 
 async function main() {
   console.log('=== HantaMap Source Ingestion ===')
   console.log(`Started at ${new Date().toISOString()}\n`)
 
-  const results: Record<string, { imported: number; skipped: number; errors: number }> = {}
+  const results: Record<string, any> = {}
 
+  console.log('--- Official Sources ---')
   results['who-don'] = await ingestWhoDon()
   console.log('')
-
   results['who-emergencies'] = await ingestWhoEmergencies()
   console.log('')
-
   results['cdc-travel'] = await ingestCdcTravel()
   console.log('')
-
   results['reliefweb'] = await ingestReliefWeb()
+  console.log('')
+
+  console.log('--- Media Monitoring ---')
+  results['google-news'] = await ingestGoogleNews()
   console.log('')
 
   // Summary
   console.log('=== Summary ===')
   let totalImported = 0
-  let totalSkipped = 0
   let totalErrors = 0
 
   for (const [provider, r] of Object.entries(results)) {
-    console.log(`  ${provider}: ${r.imported} imported, ${r.skipped} skipped, ${r.errors} errors`)
+    console.log(`  ${provider}: ${r.imported} imported, ${r.errors} errors`)
     totalImported += r.imported
-    totalSkipped += r.skipped
     totalErrors += r.errors
   }
 
-  console.log(`\n  Total: ${totalImported} imported, ${totalSkipped} skipped, ${totalErrors} errors`)
+  console.log(`\n  Total: ${totalImported} imported, ${totalErrors} errors`)
   console.log(`Finished at ${new Date().toISOString()}`)
 
   process.exit(totalErrors > 0 ? 1 : 0)

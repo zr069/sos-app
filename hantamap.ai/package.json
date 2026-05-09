@@ -11,6 +11,7 @@
     "ingest:who-emergencies": "tsx scripts/ingest-who-emergencies.ts",
     "ingest:cdc": "tsx scripts/ingest-cdc-travel-notices.ts",
     "ingest:reliefweb": "tsx scripts/ingest-reliefweb.ts",
+    "ingest:media": "tsx scripts/ingest-google-news.ts",
     "ingest:all": "tsx scripts/ingest-all.ts"
   },
   "dependencies": {

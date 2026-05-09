@@ -162,6 +162,8 @@ export interface Product {
 }
 
 export type ReviewStatus = 'pending' | 'reviewed' | 'ignored'
+export type CandidateSourceType = 'official' | 'media' | 'aggregator'
+export type ConfidenceLevel = 'official' | 'high' | 'medium' | 'low'
 
 export interface SourceCandidate {
   id: string
@@ -178,6 +180,11 @@ export interface SourceCandidate {
   detected_countries: string[] | null
   review_status: ReviewStatus
   linked_source_id: string | null
+  source_type: CandidateSourceType
+  confidence_level: ConfidenceLevel
+  original_publisher: string | null
+  aggregator_source: string | null
+  is_public: boolean
   created_at: string
   updated_at: string
 }

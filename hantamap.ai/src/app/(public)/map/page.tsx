@@ -1,63 +1,58 @@
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
-import { MapFilters } from './map-filters'
-import { DynamicMap as MapView } from '@/components/map/dynamic-map'
+import { MapPageClient } from './map-page-client'
 
 export const metadata: Metadata = {
   title: 'Live Map',
-  description: 'Interactive map showing verified outbreak locations worldwide with source-backed data.',
+  description: 'Interactive outbreak map with verified reports and media monitoring layer.',
 }
 
 export const revalidate = 300
 
 export default async function MapPage() {
   let reports: any[] = []
-  let outbreaks: any[] = []
-  let countries: string[] = []
+  let mediaItems: any[] = []
+  let lastChecked: string | null = null
 
   try {
     const supabase = await createClient()
 
-    const [reportsRes, outbreaksRes] = await Promise.all([
+    const tenDaysAgo = new Date()
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
+
+    const [reportsRes, mediaRes] = await Promise.all([
       supabase
         .from('reports')
-        .select('*, outbreak:outbreaks(id, name, slug), location:locations(country, region, city, latitude, longitude)')
+        .select('*, outbreak:outbreaks(id, name, slug), location:locations(country, region, city, latitude, longitude, precision)')
         .eq('published', true),
       supabase
-        .from('outbreaks')
-        .select('id, name, slug')
-        .eq('published', true)
-        .order('name'),
+        .from('source_candidates')
+        .select('id, title, url, publisher, original_publisher, published_at, detected_countries, extracted_summary, confidence_level')
+        .eq('is_public', true)
+        .eq('source_type', 'media')
+        .gte('published_at', tenDaysAgo.toISOString()),
     ])
 
     reports = reportsRes.data || []
-    outbreaks = outbreaksRes.data || []
+    mediaItems = (mediaRes.data || []).map((item: any) => ({
+      ...item,
+      // Media items may not have exact lat/lng in source_candidates.
+      // Use detected_countries to approximate coordinates if needed.
+      // For now, pass through as-is. The map component filters out items without coords.
+      latitude: item.latitude ?? null,
+      longitude: item.longitude ?? null,
+    }))
 
-    const countrySet = new Set<string>()
-    reports.forEach((r: any) => {
-      if (r.location?.country) countrySet.add(r.location.country)
-    })
-    countries = Array.from(countrySet).sort()
+    lastChecked = new Date().toISOString()
   } catch {
     // Supabase not configured
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-3">
-        <div className="mx-auto max-w-7xl flex items-center justify-between">
-          <h1 className="text-sm font-semibold text-slate-900">Live outbreak map</h1>
-          <p className="text-xs text-slate-400">
-            {reports.length > 0
-              ? `${reports.length} published report${reports.length !== 1 ? 's' : ''}`
-              : 'No verified data available yet'}
-          </p>
-        </div>
-      </div>
-      <MapFilters outbreaks={outbreaks} countries={countries} />
-      <div className="flex-1">
-        <MapView reports={reports} height="100%" interactive={true} />
-      </div>
-    </div>
+    <MapPageClient
+      reports={reports}
+      mediaItems={mediaItems}
+      lastChecked={lastChecked}
+    />
   )
 }

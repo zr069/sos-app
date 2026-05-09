@@ -276,6 +276,101 @@ async function ingestReliefWeb(supabase: any) {
   }
 }
 
+// ---------- Google News Media Monitoring ----------
+
+const GOOGLE_NEWS_QUERIES = [
+  'hantavirus OR "hanta virus"',
+  '"Andes virus" OR "Andes hantavirus"',
+  '"MV Hondius" hantavirus',
+]
+
+const HIGH_CONFIDENCE = [
+  'reuters', 'associated press', 'ap news', 'bbc', 'cnn',
+  'the guardian', 'financial times', 'new york times', 'washington post',
+  'deutsche welle', 'dw', 'euronews', 'sky news', 'al jazeera',
+  'abc news', 'nbc news', 'france 24', 'bloomberg', 'politico',
+]
+
+function parseGoogleNewsItems(xml: string) {
+  const items: Array<{ title: string; link: string; pubDate: string; guid: string; publisher: string; cleanTitle: string; description: string }> = []
+  const re = /<item>([\s\S]*?)<\/item>/gi
+  let m
+  while ((m = re.exec(xml)) !== null) {
+    const b = m[1]
+    const getF = (t: string) => {
+      const r2 = new RegExp(`<${t}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${t}>|<${t}[^>]*>([^<]*)</${t}>`, 'i')
+      const m2 = b.match(r2)
+      return m2 ? (m2[1] || m2[2] || '').trim() : ''
+    }
+    const rawTitle = getF('title')
+    const link = getF('link')
+    const pubDate = getF('pubDate')
+    const description = getF('description')
+    const guid = getF('guid') || link
+    const dashIdx = rawTitle.lastIndexOf(' - ')
+    const publisher = dashIdx > 0 ? rawTitle.slice(dashIdx + 3).trim() : 'Unknown'
+    const cleanTitle = dashIdx > 0 ? rawTitle.slice(0, dashIdx).trim() : rawTitle
+    if (cleanTitle && link) items.push({ title: rawTitle, cleanTitle, link, pubDate, description, guid, publisher })
+  }
+  return items
+}
+
+async function ingestGoogleNewsCron(supabase: any) {
+  const MAX_AGE = 10 * 24 * 60 * 60 * 1000
+  const cutoff = Date.now() - MAX_AGE
+  let imported = 0, skipped = 0, skipped_irrelevant = 0, errors = 0
+  const seen = new Set<string>()
+
+  for (const q of GOOGLE_NEWS_QUERIES) {
+    try {
+      const res = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en&gl=US&ceid=US:en`, {
+        headers: { 'User-Agent': 'HantaMap.ai/1.0' },
+      })
+      if (!res.ok) continue
+      const xml = await res.text()
+      const items = parseGoogleNewsItems(xml)
+
+      for (const item of items) {
+        if (seen.has(item.guid)) continue
+        seen.add(item.guid)
+
+        let pub: Date | null = null
+        try { pub = new Date(item.pubDate); if (isNaN(pub.getTime())) pub = null } catch { pub = null }
+        if (!pub || pub.getTime() < cutoff) continue
+
+        const text = `${item.cleanTitle} ${item.description} ${item.publisher}`
+        if (!isMvpRelevant(text)) { skipped_irrelevant++; continue }
+
+        const conf = HIGH_CONFIDENCE.some(p => item.publisher.toLowerCase().includes(p)) ? 'high' : 'medium'
+        const desc = item.description ? item.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 2000) : null
+
+        const { error } = await supabase.from('source_candidates').upsert({
+          source_provider: 'google-news',
+          external_id: item.guid,
+          title: item.cleanTitle,
+          url: item.link,
+          publisher: item.publisher,
+          published_at: pub.toISOString(),
+          fetched_at: new Date().toISOString(),
+          raw_payload: { original_title: item.title, description: item.description, query: q },
+          extracted_summary: desc,
+          detected_keywords: detectKeywords(text),
+          detected_countries: [],
+          source_type: 'media',
+          confidence_level: conf,
+          original_publisher: item.publisher,
+          aggregator_source: 'Google News',
+          is_public: conf === 'high',
+        }, { onConflict: 'source_provider,external_id', ignoreDuplicates: true })
+
+        if (error) { if (error.code === '23505') skipped++; else errors++ }
+        else imported++
+      }
+    } catch { errors++ }
+  }
+  return { imported, skipped, skipped_irrelevant, errors }
+}
+
 // ---------- Main handler ----------
 
 export async function GET(request: NextRequest) {
@@ -308,19 +403,18 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient(url, key)
 
-  const results: Record<string, { imported: number; skipped: number; skipped_irrelevant: number; errors: number }> = {}
+  const results: Record<string, any> = {}
 
   results['who-don'] = await ingestWhoDon(supabase)
   results['who-emergencies'] = await ingestWhoEmergencies(supabase)
   results['cdc-travel'] = await ingestCdc(supabase)
   results['reliefweb'] = await ingestReliefWeb(supabase)
+  results['google-news'] = await ingestGoogleNewsCron(supabase)
 
   let totalImported = 0
-  let totalSkippedIrrelevant = 0
   let totalErrors = 0
   for (const r of Object.values(results)) {
     totalImported += r.imported
-    totalSkippedIrrelevant += r.skipped_irrelevant
     totalErrors += r.errors
   }
 
@@ -329,7 +423,6 @@ export async function GET(request: NextRequest) {
     topic: 'hantavirus',
     timestamp: new Date().toISOString(),
     total_imported: totalImported,
-    total_skipped_irrelevant: totalSkippedIrrelevant,
     total_errors: totalErrors,
     providers: results,
   })

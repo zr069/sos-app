@@ -19,18 +19,25 @@ export default async function HomePage() {
   let outbreakCount = 0
   let reportCount = 0
   let countryCount = 0
+  let mediaSignalCount = 0
   let updates: any[] = []
   let reports: any[] = []
   let recentReports: any[] = []
+  let mediaItems: any[] = []
 
   try {
     const supabase = await createClient()
 
-    const [outbreaksRes, reportsRes, updatesRes, reportsWithLocRes] = await Promise.all([
+    const tenDaysAgo = new Date()
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
+    const tenDaysAgoISO = tenDaysAgo.toISOString()
+
+    const [outbreaksRes, reportsRes, updatesRes, reportsWithLocRes, mediaRes] = await Promise.all([
       supabase.from('outbreaks').select('id', { count: 'exact' }).eq('published', true),
       supabase.from('reports').select('id, location_id, locations(country)', { count: 'exact' }).eq('published', true),
       supabase.from('updates').select('*, outbreak:outbreaks(name, slug), location:locations(country, region, city)').eq('published', true).order('published_at', { ascending: false }).limit(5),
       supabase.from('reports').select('*, outbreak:outbreaks(name, slug), location:locations(country, region, city, latitude, longitude)').eq('published', true).order('created_at', { ascending: false }).limit(50),
+      supabase.from('source_candidates').select('id, title, url, publisher, original_publisher, published_at, confidence_level, source_type').eq('is_public', true).eq('source_type', 'media').gte('published_at', tenDaysAgoISO).order('published_at', { ascending: false }).limit(10),
     ])
 
     outbreakCount = outbreaksRes.count || 0
@@ -45,6 +52,8 @@ export default async function HomePage() {
 
     updates = updatesRes.data || []
     reports = reportsWithLocRes.data || []
+    mediaItems = mediaRes.data || []
+    mediaSignalCount = mediaItems.length
 
     // Recent reports for table
     const recentRes = await supabase
@@ -105,9 +114,9 @@ export default async function HomePage() {
             subtitle="With published reports"
           />
           <MetricCard
-            label="Data sources"
-            value="WHO, ECDC, CDC"
-            subtitle="Prioritized hierarchy"
+            label="Media signals"
+            value={mediaSignalCount || 'None'}
+            subtitle="Last 10 days, not verified"
           />
         </div>
       </section>
@@ -147,6 +156,61 @@ export default async function HomePage() {
           />
         )}
       </section>
+
+      {/* Media Monitoring */}
+      {mediaItems.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Media monitoring</h2>
+            <Link href="/updates?tab=media" className="text-xs text-slate-500 hover:text-slate-700">
+              View all
+            </Link>
+          </div>
+          {updates.length === 0 && (
+            <div className="bg-slate-50 border border-slate-200 rounded p-4 mb-4">
+              <p className="text-sm text-slate-600">
+                No official Hantavirus reports published yet. Recent media monitoring is active.
+              </p>
+            </div>
+          )}
+          <div className="space-y-3">
+            {mediaItems.map((item: any) => (
+              <article key={item.id} className="border border-slate-200 rounded p-5 bg-amber-50/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded border ${
+                    item.confidence_level === 'high'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}>
+                    {item.confidence_level === 'high' ? 'High confidence' : 'Media'}
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold text-slate-900 leading-snug">
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-slate-700"
+                  >
+                    {item.title}
+                  </a>
+                </h3>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-xs text-slate-500">
+                    {item.original_publisher || item.publisher}
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    {item.published_at
+                      ? new Date(item.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : 'Date unknown'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-2">Media monitoring: awaiting official confirmation</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Affected Regions Table */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
