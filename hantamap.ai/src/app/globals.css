@@ -27,11 +27,27 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  background: #061417;
+}
+
 body {
-  background: var(--bg-primary);
+  background: #061417;
   color: var(--text-primary);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* Leaflet container must fill parent */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  background: #061417 !important;
 }
 
 /* Leaflet dark overrides */

@@ -161,5 +161,5 @@ export function MapView({ reports = [], mediaItems = [], height = '500px', inter
     }
   }, [reports, mediaItems, showMedia, autoFit, handleClick])
 
-  return <div ref={mapRef} style={{ height, width: '100%' }} className="bg-[var(--bg-primary)]" />
+  return <div ref={mapRef} style={{ height, width: '100%', position: 'absolute', inset: 0 }} className="bg-[#061417]" />
 }
