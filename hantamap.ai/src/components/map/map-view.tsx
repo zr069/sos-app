@@ -165,7 +165,15 @@ export function MapView({
       })
 
       const marker = L.marker([loc.latitude, loc.longitude], { icon }).addTo(map)
-      marker.bindPopup(buildPopup(report), { maxWidth: 320, closeButton: true, className: 'hm-popup' })
+      marker.bindPopup(buildPopup(report), {
+        maxWidth: Math.min(320, window.innerWidth - 48),
+        minWidth: 200,
+        closeButton: true,
+        className: 'hm-popup',
+        autoPan: true,
+        autoPanPadding: L.point(24, 24),
+        keepInView: true,
+      })
       marker.on('click', () => handleClick(report))
       markersRef.current.push(marker)
     })
@@ -182,7 +190,15 @@ export function MapView({
           </div>`,
         })
         const marker = L.marker([item.latitude, item.longitude], { icon }).addTo(map)
-        marker.bindPopup(buildMediaPopup(item), { maxWidth: 300, closeButton: true, className: 'hm-popup' })
+        marker.bindPopup(buildMediaPopup(item), {
+          maxWidth: Math.min(300, window.innerWidth - 48),
+          minWidth: 180,
+          closeButton: true,
+          className: 'hm-popup',
+          autoPan: true,
+          autoPanPadding: L.point(24, 24),
+          keepInView: true,
+        })
         markersRef.current.push(marker)
       })
     }
