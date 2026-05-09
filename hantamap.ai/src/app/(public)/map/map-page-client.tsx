@@ -22,29 +22,11 @@ function dayStr(d: Date) {
   return d.toISOString().slice(0, 10)
 }
 
-const REPORT_LABELS: Record<string, string> = {
-  outbreak_origin: 'Cluster origin',
-  confirmed_case_location: 'Confirmed case',
-  probable_case_location: 'Probable case',
-  suspected_case_location: 'Suspected case',
-  treatment_location: 'Treatment location',
-  monitoring_location: 'Monitoring',
-  evacuation_location: 'Evacuation',
-  response_location: 'Response location',
-  media_signal: 'Media signal',
-}
-
-const CLUSTER_LABELS: Record<string, string> = {
-  linked_to_mv_hondius: 'Linked to MV Hondius',
-  separate_hantavirus_case: 'Separate signal',
-}
-
 // ── Component ──
 
 export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClientProps) {
   const [showOfficial, setShowOfficial] = useState(true)
   const [showMedia, setShowMedia] = useState(true)
-  const [selected, setSelected] = useState<any>(null)
   const [timelineOpen, setTimelineOpen] = useState(false)
   const [playbackDay, setPlaybackDay] = useState<string | null>(null)
   const [playing, setPlaying] = useState(false)
@@ -132,14 +114,12 @@ export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClien
     return () => clearInterval(interval)
   })
 
-  const handleMarkerSelect = useCallback((r: any) => { setSelected(r) }, [])
-
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={{ background: '#02090b', zIndex: 10 }}>
 
-      {/* Map */}
+      {/* Map: Leaflet popups handle marker details (anchored with pointer) */}
       <div className="absolute inset-0">
-        <MapView reports={visibleReports} mediaItems={visibleMedia} height="100%" interactive={true} showMedia={showMedia} captureScroll={true} onMarkerSelect={handleMarkerSelect} />
+        <MapView reports={visibleReports} mediaItems={visibleMedia} height="100%" interactive={true} showMedia={showMedia} captureScroll={true} />
       </div>
 
       {/* Overlays */}
@@ -199,71 +179,31 @@ export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClien
           </div>
         </div>
 
-        {/* ── Selected marker panel (single, right on desktop, bottom on mobile) ── */}
-        {selected && (
-          <>
-            {/* Desktop: right panel */}
-            <div className="absolute top-14 right-3 hidden sm:block pointer-events-auto" style={{ width: '280px' }}>
-              <div className="bg-[#0b1a1f]/95 border border-white/[0.08] rounded-2xl p-4 backdrop-blur-xl">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-sm font-bold text-white/90 leading-tight pr-2">{selected.outbreak?.name || selected.title || 'Signal'}</h3>
-                  <button onClick={() => setSelected(null)} className="text-white/30 hover:text-white/70 p-0.5 flex-shrink-0">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </div>
-                <p className="text-[10px] text-white/40 mb-3">{[selected.location?.city, selected.location?.region, selected.location?.country].filter(Boolean).join(', ')}</p>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ color: selected.counts_as_case !== false ? '#ff4d57' : '#38bdf8', background: selected.counts_as_case !== false ? 'rgba(255,77,87,0.12)' : 'rgba(56,189,248,0.12)', border: `1px solid ${selected.counts_as_case !== false ? 'rgba(255,77,87,0.2)' : 'rgba(56,189,248,0.2)'}` }}>
-                    {REPORT_LABELS[selected.report_type] || 'Report'}
-                  </span>
-                  {selected.cluster_relation && CLUSTER_LABELS[selected.cluster_relation] && (
-                    <span className="text-[8px] text-white/30 px-2 py-0.5 rounded-full border border-white/[0.06]">{CLUSTER_LABELS[selected.cluster_relation]}</span>
-                  )}
-                </div>
-                {selected.counts_as_case !== false ? (
-                  <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div className="bg-white/[0.03] rounded-lg p-2.5">
-                      <div className="text-[8px] text-white/30 uppercase tracking-wider">Confirmed</div>
-                      <div className="text-lg font-bold text-white/90 tabular-nums">{selected.confirmed_cases ?? 'Unknown'}</div>
-                    </div>
-                    <div className="bg-white/[0.03] rounded-lg p-2.5">
-                      <div className="text-[8px] text-white/30 uppercase tracking-wider">Deaths</div>
-                      <div className="text-lg font-bold text-white/90 tabular-nums">{selected.deaths ?? 'Unknown'}</div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-[10px] text-white/30 mb-3">Does not count toward confirmed case totals.</p>
-                )}
-                {selected.location?.precision === 'approximate' && <p className="text-[9px] text-[#ffb240] mb-2">Approximate location</p>}
-                {selected.editor_note && <p className="text-[9px] text-white/25 italic mb-3 line-clamp-3">{selected.editor_note}</p>}
-                {selected.outbreak?.slug && (
-                  <Link href={`/outbreaks/${selected.outbreak.slug}`} className="block text-center text-[10px] font-medium py-2 rounded-full bg-white/[0.05] text-white/50 hover:bg-white/[0.08] hover:text-white/70 transition-colors">Open full report</Link>
-                )}
+        {/* ── Right panel: overview stats (desktop only, not for selected marker) ── */}
+        <div className="absolute top-14 right-3 hidden sm:block pointer-events-auto" style={{ width: '260px' }}>
+          <div className="bg-[#0b1a1f]/90 border border-white/[0.06] rounded-2xl p-4 backdrop-blur-xl">
+            <h3 className="text-xs font-bold text-white/70 mb-3">Hantavirus overview</h3>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="bg-white/[0.03] rounded-lg p-2.5">
+                <div className="text-[7px] text-white/25 uppercase tracking-wider">Confirmed</div>
+                <div className="text-lg font-bold text-[#ff4d57] tabular-nums">{hasConfirmed ? totalConfirmed : '-'}</div>
+              </div>
+              <div className="bg-white/[0.03] rounded-lg p-2.5">
+                <div className="text-[7px] text-white/25 uppercase tracking-wider">Deaths</div>
+                <div className="text-lg font-bold text-white/80 tabular-nums">{hasDeaths ? totalDeaths : '-'}</div>
+              </div>
+              <div className="bg-white/[0.03] rounded-lg p-2.5">
+                <div className="text-[7px] text-white/25 uppercase tracking-wider">Locations</div>
+                <div className="text-lg font-bold text-[#38bdf8] tabular-nums">{filteredReports.length}</div>
+              </div>
+              <div className="bg-white/[0.03] rounded-lg p-2.5">
+                <div className="text-[7px] text-white/25 uppercase tracking-wider">Media</div>
+                <div className="text-lg font-bold text-[#ffb240] tabular-nums">{filteredMedia.length}</div>
               </div>
             </div>
-            {/* Mobile: bottom sheet */}
-            <div className="absolute bottom-16 left-3 right-3 sm:hidden pointer-events-auto safe-bottom">
-              <div className="bg-[#0b1a1f]/95 border border-white/[0.08] rounded-2xl p-4 backdrop-blur-xl">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-sm font-bold text-white/90">{selected.outbreak?.name || selected.title || 'Signal'}</h3>
-                  <button onClick={() => setSelected(null)} className="text-white/30 hover:text-white/70 p-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ color: selected.counts_as_case !== false ? '#ff4d57' : '#38bdf8', background: selected.counts_as_case !== false ? 'rgba(255,77,87,0.12)' : 'rgba(56,189,248,0.12)' }}>{REPORT_LABELS[selected.report_type] || 'Report'}</span>
-                  <span className="text-[10px] text-white/30">{[selected.location?.city, selected.location?.country].filter(Boolean).join(', ')}</span>
-                </div>
-                {selected.counts_as_case !== false && (
-                  <div className="flex gap-4 mb-2">
-                    <div><span className="text-[8px] text-white/30 uppercase">Confirmed </span><span className="text-sm font-bold text-white/90 tabular-nums">{selected.confirmed_cases ?? '?'}</span></div>
-                    <div><span className="text-[8px] text-white/30 uppercase">Deaths </span><span className="text-sm font-bold text-white/90 tabular-nums">{selected.deaths ?? '?'}</span></div>
-                  </div>
-                )}
-                {selected.location?.precision === 'approximate' && <p className="text-[9px] text-[#ffb240] mb-2">Approximate location</p>}
-                {selected.outbreak?.slug && <Link href={`/outbreaks/${selected.outbreak.slug}`} className="block text-center text-[10px] font-medium py-2 rounded-full bg-white/[0.05] text-white/50">Open full report</Link>}
-              </div>
-            </div>
-          </>
-        )}
+            <p className="text-[8px] text-white/20">Click a marker for details. Media signals are not confirmed cases.</p>
+          </div>
+        </div>
 
         {/* ── Bottom rail ── */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-auto safe-bottom">
