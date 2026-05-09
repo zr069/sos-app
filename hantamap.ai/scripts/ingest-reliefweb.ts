@@ -1,33 +1,55 @@
 /**
- * Ingest ReliefWeb Reports (disease/epidemic topic)
- * Source: https://api.reliefweb.int/v1/reports
+ * Ingest ReliefWeb Reports (Health theme)
+ * Source: https://api.reliefweb.int/v2/reports
  * Publisher: ReliefWeb (OCHA)
  * Does NOT publish any public data.
+ *
+ * Requires approved appname from ReliefWeb.
+ * Register at: https://apidoc.reliefweb.int/parameters#appname
+ * Set RELIEFWEB_APPNAME in environment variables.
  */
 
 import { getSupabase, detectKeywords, detectCountries, upsertCandidates, log, type CandidateRow } from './shared'
 
 const PROVIDER = 'reliefweb'
-const API_URL = 'https://api.reliefweb.int/v1/reports'
+const API_URL = 'https://api.reliefweb.int/v2/reports'
 const PUBLISHER = 'ReliefWeb (OCHA)'
 
 async function fetchItems(): Promise<any[]> {
-  const params = new URLSearchParams({
-    'appname': 'hantamap.ai',
-    'preset': 'latest',
-    'limit': '50',
-    'filter[field]': 'theme.name',
-    'filter[value]': 'Health',
-    'fields[include][]': 'title,url_alias,source,date,body-html,country',
+  const appname = process.env.RELIEFWEB_APPNAME
+  if (!appname) {
+    log(PROVIDER, 'RELIEFWEB_APPNAME is not set. Register at https://apidoc.reliefweb.int/parameters#appname')
+    log(PROVIDER, 'Skipping ReliefWeb ingestion.')
+    return []
+  }
+
+  const res = await fetch(`${API_URL}?appname=${encodeURIComponent(appname)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      preset: 'latest',
+      limit: 50,
+      fields: {
+        include: ['title', 'url_alias', 'source', 'date', 'country'],
+      },
+      filter: {
+        field: 'theme.name',
+        value: 'Health',
+      },
+    }),
   })
 
-  // ReliefWeb also supports filter by disaster type
-  const res = await fetch(`${API_URL}?${params.toString()}`, {
-    headers: { 'Accept': 'application/json' },
-  })
+  if (res.status === 403) {
+    const body = await res.json().catch(() => null)
+    const msg = body?.error?.message || 'Access denied'
+    log(PROVIDER, `API returned 403: ${msg}`)
+    log(PROVIDER, 'Your appname may not be approved yet. Register at https://apidoc.reliefweb.int/parameters#appname')
+    return []
+  }
 
   if (!res.ok) {
-    throw new Error(`ReliefWeb API returned ${res.status}: ${res.statusText}`)
+    const body = await res.text().catch(() => '')
+    throw new Error(`ReliefWeb API returned ${res.status}: ${body.slice(0, 200)}`)
   }
 
   const data = await res.json()
@@ -42,7 +64,7 @@ function normalizeItem(item: any): CandidateRow | null {
   const title = fields.title
   if (!title) return null
 
-  const urlAlias = fields.url_alias || fields['url_alias']
+  const urlAlias = fields.url_alias
   const url = urlAlias
     ? `https://reliefweb.int${urlAlias}`
     : `https://reliefweb.int/node/${id}`
@@ -60,18 +82,7 @@ function normalizeItem(item: any): CandidateRow | null {
     ? countries.map((c: any) => c.name).filter(Boolean)
     : []
 
-  // Extract summary from body-html if available (strip tags)
-  let summary: string | null = null
-  const bodyHtml = fields['body-html']
-  if (bodyHtml) {
-    summary = bodyHtml
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 2000)
-  }
-
-  const searchText = [title, summary || '', ...countryNames].join(' ')
+  const searchText = [title, ...countryNames].join(' ')
 
   return {
     source_provider: PROVIDER,
@@ -81,7 +92,7 @@ function normalizeItem(item: any): CandidateRow | null {
     publisher: publisherName,
     published_at: publishedAt ? new Date(publishedAt).toISOString() : null,
     raw_payload: item,
-    extracted_summary: summary,
+    extracted_summary: null,
     detected_keywords: detectKeywords(searchText),
     detected_countries: [...new Set([...countryNames, ...detectCountries(searchText)])],
   }
@@ -98,6 +109,11 @@ export async function ingestReliefWeb() {
     return { imported: 0, skipped: 0, errors: 1 }
   }
 
+  if (items.length === 0) {
+    log(PROVIDER, 'No items to import.')
+    return { imported: 0, skipped: 0, errors: 0 }
+  }
+
   log(PROVIDER, `Fetched ${items.length} items from API`)
 
   const candidates = items
@@ -105,11 +121,6 @@ export async function ingestReliefWeb() {
     .filter((c): c is CandidateRow => c !== null)
 
   log(PROVIDER, `Normalized ${candidates.length} candidates`)
-
-  if (candidates.length === 0) {
-    log(PROVIDER, 'No candidates to import.')
-    return { imported: 0, skipped: 0, errors: 0 }
-  }
 
   const supabase = getSupabase()
   const result = await upsertCandidates(supabase, candidates)

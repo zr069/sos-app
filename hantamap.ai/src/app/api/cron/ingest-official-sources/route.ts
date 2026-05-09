@@ -190,16 +190,31 @@ async function ingestCdc(supabase: any) {
 // ---------- ReliefWeb ----------
 
 async function ingestReliefWeb(supabase: any) {
-  try {
-    const params = new URLSearchParams({
-      appname: 'hantamap.ai',
-      preset: 'latest',
-      limit: '50',
-      'filter[field]': 'theme.name',
-      'filter[value]': 'Health',
-    })
+  // ReliefWeb v2 API requires an approved appname.
+  // If RELIEFWEB_APPNAME is not set, skip gracefully (not an error).
+  const appname = process.env.RELIEFWEB_APPNAME
+  if (!appname) {
+    return { imported: 0, skipped: 0, errors: 0 }
+  }
 
-    const res = await fetch(`https://api.reliefweb.int/v1/reports?${params}`)
+  try {
+    const res = await fetch(
+      `https://api.reliefweb.int/v2/reports?appname=${encodeURIComponent(appname)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          preset: 'latest',
+          limit: 50,
+          fields: {
+            include: ['title', 'url_alias', 'source', 'date', 'country'],
+          },
+          filter: { field: 'theme.name', value: 'Health' },
+        }),
+      }
+    )
+
+    if (res.status === 403) return { imported: 0, skipped: 0, errors: 0 }
     if (!res.ok) return { imported: 0, skipped: 0, errors: 1 }
 
     const data = await res.json()
@@ -217,9 +232,14 @@ async function ingestReliefWeb(supabase: any) {
         ? sources.map((s: any) => s.name).filter(Boolean).join(', ')
         : 'ReliefWeb (OCHA)'
 
+      const countries = fields.country || []
+      const countryNames = Array.isArray(countries)
+        ? countries.map((c: any) => c.name).filter(Boolean)
+        : []
+
       const dateFields = fields.date || {}
       const publishedAt = dateFields.created || dateFields.original || null
-      const searchText = title
+      const searchText = [title, ...countryNames].join(' ')
 
       return {
         source_provider: 'reliefweb',
@@ -231,7 +251,7 @@ async function ingestReliefWeb(supabase: any) {
         raw_payload: item,
         extracted_summary: null,
         detected_keywords: detectKeywords(searchText),
-        detected_countries: [],
+        detected_countries: [...new Set(countryNames)],
       }
     }).filter(Boolean) as CandidateRow[]
 
