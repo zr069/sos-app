@@ -77,17 +77,19 @@ create trigger trg_prevent_role_escalation
   execute function public.prevent_role_escalation();
 
 -- ============================================================
--- ADDITIONAL SAFETY: Prevent anonymous inserts on user tables
--- These are already handled by RLS (auth.uid() = user_id),
--- but adding explicit deny for clarity.
+-- ADMIN PROFILE ACCESS
+-- Uses a security definer function to avoid RLS recursion
+-- when checking admin role from within the profiles table.
 -- ============================================================
 
--- Profiles: admin can view all profiles (needed for admin dashboard)
+create or replace function public.is_admin(check_user_id uuid)
+returns boolean as $$
+  select exists (
+    select 1 from public.profiles
+    where user_id = check_user_id and role = 'admin'
+  );
+$$ language sql security definer stable;
+
 create policy "Admins can view all profiles"
   on public.profiles for select
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.user_id = auth.uid() and p.role = 'admin'
-    )
-  );
+  using (public.is_admin(auth.uid()));
