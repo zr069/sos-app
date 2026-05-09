@@ -81,7 +81,7 @@ export async function ingestCdcTravel() {
     items = await fetchItems()
   } catch (err: any) {
     log(PROVIDER, `Failed to fetch: ${err.message}`)
-    return { imported: 0, skipped: 0, errors: 1 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
   }
 
   log(PROVIDER, `Parsed ${items.length} items from RSS feed`)
@@ -90,13 +90,13 @@ export async function ingestCdcTravel() {
 
   if (candidates.length === 0) {
     log(PROVIDER, 'No candidates to import.')
-    return { imported: 0, skipped: 0, errors: 0 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 0 }
   }
 
   const supabase = getSupabase()
   const result = await upsertCandidates(supabase, candidates)
 
-  log(PROVIDER, `Done: ${result.imported} imported, ${result.skipped} skipped, ${result.errors} errors`)
+  log(PROVIDER, `Done: ${result.imported} imported, ${result.skipped} skipped, ${result.skipped_irrelevant} irrelevant, ${result.errors} errors`)
   return result
 }
 

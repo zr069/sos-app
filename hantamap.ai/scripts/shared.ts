@@ -93,6 +93,34 @@ export function detectCountries(text: string): string[] {
   })
 }
 
+// ---------- MVP topic filter ----------
+
+// Inline the topic config to avoid importing from src/ in scripts
+const MVP_ALLOWED_KEYWORDS = [
+  'hantavirus', 'hanta virus', 'andes virus', 'andes hantavirus',
+  'orthohantavirus', 'hantavirus pulmonary syndrome',
+  'hantavirus cardiopulmonary syndrome', 'hps', 'hcps',
+  'hemorrhagic fever with renal syndrome',
+  'haemorrhagic fever with renal syndrome', 'hfrs', 'hondius',
+]
+const MVP_CONTEXT_REQUIRED = ['hps', 'hcps', 'hfrs', 'hondius']
+const MVP_UNAMBIGUOUS = MVP_ALLOWED_KEYWORDS.filter(
+  kw => !MVP_CONTEXT_REQUIRED.includes(kw)
+)
+
+export function isMvpRelevant(text: string): boolean {
+  const lower = text.toLowerCase()
+  for (const kw of MVP_UNAMBIGUOUS) {
+    if (lower.includes(kw)) return true
+  }
+  for (const term of MVP_CONTEXT_REQUIRED) {
+    if (lower.includes(term)) {
+      if (MVP_UNAMBIGUOUS.some(kw => lower.includes(kw))) return true
+    }
+  }
+  return false
+}
+
 // ---------- Upsert helper ----------
 
 export interface CandidateRow {
@@ -111,12 +139,25 @@ export interface CandidateRow {
 export async function upsertCandidates(
   supabase: ReturnType<typeof getSupabase>,
   candidates: CandidateRow[]
-): Promise<{ imported: number; skipped: number; errors: number }> {
+): Promise<{ imported: number; skipped: number; skipped_irrelevant: number; errors: number }> {
   let imported = 0
   let skipped = 0
+  let skipped_irrelevant = 0
   let errors = 0
 
   for (const c of candidates) {
+    // MVP topic filter: only import hantavirus-related candidates
+    const searchText = [
+      c.title,
+      c.extracted_summary || '',
+      JSON.stringify(c.raw_payload || ''),
+    ].join(' ')
+
+    if (!isMvpRelevant(searchText)) {
+      skipped_irrelevant++
+      continue
+    }
+
     const { error } = await supabase
       .from('source_candidates')
       .upsert(
@@ -138,7 +179,6 @@ export async function upsertCandidates(
 
     if (error) {
       if (error.code === '23505') {
-        // Duplicate, already exists
         skipped++
       } else {
         console.error(`  Error inserting "${c.title}": ${error.message}`)
@@ -149,7 +189,7 @@ export async function upsertCandidates(
     }
   }
 
-  return { imported, skipped, errors }
+  return { imported, skipped, skipped_irrelevant, errors }
 }
 
 export function log(provider: string, msg: string) {

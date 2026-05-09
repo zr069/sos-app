@@ -106,12 +106,12 @@ export async function ingestReliefWeb() {
     items = await fetchItems()
   } catch (err: any) {
     log(PROVIDER, `Failed to fetch: ${err.message}`)
-    return { imported: 0, skipped: 0, errors: 1 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
   }
 
   if (items.length === 0) {
     log(PROVIDER, 'No items to import.')
-    return { imported: 0, skipped: 0, errors: 0 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 0 }
   }
 
   log(PROVIDER, `Fetched ${items.length} items from API`)
@@ -125,7 +125,7 @@ export async function ingestReliefWeb() {
   const supabase = getSupabase()
   const result = await upsertCandidates(supabase, candidates)
 
-  log(PROVIDER, `Done: ${result.imported} imported, ${result.skipped} skipped, ${result.errors} errors`)
+  log(PROVIDER, `Done: ${result.imported} imported, ${result.skipped} skipped, ${result.skipped_irrelevant} irrelevant, ${result.errors} errors`)
   return result
 }
 

@@ -38,13 +38,20 @@ export default async function SourceCandidatesPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Source review queue</h1>
           <p className="text-sm text-slate-500 mt-1">
             Imported source candidates awaiting editorial review. No public data has been created yet.
           </p>
         </div>
+      </div>
+
+      <div className="border border-slate-200 rounded p-3 bg-slate-50 mb-6">
+        <p className="text-xs text-slate-600">
+          <span className="font-medium">Current ingestion topic:</span> Hantavirus / Andes-Hantavirus.
+          Only sources matching this topic are imported. Irrelevant sources are skipped during ingestion.
+        </p>
       </div>
 
       {/* Status filter tabs */}

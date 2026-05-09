@@ -11,21 +11,31 @@ import { createClient } from '@supabase/supabase-js'
 
 // ---------- Shared helpers (inlined to avoid script imports in edge) ----------
 
-const DISEASE_KEYWORDS = [
-  'hantavirus', 'andes virus', 'andes hantavirus',
-  'hemorrhagic fever', 'haemorrhagic fever',
-  'avian influenza', 'bird flu', 'h5n1', 'h7n9',
-  'mpox', 'monkeypox', 'ebola', 'marburg', 'cholera',
-  'dengue', 'measles', 'yellow fever', 'covid', 'sars-cov-2',
-  'coronavirus', 'influenza', 'plague', 'nipah', 'lassa fever',
-  'zika', 'chikungunya', 'meningitis', 'diphtheria',
-  'polio', 'poliovirus', 'anthrax', 'rift valley fever',
-  'mers', 'hepatitis',
+// MVP topic filter: Hantavirus only
+const MVP_UNAMBIGUOUS = [
+  'hantavirus', 'hanta virus', 'andes virus', 'andes hantavirus',
+  'orthohantavirus', 'hantavirus pulmonary syndrome',
+  'hantavirus cardiopulmonary syndrome',
+  'hemorrhagic fever with renal syndrome',
+  'haemorrhagic fever with renal syndrome',
 ]
+const MVP_CONTEXT_REQUIRED = ['hps', 'hcps', 'hfrs', 'hondius']
+
+function isMvpRelevant(text: string): boolean {
+  const lower = text.toLowerCase()
+  for (const kw of MVP_UNAMBIGUOUS) {
+    if (lower.includes(kw)) return true
+  }
+  for (const term of MVP_CONTEXT_REQUIRED) {
+    if (lower.includes(term) && MVP_UNAMBIGUOUS.some(kw => lower.includes(kw))) return true
+  }
+  return false
+}
 
 function detectKeywords(text: string): string[] {
   const lower = text.toLowerCase()
-  return DISEASE_KEYWORDS.filter(kw => lower.includes(kw))
+  const all = [...MVP_UNAMBIGUOUS, ...MVP_CONTEXT_REQUIRED]
+  return all.filter(kw => lower.includes(kw))
 }
 
 interface CandidateRow {
@@ -42,8 +52,13 @@ interface CandidateRow {
 }
 
 async function upsertCandidates(supabase: any, candidates: CandidateRow[]) {
-  let imported = 0, skipped = 0, errors = 0
+  let imported = 0, skipped = 0, skipped_irrelevant = 0, errors = 0
   for (const c of candidates) {
+    const searchText = [c.title, c.extracted_summary || '', JSON.stringify(c.raw_payload || '')].join(' ')
+    if (!isMvpRelevant(searchText)) {
+      skipped_irrelevant++
+      continue
+    }
     const { error } = await supabase
       .from('source_candidates')
       .upsert({
@@ -57,7 +72,7 @@ async function upsertCandidates(supabase: any, candidates: CandidateRow[]) {
       imported++
     }
   }
-  return { imported, skipped, errors }
+  return { imported, skipped, skipped_irrelevant, errors }
 }
 
 // ---------- WHO Disease Outbreak News ----------
@@ -67,7 +82,7 @@ async function ingestWhoDon(supabase: any) {
     const res = await fetch('https://www.who.int/api/news/diseaseoutbreaknews', {
       headers: { 'Accept': 'application/json' },
     })
-    if (!res.ok) return { imported: 0, skipped: 0, errors: 1 }
+    if (!res.ok) return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
 
     const data = await res.json()
     const items = Array.isArray(data) ? data : data.value || data.Data || []
@@ -95,7 +110,7 @@ async function ingestWhoDon(supabase: any) {
 
     return await upsertCandidates(supabase, candidates)
   } catch {
-    return { imported: 0, skipped: 0, errors: 1 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
   }
 }
 
@@ -106,7 +121,7 @@ async function ingestWhoEmergencies(supabase: any) {
     const res = await fetch('https://www.who.int/api/emergencies/diseaseoutbreaknews', {
       headers: { 'Accept': 'application/json' },
     })
-    if (!res.ok) return { imported: 0, skipped: 0, errors: 1 }
+    if (!res.ok) return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
 
     const data = await res.json()
     const items = Array.isArray(data) ? data : data.value || data.Data || []
@@ -134,7 +149,7 @@ async function ingestWhoEmergencies(supabase: any) {
 
     return await upsertCandidates(supabase, candidates)
   } catch {
-    return { imported: 0, skipped: 0, errors: 1 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
   }
 }
 
@@ -143,7 +158,7 @@ async function ingestWhoEmergencies(supabase: any) {
 async function ingestCdc(supabase: any) {
   try {
     const res = await fetch('https://wwwnc.cdc.gov/travel/rss/notices.xml')
-    if (!res.ok) return { imported: 0, skipped: 0, errors: 1 }
+    if (!res.ok) return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
 
     const xml = await res.text()
     const itemRegex = /<item>([\s\S]*?)<\/item>/gi
@@ -183,7 +198,7 @@ async function ingestCdc(supabase: any) {
 
     return await upsertCandidates(supabase, candidates)
   } catch {
-    return { imported: 0, skipped: 0, errors: 1 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
   }
 }
 
@@ -194,7 +209,7 @@ async function ingestReliefWeb(supabase: any) {
   // If RELIEFWEB_APPNAME is not set, skip gracefully (not an error).
   const appname = process.env.RELIEFWEB_APPNAME
   if (!appname) {
-    return { imported: 0, skipped: 0, errors: 0 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 0 }
   }
 
   try {
@@ -214,8 +229,8 @@ async function ingestReliefWeb(supabase: any) {
       }
     )
 
-    if (res.status === 403) return { imported: 0, skipped: 0, errors: 0 }
-    if (!res.ok) return { imported: 0, skipped: 0, errors: 1 }
+    if (res.status === 403) return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 0 }
+    if (!res.ok) return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
 
     const data = await res.json()
     const items = data.data || []
@@ -257,7 +272,7 @@ async function ingestReliefWeb(supabase: any) {
 
     return await upsertCandidates(supabase, candidates)
   } catch {
-    return { imported: 0, skipped: 0, errors: 1 }
+    return { imported: 0, skipped: 0, skipped_irrelevant: 0, errors: 1 }
   }
 }
 
@@ -293,7 +308,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient(url, key)
 
-  const results: Record<string, { imported: number; skipped: number; errors: number }> = {}
+  const results: Record<string, { imported: number; skipped: number; skipped_irrelevant: number; errors: number }> = {}
 
   results['who-don'] = await ingestWhoDon(supabase)
   results['who-emergencies'] = await ingestWhoEmergencies(supabase)
@@ -301,16 +316,20 @@ export async function GET(request: NextRequest) {
   results['reliefweb'] = await ingestReliefWeb(supabase)
 
   let totalImported = 0
+  let totalSkippedIrrelevant = 0
   let totalErrors = 0
   for (const r of Object.values(results)) {
     totalImported += r.imported
+    totalSkippedIrrelevant += r.skipped_irrelevant
     totalErrors += r.errors
   }
 
   return NextResponse.json({
     success: totalErrors === 0,
+    topic: 'hantavirus',
     timestamp: new Date().toISOString(),
     total_imported: totalImported,
+    total_skipped_irrelevant: totalSkippedIrrelevant,
     total_errors: totalErrors,
     providers: results,
   })
