@@ -28,9 +28,9 @@ export function MapPageClient({ reports, mediaItems, lastChecked }: MapPageClien
   const hasDeathData = caseReports.some((r: any) => r.deaths !== null)
 
   return (
-    <div className="relative h-[calc(100vh-56px)] bg-[var(--bg-primary)] -mt-14 pt-14">
+    <div className="relative bg-[var(--bg-primary)] -mt-14" style={{ height: '100svh' }}>
       {/* Map fills everything */}
-      <div className="absolute inset-0 top-14">
+      <div className="absolute inset-0">
         <MapView
           reports={visibleReports}
           mediaItems={visibleMedia}

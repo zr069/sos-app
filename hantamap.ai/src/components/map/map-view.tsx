@@ -10,6 +10,8 @@ interface MapViewProps {
   interactive?: boolean
   showMedia?: boolean
   autoFit?: boolean
+  /** When true, scroll/touch on map pans the map. When false, page scroll passes through. */
+  captureScroll?: boolean
   onMarkerSelect?: (report: any) => void
 }
 
@@ -35,7 +37,11 @@ function getStyle(type: string) {
   return MARKER_STYLES[type] || MARKER_STYLES.media_signal
 }
 
-export function MapView({ reports = [], mediaItems = [], height = '500px', interactive = true, showMedia = true, autoFit = false, onMarkerSelect }: MapViewProps) {
+export function MapView({
+  reports = [], mediaItems = [], height = '500px',
+  interactive = true, showMedia = true, autoFit = false,
+  captureScroll = true, onMarkerSelect,
+}: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L.Map | null>(null)
   const markersRef = useRef<L.Layer[]>([])
@@ -45,20 +51,40 @@ export function MapView({ reports = [], mediaItems = [], height = '500px', inter
     const sw = L.latLng(-85, -180)
     const ne = L.latLng(85, 180)
     const bounds = L.latLngBounds(sw, ne)
+
     const map = L.map(mapRef.current, {
-      center: [15, 0], zoom: 2, minZoom: 2, maxZoom: 18,
-      maxBounds: bounds, maxBoundsViscosity: 1.0, worldCopyJump: false,
-      scrollWheelZoom: interactive, dragging: interactive, zoomControl: false, attributionControl: true,
+      center: [15, 0],
+      zoom: 2,
+      minZoom: 2,
+      maxZoom: 18,
+      maxBounds: bounds,
+      maxBoundsViscosity: 1.0,
+      worldCopyJump: false,
+      // Touch and interaction
+      dragging: interactive,
+      touchZoom: interactive,
+      doubleClickZoom: interactive,
+      scrollWheelZoom: interactive && captureScroll,
+      inertia: true,
+      inertiaDeceleration: 3000,
+      // Controls
+      zoomControl: false,
+      attributionControl: true,
     })
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
       maxZoom: 18, subdomains: 'abcd', noWrap: true, bounds,
     }).addTo(map)
-    if (interactive) L.control.zoom({ position: 'topright' }).addTo(map)
-    setTimeout(() => map.invalidateSize(), 100)
+
+    if (interactive) {
+      L.control.zoom({ position: 'topright' }).addTo(map)
+    }
+
+    setTimeout(() => map.invalidateSize(), 150)
     mapInstance.current = map
     return () => { map.remove(); mapInstance.current = null }
-  }, [interactive])
+  }, [interactive, captureScroll])
 
   const handleClick = useCallback((r: any) => { onMarkerSelect?.(r) }, [onMarkerSelect])
 
@@ -95,13 +121,12 @@ export function MapView({ reports = [], mediaItems = [], height = '500px', inter
       const deaths = report.deaths !== null ? report.deaths : 'Unknown'
       const badgeColor = type.includes('treatment') || type.includes('monitoring') || type.includes('response') || type.includes('evacuation')
         ? style.color : report.verification_status === 'verified' ? '#38d48b' : '#ffb240'
-      const badgeText = style.label
 
       let popup = `<div style="min-width:220px;">
         <div style="font-weight:700;font-size:14px;color:#f2f7f8;margin-bottom:2px;">${report.outbreak?.name || 'Report'}</div>
         <div style="color:#9fb0b7;font-size:11px;margin-bottom:6px;">${locParts.join(', ')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-          <span style="font-size:9px;font-weight:700;color:${badgeColor};border:1px solid ${badgeColor}40;border-radius:4px;padding:2px 8px;text-transform:uppercase;letter-spacing:0.4px;">${badgeText}</span>
+          <span style="font-size:9px;font-weight:700;color:${badgeColor};border:1px solid ${badgeColor}40;border-radius:4px;padding:2px 8px;text-transform:uppercase;letter-spacing:0.4px;">${style.label}</span>
           ${clusterLabel ? `<span style="font-size:9px;color:#5a7078;border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:2px 6px;">${clusterLabel}</span>` : ''}
         </div>`
 
@@ -146,7 +171,7 @@ export function MapView({ reports = [], mediaItems = [], height = '500px', inter
           <div style="font-weight:700;font-size:13px;color:#f2f7f8;margin-bottom:4px;">${item.title || 'Untitled'}</div>
           <div style="color:#9fb0b7;font-size:11px;margin-bottom:6px;">${item.publisher || 'Unknown'} · ${pubDate}</div>
           <span style="font-size:9px;font-weight:700;color:#ffb240;border:1px solid rgba(255,178,64,0.3);border-radius:4px;padding:2px 8px;text-transform:uppercase;letter-spacing:0.4px;">Media reported</span>
-          <div style="color:#5a7078;font-size:10px;margin-top:8px;">Not verified by health authorities. Case counts: Unknown.</div>
+          <div style="color:#5a7078;font-size:10px;margin-top:8px;">Not verified by health authorities</div>
           ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" style="color:#28d7c2;font-size:11px;text-decoration:none;display:block;margin-top:6px;">View source</a>` : ''}
         </div>`
         const marker = L.marker([item.latitude, item.longitude], { icon }).addTo(map)
@@ -161,5 +186,5 @@ export function MapView({ reports = [], mediaItems = [], height = '500px', inter
     }
   }, [reports, mediaItems, showMedia, autoFit, handleClick])
 
-  return <div ref={mapRef} style={{ height, width: '100%', position: 'absolute', inset: 0 }} className="bg-[#061417]" />
+  return <div ref={mapRef} style={{ height, width: '100%' }} className="bg-[#061417]" />
 }

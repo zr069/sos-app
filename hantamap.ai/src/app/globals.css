@@ -49,6 +49,8 @@ body {
   height: 100% !important;
   background: #061417 !important;
   background-color: #061417 !important;
+  /* Let Leaflet handle all touch gestures inside the map */
+  touch-action: none;
 }
 
 div.leaflet-container {

@@ -77,9 +77,9 @@ export default async function HomePage() {
           {/* Right: live map dashboard card */}
           <div className="w-full">
             <div className="bg-[#0b2026] border border-white/[0.08] rounded-[20px] overflow-hidden">
-              {/* Map */}
-              <div className="relative w-full" style={{ height: '380px' }}>
-                <DynamicMap reports={reports} height="100%" interactive={false} />
+              {/* Map: interactive for touch but does not capture scroll */}
+              <div className="relative w-full h-[55svh] sm:h-[380px]">
+                <DynamicMap reports={reports} height="100%" interactive={true} captureScroll={false} />
               </div>
               {/* Compact metrics strip inside card */}
               <div className="flex items-center justify-between px-4 py-3 border-t border-white/[0.06]">
