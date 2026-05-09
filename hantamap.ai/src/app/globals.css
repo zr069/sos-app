@@ -43,10 +43,15 @@ body {
   overflow-x: hidden;
 }
 
-/* Leaflet container must fill parent */
+/* Leaflet container: fill parent, dark background instead of default #ddd */
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;
+  background: #061417 !important;
+  background-color: #061417 !important;
+}
+
+div.leaflet-container {
   background: #061417 !important;
 }
 

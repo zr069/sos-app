@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useCallback } from 'react'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+// leaflet.css imported in globals.css with dark background override
 
 interface MapViewProps {
   reports?: any[]
