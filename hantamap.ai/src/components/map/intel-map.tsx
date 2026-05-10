@@ -8,7 +8,6 @@ interface IntelMapProps {
   reports?: any[]
   mediaItems?: any[]
   onMarkerSelect?: (report: any) => void
-  onResetView?: () => void
 }
 
 const COLORS: Record<string, string> = {
@@ -38,27 +37,7 @@ const DEFAULT_ZOOM = 2.2
 
 function col(type: string) { return COLORS[type] || '#ffb240' }
 
-function makeMarkerEl(type: string, isOrigin: boolean, isApprox: boolean): HTMLElement {
-  const color = col(type)
-  const size = isOrigin ? 40 : 26
-  const dot = isOrigin ? 14 : 10
-  const el = document.createElement('div')
-  el.style.cssText = `width:${size}px;height:${size}px;cursor:pointer;position:relative;`
-  el.innerHTML = `<div class="signal-pulse" style="position:absolute;inset:0;border-radius:50%;background:${color}20;"></div>
-    ${isApprox ? `<div style="position:absolute;inset:3px;border-radius:50%;border:1.5px dashed ${color}40;"></div>` : ''}
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:${dot}px;height:${dot}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.85);box-shadow:0 0 ${isOrigin ? 20 : 12}px ${color}99;"></div>`
-  return el
-}
-
-function makeMediaEl(): HTMLElement {
-  const el = document.createElement('div')
-  el.style.cssText = 'width:20px;height:20px;cursor:pointer;position:relative;'
-  el.innerHTML = `<div class="media-pulse" style="position:absolute;inset:0;border-radius:50%;background:rgba(255,178,64,0.1);"></div>
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:#ffb240;border:2px dotted rgba(255,255,255,0.5);box-shadow:0 0 10px rgba(255,178,64,0.5);"></div>`
-  return el
-}
-
-function popupHTML(r: any): string {
+function buildPopup(r: any): string {
   const type = r.report_type || 'confirmed_case_location'
   const c = col(type)
   const loc = r.location || {}
@@ -77,31 +56,20 @@ function popupHTML(r: any): string {
       <span style="font-size:8px;font-weight:700;color:${c};background:${c}15;border:1px solid ${c}30;border-radius:9px;padding:2px 7px;text-transform:uppercase;letter-spacing:0.4px;">${LABELS[type] || 'Report'}</span>
       ${cl ? `<span style="font-size:8px;color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:2px 6px;">${cl}</span>` : ''}
     </div>`
-
   if (isCase) {
     h += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:9px;">
-      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:6px 8px;"><div style="font-size:7px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:0.3px;">Confirmed</div><div style="font-size:17px;font-weight:700;color:#f2f7f8;margin-top:2px;">${cases}</div></div>
-      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:6px 8px;"><div style="font-size:7px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:0.3px;">Deaths</div><div style="font-size:17px;font-weight:700;color:#f2f7f8;margin-top:2px;">${deaths}</div></div>
-    </div>`
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:6px 8px;"><div style="font-size:7px;color:rgba(255,255,255,0.25);text-transform:uppercase;">Confirmed</div><div style="font-size:17px;font-weight:700;color:#f2f7f8;margin-top:2px;">${cases}</div></div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:6px 8px;"><div style="font-size:7px;color:rgba(255,255,255,0.25);text-transform:uppercase;">Deaths</div><div style="font-size:17px;font-weight:700;color:#f2f7f8;margin-top:2px;">${deaths}</div></div></div>`
   } else {
     h += `<div style="font-size:9px;color:rgba(255,255,255,0.25);margin-bottom:7px;">Does not count toward confirmed case totals.</div>`
   }
-
   if (isApprox) h += `<div style="color:#ffb240;font-size:8px;margin-bottom:5px;">Approximate location</div>`
-
-  if (r.editor_note) {
-    const n = r.editor_note.length > 100 ? r.editor_note.slice(0, 100) + '...' : r.editor_note
-    h += `<div style="color:rgba(255,255,255,0.18);font-size:8px;font-style:italic;border-top:1px solid rgba(255,255,255,0.04);padding-top:5px;margin-top:4px;">${n}</div>`
-  }
-
-  if (slug) {
-    h += `<a href="/outbreaks/${slug}" style="display:block;text-align:center;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 0;margin-top:8px;text-decoration:none;border:1px solid rgba(255,255,255,0.05);">View outbreak details</a>`
-  }
-
+  if (r.editor_note) { const n = r.editor_note.slice(0, 100); h += `<div style="color:rgba(255,255,255,0.18);font-size:8px;font-style:italic;border-top:1px solid rgba(255,255,255,0.04);padding-top:5px;margin-top:4px;">${n}${r.editor_note.length > 100 ? '...' : ''}</div>` }
+  if (slug) h += `<a href="/outbreaks/${slug}" style="display:block;text-align:center;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 0;margin-top:8px;text-decoration:none;border:1px solid rgba(255,255,255,0.05);">View outbreak details</a>`
   return h + '</div>'
 }
 
-function mediaPopupHTML(item: any): string {
+function buildMediaPopup(item: any): string {
   const d = item.published_at ? new Date(item.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Unknown'
   return `<div style="min-width:190px;max-width:280px;font-family:system-ui,sans-serif;">
     <div style="font-weight:700;font-size:12px;color:#f2f7f8;margin-bottom:3px;padding-right:18px;">${item.title || 'Untitled'}</div>
@@ -114,11 +82,13 @@ function mediaPopupHTML(item: any): string {
 export function IntelMap({ reports = [], mediaItems = [], onMarkerSelect }: IntelMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
-  const markersRef = useRef<maplibregl.Marker[]>([])
+  const popupRef = useRef<maplibregl.Popup | null>(null)
+  // Store report data for click lookups
+  const reportDataRef = useRef<Map<string, any>>(new Map())
 
   const handleSelect = useCallback((r: any) => { onMarkerSelect?.(r) }, [onMarkerSelect])
 
-  // Expose map controls for parent via window
+  // Expose map controls
   useEffect(() => {
     if (typeof window === 'undefined') return
     const w = window as any
@@ -128,6 +98,7 @@ export function IntelMap({ reports = [], mediaItems = [], onMarkerSelect }: Inte
     return () => { delete w.__hantamap_reset; delete w.__hantamap_zoomIn; delete w.__hantamap_zoomOut }
   }, [])
 
+  // Init map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
 
@@ -145,54 +116,157 @@ export function IntelMap({ reports = [], mediaItems = [], onMarkerSelect }: Inte
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
-    map.on('load', () => { map.resize() })
+    map.on('load', () => map.resize())
     requestAnimationFrame(() => map.resize())
     setTimeout(() => map.resize(), 300)
-    const onResize = () => map.resize()
-    window.addEventListener('resize', onResize)
+    window.addEventListener('resize', () => map.resize())
 
     mapRef.current = map
-    return () => { window.removeEventListener('resize', onResize); map.remove(); mapRef.current = null }
+    return () => { map.remove(); mapRef.current = null }
   }, [])
 
+  // Render markers as GeoJSON layers (projection-native, no DOM drift)
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
 
-    markersRef.current.forEach(m => m.remove())
-    markersRef.current = []
+    // Wait for style to load
+    const render = () => {
+      // Remove old layers and sources
+      const layerIds = ['reports-glow', 'reports-core', 'reports-approx', 'media-glow', 'media-core']
+      layerIds.forEach(id => { if (map.getLayer(id)) map.removeLayer(id) })
+      const sourceIds = ['reports-source', 'media-source']
+      sourceIds.forEach(id => { if (map.getSource(id)) map.removeSource(id) })
 
-    const maxW = typeof window !== 'undefined' ? Math.min(320, window.innerWidth - 48) : 320
+      // Remove old click popup
+      if (popupRef.current) { popupRef.current.remove(); popupRef.current = null }
 
-    reports.forEach(report => {
-      const loc = report.location
-      if (!loc?.latitude || !loc?.longitude) return
-      const type = report.report_type || 'confirmed_case_location'
-      const isOrigin = type === 'outbreak_origin'
-      const isApprox = loc.precision === 'approximate' || loc.precision === 'city_level'
+      // Build report data lookup and GeoJSON
+      const dataMap = new Map<string, any>()
+      const reportFeatures = reports.filter(r => r.location?.latitude && r.location?.longitude).map((r: any) => {
+        const id = r.id
+        dataMap.set(id, r)
+        const type = r.report_type || 'confirmed_case_location'
+        return {
+          type: 'Feature' as const,
+          properties: { id, color: col(type), isOrigin: type === 'outbreak_origin' ? 1 : 0, isApprox: (r.location.precision === 'approximate' || r.location.precision === 'city_level') ? 1 : 0 },
+          geometry: { type: 'Point' as const, coordinates: [r.location.longitude, r.location.latitude] },
+        }
+      })
+      reportDataRef.current = dataMap
 
-      const el = makeMarkerEl(type, isOrigin, isApprox)
-      const popup = new maplibregl.Popup({ offset: isOrigin ? 24 : 16, closeButton: true, maxWidth: `${maxW}px`, className: 'hm-gl-popup' }).setHTML(popupHTML(report))
+      const mediaFeatures = mediaItems.filter(m => m.latitude && m.longitude).map((m: any, i: number) => ({
+        type: 'Feature' as const,
+        properties: { id: `media-${i}`, idx: i },
+        geometry: { type: 'Point' as const, coordinates: [m.longitude, m.latitude] },
+      }))
 
-      el.addEventListener('click', () => handleSelect(report))
+      // Add report source
+      map.addSource('reports-source', { type: 'geojson', data: { type: 'FeatureCollection', features: reportFeatures } })
 
-      const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([loc.longitude, loc.latitude])
-        .setPopup(popup)
-        .addTo(map)
-      markersRef.current.push(marker)
-    })
+      // Glow ring layer
+      map.addLayer({
+        id: 'reports-glow',
+        type: 'circle',
+        source: 'reports-source',
+        paint: {
+          'circle-radius': ['case', ['==', ['get', 'isOrigin'], 1], 18, 12],
+          'circle-color': ['get', 'color'],
+          'circle-opacity': 0.12,
+          'circle-blur': 0.8,
+        },
+      })
 
-    mediaItems.forEach(item => {
-      if (!item.latitude || !item.longitude) return
-      const el = makeMediaEl()
-      const popup = new maplibregl.Popup({ offset: 14, closeButton: true, maxWidth: `${maxW}px`, className: 'hm-gl-popup' }).setHTML(mediaPopupHTML(item))
-      const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([item.longitude, item.latitude])
-        .setPopup(popup)
-        .addTo(map)
-      markersRef.current.push(marker)
-    })
+      // Approximate ring layer
+      map.addLayer({
+        id: 'reports-approx',
+        type: 'circle',
+        source: 'reports-source',
+        filter: ['==', ['get', 'isApprox'], 1],
+        paint: {
+          'circle-radius': ['case', ['==', ['get', 'isOrigin'], 1], 14, 10],
+          'circle-color': 'transparent',
+          'circle-stroke-color': ['get', 'color'],
+          'circle-stroke-width': 1,
+          'circle-stroke-opacity': 0.25,
+        },
+      })
+
+      // Core dot layer
+      map.addLayer({
+        id: 'reports-core',
+        type: 'circle',
+        source: 'reports-source',
+        paint: {
+          'circle-radius': ['case', ['==', ['get', 'isOrigin'], 1], 6, 4.5],
+          'circle-color': ['get', 'color'],
+          'circle-stroke-color': 'rgba(255,255,255,0.85)',
+          'circle-stroke-width': 1.5,
+        },
+      })
+
+      // Media source
+      if (mediaFeatures.length > 0) {
+        map.addSource('media-source', { type: 'geojson', data: { type: 'FeatureCollection', features: mediaFeatures } })
+        map.addLayer({
+          id: 'media-glow',
+          type: 'circle',
+          source: 'media-source',
+          paint: { 'circle-radius': 10, 'circle-color': '#ffb240', 'circle-opacity': 0.08, 'circle-blur': 0.6 },
+        })
+        map.addLayer({
+          id: 'media-core',
+          type: 'circle',
+          source: 'media-source',
+          paint: { 'circle-radius': 3.5, 'circle-color': '#ffb240', 'circle-stroke-color': 'rgba(255,255,255,0.5)', 'circle-stroke-width': 1 },
+        })
+      }
+
+      // Click handlers
+      map.on('click', 'reports-core', (e) => {
+        if (!e.features || e.features.length === 0) return
+        const feat = e.features[0]
+        const coords = (feat.geometry as any).coordinates.slice() as [number, number]
+        const id = feat.properties?.id
+        const report = reportDataRef.current.get(id)
+        if (!report) return
+
+        if (popupRef.current) popupRef.current.remove()
+        popupRef.current = new maplibregl.Popup({ offset: 12, closeButton: true, maxWidth: '320px', className: 'hm-gl-popup' })
+          .setLngLat(coords)
+          .setHTML(buildPopup(report))
+          .addTo(map)
+
+        handleSelect(report)
+      })
+
+      map.on('click', 'media-core', (e) => {
+        if (!e.features || e.features.length === 0) return
+        const feat = e.features[0]
+        const coords = (feat.geometry as any).coordinates.slice() as [number, number]
+        const idx = feat.properties?.idx
+        const item = mediaItems[idx]
+        if (!item) return
+
+        if (popupRef.current) popupRef.current.remove()
+        popupRef.current = new maplibregl.Popup({ offset: 10, closeButton: true, maxWidth: '300px', className: 'hm-gl-popup' })
+          .setLngLat(coords)
+          .setHTML(buildMediaPopup(item))
+          .addTo(map)
+      })
+
+      // Cursor
+      map.on('mouseenter', 'reports-core', () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', 'reports-core', () => { map.getCanvas().style.cursor = '' })
+      map.on('mouseenter', 'media-core', () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', 'media-core', () => { map.getCanvas().style.cursor = '' })
+    }
+
+    if (map.isStyleLoaded()) {
+      render()
+    } else {
+      map.on('load', render)
+    }
   }, [reports, mediaItems, handleSelect])
 
   return <div ref={containerRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' }} />
