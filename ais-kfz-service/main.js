@@ -183,7 +183,7 @@
         "Hinweis: Eigentumsnachweis liegt vor / kann vorgelegt werden."
       ];
       var subject = "Service-Anfrage: " + (v("thema") || "Fahrzeug") + " – " + v("name");
-      var mailto = "mailto:kontakt@ais-kfz-service.de"
+      var mailto = "mailto:info@ais-kfz.de"
         + "?subject=" + encodeURIComponent(subject)
         + "&body=" + encodeURIComponent(lines.join("\n"));
 

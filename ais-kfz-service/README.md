@@ -118,14 +118,18 @@ Endpoint (z. B. Formspree, Vercel Serverless Function, eigenes CRM) umstellen.
 
 ---
 
-## 6 · Anpassen für den Live-Betrieb
+## 6 · Stammdaten (eingetragen)
 
-Vor dem Schalten ersetzen:
+- **Firma:** AIS Kfz · Inhaber Ivan Antonenko
+- **Adresse:** Oberurseler Straße 81, 61440 Oberursel (Taunus)
+- **Telefon:** +49 163 7963915 · **E-Mail:** info@ais-kfz.de
+- **Domain:** ais-kfz.de (in Vercel manuell verbinden)
+- Strukturierte Daten (`AutoRepair` JSON-LD), `og:url`/Canonical auf `https://ais-kfz.de/` gesetzt
 
-- **Telefonnummer:** Platzhalter `+490000000000` (Header, Drawer, Kontakt, Footer, Sticky-CTA)
-- **E-Mail:** `kontakt@ais-kfz-service.de`
-- **Adresse / Öffnungszeiten** in der Kontakt-Sektion
-- **Impressum / Datenschutz / AGB:** Links (`#impressum`, `#datenschutz`, `#agb`) auf echte Seiten führen
+**Noch offen vor dem finalen Launch:**
+
+- **Impressum / Datenschutz / AGB:** Links (`#impressum`, `#datenschutz`, `#agb`) auf echte Inhalte führen (rechtlich erforderlich)
+- Öffnungszeiten konkretisieren (aktuell „Termine nach Vereinbarung“)
 - Optional Formular-Endpoint statt `mailto:` hinterlegen
 
 ---
