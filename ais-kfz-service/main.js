@@ -111,6 +111,29 @@
       });
     }
 
+    /* Subtle image parallax — a little continuous, scroll-linked motion on key
+       media. GPU-only (translate3d + a slight scale so edges never show). */
+    var parallaxEls = document.querySelectorAll("[data-parallax]");
+    if (parallaxEls.length) {
+      var updateParallax = function () {
+        var vh = window.innerHeight || 800;
+        parallaxEls.forEach(function (el) {
+          var r = el.getBoundingClientRect();
+          if (r.bottom < -120 || r.top > vh + 120) return;   // skip off-screen
+          var rel = (r.top + r.height / 2 - vh / 2) / vh;      // ~ -0.6..0.6 in view
+          var speed = parseFloat(el.getAttribute("data-parallax-speed")) || 16;
+          el.style.transform = "translate3d(0," + (-rel * speed).toFixed(2) + "px,0) scale(1.08)";
+        });
+      };
+      updateParallax();
+      if (window.__lenis) {
+        window.__lenis.on("scroll", updateParallax);
+      } else {
+        window.addEventListener("scroll", updateParallax, { passive: true });
+      }
+      window.addEventListener("resize", updateParallax, { passive: true });
+    }
+
     /* Reveals via IntersectionObserver — CSS handles motion + data-d stagger */
     if ("IntersectionObserver" in window) {
       var io = new IntersectionObserver(function (entries) {
