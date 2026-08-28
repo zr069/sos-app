@@ -83,20 +83,77 @@
     });
   }
 
-  /* ---- Scroll reveal ---- */
+  /* ---- Smooth scroll (Lenis) + scroll reveals + hero headline ----
+     Design intent: subtle, restrained motion. Lenis smooths the scroll;
+     reveals fade in on enter; the hero headline does one quiet line reveal.
+
+     Reveals are triggered with IntersectionObserver, NOT ScrollTrigger.batch:
+     with smooth scroll + deep links / anchor jumps, a batch can skip firing
+     and leave a section blank. IO fires reliably on every scroll, jump and
+     #deep-link, and the visual (the .is-in CSS transition) is identical.
+     Everything degrades to plain native scroll for reduced-motion.          */
   var reveals = document.querySelectorAll(".reveal");
-  if (reduceMotion || !("IntersectionObserver" in window)) {
+
+  function revealAll() {
     reveals.forEach(function (el) { el.classList.add("is-in"); });
+  }
+
+  if (reduceMotion) {
+    revealAll();                       // no smooth scroll, no animation
   } else {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-in");
-          io.unobserve(entry.target);
-        }
+    /* Lenis smooth scroll (runs on native scroll, so IO + anchors keep working) */
+    if (typeof window.Lenis !== "undefined") {
+      window.__lenis = new Lenis({
+        lerp: 0.09,
+        autoRaf: true,
+        anchors: { offset: -84 },      // clear the fixed header on anchor jumps
+        allowNestedScroll: true        // let the mobile drawer scroll natively
       });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
-    reveals.forEach(function (el) { io.observe(el); });
+    }
+
+    /* Reveals via IntersectionObserver — CSS handles motion + data-d stagger */
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-in");
+            io.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+      reveals.forEach(function (el) { io.observe(el); });
+    } else {
+      revealAll();
+    }
+
+    /* Hero headline: one quiet, line-by-line reveal (GSAP SplitText), after
+       fonts load so line breaks are correct. Falls back cleanly on any error. */
+    var heroTitle = document.getElementById("hero-title");
+    if (heroTitle && typeof window.gsap !== "undefined" && typeof window.SplitText !== "undefined") {
+      heroTitle.classList.add("is-in");
+      var runSplit = function () {
+        try {
+          gsap.registerPlugin(SplitText);
+          var split = new SplitText(heroTitle, { type: "lines", mask: "lines", linesClass: "split-line" });
+          gsap.set(heroTitle, { opacity: 1 });
+          gsap.from(split.lines, {
+            yPercent: 100,
+            opacity: 0,
+            duration: 0.9,
+            ease: "power3.out",
+            stagger: 0.11,
+            delay: 0.1
+          });
+        } catch (e) {
+          heroTitle.classList.add("is-in");
+        }
+      };
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(runSplit);
+      } else {
+        runSplit();
+      }
+    }
   }
 
   /* ---- Mobile sticky CTA (show after hero) ---- */
