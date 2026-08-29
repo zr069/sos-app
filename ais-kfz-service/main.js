@@ -278,9 +278,137 @@
       setTimeout(function () {
         if (btn) {
           btn.disabled = false; btn.style.opacity = "";
-          btn.innerHTML = 'Service anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+          btn.innerHTML = '<span>Service anfragen</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
         }
       }, 4000);
+    });
+  }
+
+  /* ---- Hero signal-net: subtle gold particle network (wiring/diagnostics) ---- */
+  (function () {
+    var canvas = document.getElementById("heroNet");
+    if (!canvas || reduceMotion) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var hero = canvas.parentElement;
+    // Positioning set inline so the canvas is never in normal flow, even if the
+    // external CSS is delayed, cached, or missing (otherwise it would push the
+    // hero content off-screen). CSS only refines opacity/mask.
+    canvas.style.position = "absolute";
+    canvas.style.inset = "0";
+    canvas.style.zIndex = "0";
+    canvas.style.pointerEvents = "none";
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var GOLD = "205,164,92";
+    var nodes = [], w = 0, h = 0, raf = 0, running = false, mouse = { x: -9999, y: -9999 };
+
+    function size() {
+      w = hero.clientWidth; h = hero.clientHeight;
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+      canvas.style.width = w + "px"; canvas.style.height = h + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var count = Math.max(24, Math.min(60, Math.round((w * h) / 26000)));
+      nodes = [];
+      for (var i = 0; i < count; i++) {
+        nodes.push({
+          x: Math.random() * w, y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.22, vy: (Math.random() - 0.5) * 0.22,
+          r: Math.random() * 1.5 + 0.8
+        });
+      }
+    }
+
+    function step() {
+      if (!running) return;
+      ctx.clearRect(0, 0, w, h);
+      var i, n;
+      for (i = 0; i < nodes.length; i++) {
+        n = nodes[i];
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+        var dxm = mouse.x - n.x, dym = mouse.y - n.y;
+        if (dxm * dxm + dym * dym < 24000) { n.x += dxm * 0.0009; n.y += dym * 0.0009; }
+      }
+      for (var a = 0; a < nodes.length; a++) {
+        for (var b = a + 1; b < nodes.length; b++) {
+          var dx = nodes[a].x - nodes[b].x, dy = nodes[a].y - nodes[b].y, d2 = dx * dx + dy * dy;
+          if (d2 < 20000) {
+            ctx.strokeStyle = "rgba(" + GOLD + "," + ((1 - d2 / 20000) * 0.38).toFixed(3) + ")";
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
+          }
+        }
+      }
+      for (i = 0; i < nodes.length; i++) {
+        n = nodes[i];
+        ctx.fillStyle = "rgba(" + GOLD + ",0.85)";
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+      }
+      raf = requestAnimationFrame(step);
+    }
+
+    function start() { if (!running) { running = true; raf = requestAnimationFrame(step); } }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+
+    size();
+    start();
+    var rt;
+    window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(size, 200); }, { passive: true });
+    hero.addEventListener("pointermove", function (e) {
+      var r = hero.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+    });
+    hero.addEventListener("pointerleave", function () { mouse.x = -9999; mouse.y = -9999; });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) { en[0].isIntersecting ? start() : stop(); }, { threshold: 0 }).observe(hero);
+    }
+    document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
+  })();
+
+  /* ---- Stat count-up ---- */
+  (function () {
+    var nums = document.querySelectorAll(".stat__num");
+    if (!nums.length) return;
+    function run(el) {
+      var target = parseFloat(el.getAttribute("data-count")) || 0;
+      var suffix = el.getAttribute("data-suffix") || "";
+      if (reduceMotion || !window.requestAnimationFrame) { el.textContent = target + suffix; return; }
+      var dur = 1300, t0 = null;
+      (function frame(ts) {
+        if (t0 === null) t0 = ts;
+        var p = Math.min((ts - t0) / dur, 1);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+        if (p < 1) requestAnimationFrame(frame);
+      })(performance.now());
+    }
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (en) {
+        en.forEach(function (e) { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } });
+      }, { threshold: 0.6 });
+      nums.forEach(function (n) { io.observe(n); });
+    } else {
+      nums.forEach(run);
+    }
+  })();
+
+  /* ---- Magnetic buttons + card spotlight (fine-pointer devices only) ---- */
+  if (!reduceMotion && window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    var clamp = function (v, m) { return Math.max(-m, Math.min(m, v)); };
+    document.querySelectorAll(".magnetic").forEach(function (btn) {
+      btn.addEventListener("pointermove", function (e) {
+        var r = btn.getBoundingClientRect();
+        var mx = clamp((e.clientX - (r.left + r.width / 2)) * 0.22, 10);
+        var my = clamp((e.clientY - (r.top + r.height / 2)) * 0.3, 6);
+        btn.style.translate = mx.toFixed(1) + "px " + my.toFixed(1) + "px";
+      });
+      btn.addEventListener("pointerleave", function () { btn.style.translate = ""; });
+    });
+    document.querySelectorAll(".svc, .sit").forEach(function (card) {
+      card.addEventListener("pointermove", function (e) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+        card.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+      });
     });
   }
 })();

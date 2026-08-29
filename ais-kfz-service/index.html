@@ -65,7 +65,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
         <span>Rückruf anfordern</span>
       </a>
-      <a class="btn btn--primary" href="#kontakt">Anfrage stellen</a>
+      <a class="btn btn--primary magnetic" href="#kontakt"><span>Anfrage stellen</span></a>
     </div>
 
     <button class="burger" id="burger" aria-label="Menü öffnen" aria-expanded="false" aria-controls="drawer">
@@ -91,7 +91,7 @@
     <a class="drawer__link" href="#faq" data-close>FAQ</a>
     <div class="drawer__foot">
       <a class="btn btn--ghost btn--block" href="tel:+491637963915" data-close>Rückruf anfordern</a>
-      <a class="btn btn--primary btn--block" href="#kontakt" data-close>Fahrzeugdaten senden</a>
+      <a class="btn btn--primary btn--block" href="#kontakt" data-close><span>Fahrzeugdaten senden</span></a>
     </div>
   </div>
 </div>
@@ -100,6 +100,7 @@
 
 <!-- ============================ HERO ============================ -->
 <section class="hero section--dark" aria-labelledby="hero-title">
+  <canvas class="hero__net" id="heroNet" aria-hidden="true"></canvas>
   <div class="container hero__grid">
     <div class="hero__copy">
       <span class="eyebrow reveal">Schlüsseltechnik &amp; Fahrzeug-Elektronik</span>
@@ -113,8 +114,8 @@
         Schlüsselverlust. Erst Diagnose, dann eine klare Einschätzung.
       </p>
       <div class="hero__cta reveal" data-d="3">
-        <a class="btn btn--primary btn--lg" href="#kontakt">
-          Jetzt Anfrage stellen
+        <a class="btn btn--primary btn--lg magnetic" href="#kontakt">
+          <span>Jetzt Anfrage stellen</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
         <a class="btn btn--ghost btn--lg" href="#leistungen">Leistungen ansehen</a>
@@ -144,6 +145,45 @@
     <div class="cred__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg><span><b>Privat & Gewerbe</b> – Werkstätten, Händler, Flotten</span></div>
   </div>
 </div>
+
+<!-- ============================ MARKEN-MARQUEE ============================ -->
+<section class="marquee" aria-label="Fahrzeugmarken, an denen wir arbeiten">
+  <p class="marquee__label reveal">Modelle vieler Hersteller — u.&nbsp;a.</p>
+  <div class="marquee__viewport">
+    <div class="marquee__track">
+      <div class="marquee__group">
+        <span class="marquee__item">BMW</span>
+        <span class="marquee__item">Mercedes-Benz</span>
+        <span class="marquee__item">Audi</span>
+        <span class="marquee__item">Volkswagen</span>
+        <span class="marquee__item">Opel</span>
+        <span class="marquee__item">Ford</span>
+        <span class="marquee__item">Škoda</span>
+        <span class="marquee__item">SEAT</span>
+        <span class="marquee__item">Renault</span>
+        <span class="marquee__item">Peugeot</span>
+        <span class="marquee__item">Toyota</span>
+        <span class="marquee__item">Volvo</span>
+        <span class="marquee__item">MINI</span>
+      </div>
+      <div class="marquee__group" aria-hidden="true">
+        <span class="marquee__item">BMW</span>
+        <span class="marquee__item">Mercedes-Benz</span>
+        <span class="marquee__item">Audi</span>
+        <span class="marquee__item">Volkswagen</span>
+        <span class="marquee__item">Opel</span>
+        <span class="marquee__item">Ford</span>
+        <span class="marquee__item">Škoda</span>
+        <span class="marquee__item">SEAT</span>
+        <span class="marquee__item">Renault</span>
+        <span class="marquee__item">Peugeot</span>
+        <span class="marquee__item">Toyota</span>
+        <span class="marquee__item">Volvo</span>
+        <span class="marquee__item">MINI</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ============================ PROBLEM / SITUATIONEN ============================ -->
 <section class="section section--light" id="situationen" aria-labelledby="sit-title">
@@ -274,6 +314,24 @@
         </div>
         <div class="svc__img"><img src="assets/img/transmission-ecu.jpg" alt="Getriebesteuergerät mit Hydraulikblock unter dem Mikroskop, angeschlossen an ein Programmiergerät" loading="lazy" width="900" height="600" data-parallax data-parallax-speed="16" /></div>
       </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ KENNZAHLEN ============================ -->
+<section class="section section--ink2" aria-label="Kennzahlen">
+  <div class="container stats">
+    <div class="stat reveal">
+      <span class="stat__num" data-count="7">0</span>
+      <span class="stat__label">Leistungsfelder rund um Schlüssel, Wegfahrsperre und Steuergeräte</span>
+    </div>
+    <div class="stat reveal" data-d="1">
+      <span class="stat__num" data-count="4">0</span>
+      <span class="stat__label">Schritte von der Anfrage bis zur Übergabe mit Funktionsprüfung</span>
+    </div>
+    <div class="stat reveal" data-d="2">
+      <span class="stat__num" data-count="100" data-suffix="%">0</span>
+      <span class="stat__label">nur mit Eigentumsnachweis — ausnahmslos und nachvollziehbar</span>
     </div>
   </div>
 </section>
@@ -529,7 +587,7 @@
       </label>
 
       <button type="submit" class="btn btn--primary btn--block btn--lg form__submit" id="submitBtn">
-        Service anfragen
+        <span>Service anfragen</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
 
@@ -603,7 +661,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
     Anrufen
   </a>
-  <a class="btn btn--primary" href="#kontakt">Anfrage stellen</a>
+  <a class="btn btn--primary" href="#kontakt"><span>Anfrage stellen</span></a>
 </div>
 
 <script src="assets/vendor/lenis/lenis.min.js"></script>
