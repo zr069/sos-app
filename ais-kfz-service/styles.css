@@ -147,6 +147,7 @@ ul { list-style: none; padding: 0; }
 }
 
 .lead { font-size: var(--fs-lead); line-height: 1.6; }
+.lead strong { color: var(--gold-bright); font-weight: 600; }
 .section--dark  .lead { color: var(--on-dark-muted); }
 .section--light .lead { color: var(--on-light-muted); }
 .section--light h2, .section--light h3 { color: var(--on-light); }
