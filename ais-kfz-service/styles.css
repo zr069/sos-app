@@ -670,8 +670,10 @@ ul { list-style: none; padding: 0; }
 .ecu__hint svg { width: 18px; height: 18px; animation: bob 1.8s var(--ease) infinite; }
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 .ecu__stage { position: relative; }
-.ecu__svg { width: 100%; height: auto; max-height: 78vh; display: block; overflow: visible; }
-.ecu__svg .ecu-layer { will-change: transform; }
+.ecu__video {
+  width: 100%; height: auto; display: block; border-radius: var(--r-lg);
+  border: 1px solid var(--line-dark-2); box-shadow: var(--sh-lg); background: #08090b;
+}
 
 .ecu-plate { fill: rgba(205,164,92,.05); stroke: var(--gold-line); stroke-width: 1.4; }
 .ecu-plate--board { fill: rgba(205,164,92,.09); stroke: var(--gold); stroke-width: 1.6; }
@@ -689,7 +691,7 @@ ul { list-style: none; padding: 0; }
 @media (max-width: 900px) {
   .ecu__pin { min-height: auto; }
   .ecu__inner { grid-template-columns: 1fr; gap: 24px; }
-  .ecu__svg { max-height: none; }
+  .ecu__video { border-radius: var(--r-md); }
 }
 @media (prefers-reduced-motion: reduce) { .ecu__hint svg { animation: none; } }
 

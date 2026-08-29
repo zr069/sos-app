@@ -122,27 +122,40 @@
       }
     }
 
-    /* Steuergerät exploded view — pinned + scroll-scrubbed assembly.
-       The SVG is drawn in its exploded (final) state, so with no JS / reduced
-       motion / small screens it stays a clean, fully-labelled diagram. */
-    (function initEcu() {
-      var svg = document.querySelector(".ecu__svg");
-      if (!svg) return;
-      var layers = svg.querySelectorAll(".ecu-layer");
-      var labels = svg.querySelectorAll(".ecu-label");
-      var canPin = hasST && !reduceMotion && window.innerWidth >= 900;
-      if (!canPin) { labels.forEach(function (l) { l.style.opacity = "1"; }); return; }
+    /* Steuergerät exploded view — a photoreal render scrubbed by scroll.
+       Desktop: pin the section and drive video.currentTime from scroll
+       progress (Apple-style). Small screens / reduced motion never hijack
+       the scroll — they get a quiet loop or a static end frame. */
+    (function initEcuVideo() {
+      var video = document.querySelector(".ecu__video");
+      if (!video) return;
+      var canScrub = hasST && !reduceMotion && window.innerWidth >= 900;
 
-      layers.forEach(function (l) { gsap.set(l, { y: parseFloat(l.getAttribute("data-collapse")) || 0 }); });
-      gsap.set(labels, { opacity: 0 });
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: ".ecu", start: "top top", end: "+=150%",
-          pin: ".ecu__pin", scrub: 1, anticipatePin: 1, invalidateOnRefresh: true
+      if (!canScrub) {
+        if (reduceMotion) {
+          var showEnd = function () { try { video.currentTime = Math.max(0, (video.duration || 5) - 0.05); } catch (e) {} };
+          if (video.readyState >= 1) showEnd(); else video.addEventListener("loadedmetadata", showEnd, { once: true });
+        } else {
+          video.loop = true; video.muted = true; video.setAttribute("muted", "");
+          var pr = video.play(); if (pr && pr.catch) pr.catch(function () {});
         }
-      })
-        .to(layers, { y: 0, ease: "power1.inOut", stagger: 0.06 }, 0)
-        .to(labels, { opacity: 1, stagger: 0.05, ease: "none" }, 0.35);
+        return;
+      }
+
+      video.pause();
+      var build = function () {
+        var dur = video.duration || 5;
+        ScrollTrigger.create({
+          trigger: ".ecu", start: "top top", end: "+=220%",
+          pin: ".ecu__pin", scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true,
+          onUpdate: function (self) {
+            var t = self.progress * dur;
+            if (isFinite(t)) { try { video.currentTime = t; } catch (e) {} }
+          }
+        });
+      };
+      if (video.readyState >= 1) build();
+      else video.addEventListener("loadedmetadata", build, { once: true });
     })();
 
     /* Recompute pin/scrub positions once everything (fonts, images) has loaded */
