@@ -101,15 +101,52 @@
   if (reduceMotion) {
     revealAll();                       // no smooth scroll, no animation
   } else {
-    /* Lenis smooth scroll (runs on native scroll, so IO + anchors keep working) */
+    var hasGSAP = typeof window.gsap !== "undefined";
+    var hasST = hasGSAP && typeof window.ScrollTrigger !== "undefined";
+    if (hasST) gsap.registerPlugin(ScrollTrigger);
+
+    /* Lenis smooth scroll (runs on native scroll, so IO + anchors keep working).
+       When ScrollTrigger is present, Lenis is driven by GSAP's ticker and kept
+       in sync so pinned/scrubbed sections stay glued to the scroll position. */
     if (typeof window.Lenis !== "undefined") {
       window.__lenis = new Lenis({
         lerp: 0.09,
-        autoRaf: true,
+        autoRaf: !hasST,
         anchors: { offset: -84 },      // clear the fixed header on anchor jumps
         allowNestedScroll: true        // let the mobile drawer scroll natively
       });
+      if (hasST) {
+        window.__lenis.on("scroll", ScrollTrigger.update);
+        gsap.ticker.add(function (t) { window.__lenis.raf(t * 1000); });
+        gsap.ticker.lagSmoothing(0);
+      }
     }
+
+    /* Steuergerät exploded view — pinned + scroll-scrubbed assembly.
+       The SVG is drawn in its exploded (final) state, so with no JS / reduced
+       motion / small screens it stays a clean, fully-labelled diagram. */
+    (function initEcu() {
+      var svg = document.querySelector(".ecu__svg");
+      if (!svg) return;
+      var layers = svg.querySelectorAll(".ecu-layer");
+      var labels = svg.querySelectorAll(".ecu-label");
+      var canPin = hasST && !reduceMotion && window.innerWidth >= 900;
+      if (!canPin) { labels.forEach(function (l) { l.style.opacity = "1"; }); return; }
+
+      layers.forEach(function (l) { gsap.set(l, { y: parseFloat(l.getAttribute("data-collapse")) || 0 }); });
+      gsap.set(labels, { opacity: 0 });
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: ".ecu", start: "top top", end: "+=150%",
+          pin: ".ecu__pin", scrub: 1, anticipatePin: 1, invalidateOnRefresh: true
+        }
+      })
+        .to(layers, { y: 0, ease: "power1.inOut", stagger: 0.06 }, 0)
+        .to(labels, { opacity: 1, stagger: 0.05, ease: "none" }, 0.35);
+    })();
+
+    /* Recompute pin/scrub positions once everything (fonts, images) has loaded */
+    if (hasST) window.addEventListener("load", function () { ScrollTrigger.refresh(); });
 
     /* Subtle image parallax — a little continuous, scroll-linked motion on key
        media. GPU-only (translate3d + a slight scale so edges never show). */
@@ -167,6 +204,7 @@
             stagger: 0.11,
             delay: 0.1
           });
+          if (window.ScrollTrigger) ScrollTrigger.refresh();
         } catch (e) {
           heroTitle.classList.add("is-in");
         }
