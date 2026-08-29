@@ -285,40 +285,57 @@
         return;
       }
 
-      // Build a structured e-mail (user keeps control; no backend needed)
+      // Real delivery to the business inbox (FormSubmit), with an e-mail fallback.
       var v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
-      var lines = [
-        "Anfrage über ais-kfz-service.de",
-        "--------------------------------",
-        "Name: " + v("name"),
-        "Telefon: " + v("phone"),
-        "Fahrzeug: " + [v("marke"), v("modell"), v("baujahr")].filter(Boolean).join(" · "),
-        "Anliegen: " + (v("thema") || "—"),
-        "",
-        "Beschreibung:",
-        v("nachricht"),
-        "",
-        "Hinweis: Eigentumsnachweis liegt vor / kann vorgelegt werden."
-      ];
-      var subject = "Service-Anfrage: " + (v("thema") || "Fahrzeug") + " – " + v("name");
-      var mailto = "mailto:info@ais-kfz.de"
-        + "?subject=" + encodeURIComponent(subject)
-        + "&body=" + encodeURIComponent(lines.join("\n"));
-
-      var okBox = document.getElementById("formOk");
-      if (okBox) okBox.classList.add("is-visible");
-
       var btn = document.getElementById("submitBtn");
-      if (btn) { btn.textContent = "Anfrage geöffnet ✓"; btn.disabled = true; btn.style.opacity = ".6"; }
+      var okBox = document.getElementById("formOk");
+      var fahrzeug = [v("marke"), v("modell"), v("baujahr")].filter(Boolean).join(" · ") || "—";
+      var subject = "Neue Anfrage über ais-kfz.de: " + (v("thema") || "Fahrzeug") + " – " + v("name");
 
-      window.location.href = mailto;
+      var payload = {
+        Name: v("name"),
+        Telefon: v("phone"),
+        Fahrzeug: fahrzeug,
+        Anliegen: v("thema") || "—",
+        Beschreibung: v("nachricht"),
+        _subject: subject,
+        _template: "table",
+        _captcha: "false"
+      };
 
-      setTimeout(function () {
-        if (btn) {
-          btn.disabled = false; btn.style.opacity = "";
-          btn.innerHTML = '<span>Service anfragen</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-        }
-      }, 4000);
+      function resetBtn() {
+        if (!btn) return;
+        btn.disabled = false; btn.style.opacity = "";
+        btn.innerHTML = '<span>Service anfragen</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      }
+      function mailtoFallback() {
+        var body = "Name: " + v("name") + "\nTelefon: " + v("phone")
+          + "\nFahrzeug: " + fahrzeug + "\nAnliegen: " + (v("thema") || "—")
+          + "\n\n" + v("nachricht");
+        window.location.href = "mailto:info@ais-kfz.de?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      }
+
+      if (btn) { btn.disabled = true; btn.style.opacity = ".7"; btn.innerHTML = "Wird gesendet …"; }
+
+      fetch("https://formsubmit.co/ajax/info@ais-kfz.de", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (!res || !(res.success === true || res.success === "true")) throw new Error("no success");
+          if (okBox) okBox.classList.add("is-visible");
+          form.reset();
+          if (fileName) fileName.textContent = "Optional · Foto oder PDF, später per E-Mail möglich";
+          resetBtn();
+          if (okBox && okBox.scrollIntoView) okBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        })
+        .catch(function () {
+          // Endpoint unreachable / not yet activated → never lose the lead
+          resetBtn();
+          mailtoFallback();
+        });
     });
   }
 
