@@ -696,6 +696,40 @@ ul { list-style: none; padding: 0; }
 @media (prefers-reduced-motion: reduce) { .ecu__hint svg { animation: none; } }
 
 /* ==========================================================================
+   Legal pages (Impressum / Datenschutz)
+   ========================================================================== */
+.legal-top { position: sticky; top: 0; z-index: 100; background: rgba(11,12,14,.9);
+  -webkit-backdrop-filter: saturate(160%) blur(14px); backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--line-dark); }
+.legal-top .container { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); }
+.back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--on-dark-muted); font-weight: 500; font-size: .92rem; }
+.back-link svg { width: 17px; height: 17px; }
+.back-link:hover { color: var(--gold-bright); }
+
+.legal-wrap { padding-block: clamp(44px, 7vw, 92px); }
+.legal { max-width: 800px; margin-inline: auto; }
+.legal h1 { font-size: clamp(2rem, 4.4vw, 2.9rem); margin-bottom: 10px; }
+.legal__updated { color: var(--on-dark-faint); font-size: .9rem; margin-bottom: 42px; }
+.legal h2 { font-size: 1.28rem; margin: 40px 0 12px; color: var(--on-dark); }
+.legal h3 { font-size: 1.04rem; margin: 24px 0 6px; color: var(--on-dark); }
+.legal p, .legal li { color: var(--on-dark-muted); font-size: 1rem; line-height: 1.72; }
+.legal p { margin-bottom: 14px; }
+.legal address { font-style: normal; color: var(--on-dark); margin-bottom: 14px; line-height: 1.7; }
+.legal ul { margin: 0 0 16px; padding: 0; }
+.legal li { position: relative; padding-left: 22px; margin-bottom: 8px; }
+.legal li::before { content: ""; position: absolute; left: 4px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold-line); }
+.legal a { color: var(--gold-bright); text-decoration: underline; text-underline-offset: 2px; word-break: break-word; }
+.legal strong { color: var(--on-dark); font-weight: 600; }
+.legal__note { display: flex; gap: 12px; padding: 16px 18px; border-radius: var(--r-md);
+  background: var(--gold-ghost); border: 1px solid var(--gold-line); font-size: .92rem; color: var(--on-dark); margin: 8px 0 26px; }
+.legal__foot { border-top: 1px solid var(--line-dark); margin-top: 48px; padding-top: 24px;
+  display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: space-between; align-items: center; }
+.legal__foot p { font-size: .82rem; color: var(--on-dark-faint); margin: 0; }
+.legal__foot nav { display: flex; gap: 18px; }
+.legal__foot a { color: var(--on-dark-muted); font-size: .82rem; }
+.legal__foot a:hover { color: var(--gold-bright); }
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 @media (max-width: 1080px) {
