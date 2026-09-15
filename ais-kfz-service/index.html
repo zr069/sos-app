@@ -3,691 +3,82 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AIS Kfz Service — Autoschlüssel, Wegfahrsperre & Steuergeräte fachgerecht</title>
-<meta name="description" content="AIS Kfz Service: Reparatur und Anfertigung von Autoschlüsseln, Programmierung von Wegfahrsperren sowie Motor- und Getriebesteuergeräten. Diagnosebasiert, mit Eigentumsnachweis – für Privatkunden und Gewerbe." />
+<title>AIS Kfz — Oberursel</title>
+<meta name="description" content="AIS Kfz, Oberursel (Taunus). Diese Website wird derzeit überarbeitet." />
+<meta name="robots" content="noindex, nofollow" />
 <meta name="theme-color" content="#0B0C0E" />
-<meta property="og:title" content="AIS Kfz Service — Schlüssel, Wegfahrsperre & Steuergeräte" />
-<meta property="og:description" content="Fachgerechter Service rund um Autoschlüssel, Wegfahrsperre und Fahrzeug-Steuergeräte. Diagnosebasiert und mit Eigentumsnachweis." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://www.ais-kfz.de/" />
-<meta property="og:image" content="https://www.ais-kfz.de/assets/img/hero-ecu.jpg" />
-<meta property="og:locale" content="de_DE" />
-<link rel="canonical" href="https://www.ais-kfz.de/" />
 <link rel="icon" href="assets/logo.jpg" />
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "AutoRepair",
-  "name": "AIS Kfz",
-  "image": "https://www.ais-kfz.de/assets/img/hero-ecu.jpg",
-  "founder": "Ivan Antonenko",
-  "telephone": "+491637963915",
-  "email": "info@ais-kfz.de",
-  "url": "https://www.ais-kfz.de/",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Oberurseler Straße 81",
-    "postalCode": "61440",
-    "addressLocality": "Oberursel (Taunus)",
-    "addressCountry": "DE"
-  },
-  "areaServed": "DE",
-  "description": "Fachgerechter Service für Autoschlüssel, Wegfahrsperren sowie Motor- und Getriebesteuergeräte. Diagnosebasiert, mit Eigentumsnachweis – für Privatkunden und Gewerbe.",
-  "knowsAbout": ["Autoschlüssel", "Wegfahrsperre", "Motorsteuergerät", "Getriebesteuergerät", "Schließzylinder", "Steuergeräte-Datenübertragung"]
-}
-</script>
-<link rel="preload" href="assets/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="assets/fonts/sora-700-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="assets/fonts/fonts.css" />
-<link rel="stylesheet" href="assets/vendor/lenis/lenis.css" />
-<link rel="stylesheet" href="styles.css" />
+<style>
+  :root { --ink:#0B0C0E; --card:#16181E; --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.16);
+    --gold:#CDA45C; --gold-bright:#E6C588; --txt:#F3F1EA; --muted:#A2A39E; --faint:#6E7077; }
+  * { box-sizing:border-box; margin:0; }
+  html,body { height:100%; }
+  body { background:var(--ink); color:var(--txt); font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased; display:flex; flex-direction:column; min-height:100dvh; }
+  a { color:inherit; }
+  main { flex:1; display:flex; align-items:center; justify-content:center; padding:40px 22px; }
+  .card { width:100%; max-width:520px; text-align:center;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+    border:1px solid var(--line); border-radius:22px; padding:clamp(30px,6vw,52px) clamp(24px,5vw,44px); }
+  .logo { width:88px; height:88px; border-radius:20px; object-fit:cover; border:1px solid rgba(205,164,92,.35);
+    box-shadow:0 8px 30px -12px rgba(0,0,0,.8); margin:0 auto 22px; display:block; }
+  h1 { font-family:"Sora",sans-serif; font-weight:700; font-size:1.9rem; letter-spacing:-.01em; }
+  .status { color:var(--muted); font-size:1.02rem; margin:14px auto 0; max-width:34ch; }
+  .rule { height:1px; background:var(--line); margin:30px 0; }
+  .kontakt-label { font-family:"Sora",sans-serif; font-size:.74rem; font-weight:600; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+  address { font-style:normal; color:var(--txt); font-size:1.02rem; line-height:1.85; }
+  address .muted { color:var(--muted); }
+  address a { color:var(--gold-bright); text-decoration:none; }
+  address a:hover { text-decoration:underline; text-underline-offset:2px; }
+  .contact-actions { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:22px; }
+  .btn { display:inline-flex; align-items:center; gap:8px; font-family:"Sora",sans-serif; font-weight:600;
+    font-size:.95rem; padding:13px 22px; border-radius:999px; text-decoration:none; transition:transform .15s, box-shadow .2s, background .2s, border-color .2s; }
+  .btn--gold { background:linear-gradient(180deg,var(--gold-bright),var(--gold) 60%,#A57F3C); color:#1A1407;
+    box-shadow:0 14px 40px -16px rgba(205,164,92,.5); }
+  .btn--gold:hover { transform:translateY(-2px); }
+  .btn--ghost { border:1px solid var(--line2); color:var(--txt); }
+  .btn--ghost:hover { border-color:rgba(205,164,92,.4); transform:translateY(-2px); }
+  footer { padding:22px; text-align:center; border-top:1px solid var(--line); }
+  footer p { color:var(--faint); font-size:.82rem; margin-bottom:8px; }
+  footer nav { display:flex; gap:18px; justify-content:center; }
+  footer nav a { color:var(--muted); font-size:.82rem; text-decoration:none; }
+  footer nav a:hover { color:var(--gold-bright); }
+</style>
 </head>
 <body>
+  <main>
+    <div class="card">
+      <img class="logo" src="assets/logo.jpg" alt="AIS Kfz" width="88" height="88" />
+      <h1>AIS Kfz</h1>
+      <p class="status">Unsere Website wird derzeit überarbeitet. Sie erreichen uns gerne direkt:</p>
 
-<!-- ============================ HEADER ============================ -->
-<header class="header" id="header">
-  <div class="container header__inner">
-    <a href="#top" class="brand" aria-label="AIS Kfz Service – Startseite">
-      <img src="assets/logo.jpg" alt="AIS Kfz Service Logo" class="brand__logo" width="42" height="42" />
-      <span class="brand__name">AIS Kfz Service<span>Fahrzeug-Elektronik</span></span>
-    </a>
+      <div class="rule"></div>
 
-    <nav class="nav" aria-label="Hauptnavigation">
-      <a class="nav__link" href="#leistungen">Leistungen</a>
-      <a class="nav__link" href="#ablauf">Ablauf</a>
-      <a class="nav__link" href="#vertrauen">Warum AIS</a>
-      <a class="nav__link" href="#werkstatt">Werkstatt</a>
-      <a class="nav__link" href="#faq">FAQ</a>
-    </nav>
-
-    <div class="header__actions">
-      <a class="header__phone" href="tel:+491637963915">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
-        <span>Rückruf anfordern</span>
-      </a>
-      <a class="btn btn--primary magnetic" href="#kontakt"><span>Anfrage stellen</span></a>
-    </div>
-
-    <button class="burger" id="burger" aria-label="Menü öffnen" aria-expanded="false" aria-controls="drawer">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-    </button>
-  </div>
-</header>
-
-<!-- Mobile drawer -->
-<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Navigation">
-  <div class="drawer__scrim" data-close></div>
-  <div class="drawer__panel">
-    <div class="drawer__head">
-      <span class="brand__name">AIS Kfz Service<span>Fahrzeug-Elektronik</span></span>
-      <button class="drawer__close" id="drawerClose" aria-label="Menü schließen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <a class="drawer__link" href="#leistungen" data-close>Leistungen</a>
-    <a class="drawer__link" href="#ablauf" data-close>Ablauf</a>
-    <a class="drawer__link" href="#vertrauen" data-close>Warum AIS</a>
-    <a class="drawer__link" href="#werkstatt" data-close>Werkstatt</a>
-    <a class="drawer__link" href="#faq" data-close>FAQ</a>
-    <div class="drawer__foot">
-      <a class="btn btn--ghost btn--block" href="tel:+491637963915" data-close>Rückruf anfordern</a>
-      <a class="btn btn--primary btn--block" href="#kontakt" data-close><span>Fahrzeugdaten senden</span></a>
-    </div>
-  </div>
-</div>
-
-<main id="top">
-
-<!-- ============================ HERO ============================ -->
-<section class="hero section--dark" aria-labelledby="hero-title">
-  <div class="hero__bg" aria-hidden="true">
-    <img src="assets/img/hero-ecu.jpg" alt="" width="1920" height="1072" fetchpriority="high" data-parallax data-parallax-speed="14" />
-  </div>
-  <canvas class="hero__net" id="heroNet" aria-hidden="true"></canvas>
-  <div class="container hero__grid">
-    <div class="hero__copy">
-      <span class="eyebrow reveal">Schlüsseltechnik &amp; Fahrzeug-Elektronik</span>
-      <h1 id="hero-title" class="reveal" data-d="1">
-        Schlüssel, Wegfahrsperre und Steuergeräte
-        <span class="sub gold-text">fachgerecht gelöst.</span>
-      </h1>
-      <p class="hero__lead reveal" data-d="2">
-        Wir reparieren und programmieren Autoschlüssel, codieren Wegfahrsperren und
-        bringen Motor- und Getriebesteuergeräte wieder zum Laufen – auch bei komplettem
-        Schlüsselverlust. Erst Diagnose, dann eine klare Einschätzung.
-      </p>
-      <div class="hero__cta reveal" data-d="3">
-        <a class="btn btn--primary btn--lg magnetic" href="#kontakt">
-          <span>Jetzt Anfrage stellen</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <a class="btn btn--ghost btn--lg" href="#leistungen">Leistungen ansehen</a>
-      </div>
-      <div class="hero__trust reveal" data-d="4">
-        <span class="trust-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Eigentumsnachweis</span>
-        <span class="trust-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Diagnose</span>
-        <span class="trust-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9zM2 10h2M2 14h2M20 10h2M20 14h2M10 2v2M14 2v2M10 20v2M14 20v2"/></svg>Programmierung</span>
-        <span class="trust-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4M21 6H7a4 4 0 0 0-4 4M7 22l-4-4 4-4M3 18h14a4 4 0 0 0 4-4"/></svg>Datenübertragung</span>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- Credibility strip -->
-<div class="cred">
-  <div class="container cred__row">
-    <div class="cred__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg><span><b>Mit Eigentumsnachweis</b> arbeiten wir transparent</span></div>
-    <div class="cred__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span><b>Diagnose zuerst</b> – keine Arbeit ins Blaue</span></div>
-    <div class="cred__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v6h6"/><path d="M4 2h10l6 6v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="m9 14 2 2 4-4"/></svg><span><b>Klare Einschätzung</b> vor jedem Auftrag</span></div>
-    <div class="cred__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg><span><b>Privat & Gewerbe</b> – Werkstätten, Händler, Flotten</span></div>
-  </div>
-</div>
-
-<!-- ============================ MARKEN-MARQUEE ============================ -->
-<section class="marquee" aria-label="Fahrzeugmarken, an denen wir arbeiten">
-  <p class="marquee__label reveal">Modelle vieler Hersteller — u.&nbsp;a.</p>
-  <div class="marquee__viewport">
-    <div class="marquee__track">
-      <div class="marquee__group">
-        <span class="marquee__item">BMW</span>
-        <span class="marquee__item">Mercedes-Benz</span>
-        <span class="marquee__item">Audi</span>
-        <span class="marquee__item">Volkswagen</span>
-        <span class="marquee__item">Opel</span>
-        <span class="marquee__item">Ford</span>
-        <span class="marquee__item">Škoda</span>
-        <span class="marquee__item">SEAT</span>
-        <span class="marquee__item">Renault</span>
-        <span class="marquee__item">Peugeot</span>
-        <span class="marquee__item">Toyota</span>
-        <span class="marquee__item">Volvo</span>
-        <span class="marquee__item">MINI</span>
-      </div>
-      <div class="marquee__group" aria-hidden="true">
-        <span class="marquee__item">BMW</span>
-        <span class="marquee__item">Mercedes-Benz</span>
-        <span class="marquee__item">Audi</span>
-        <span class="marquee__item">Volkswagen</span>
-        <span class="marquee__item">Opel</span>
-        <span class="marquee__item">Ford</span>
-        <span class="marquee__item">Škoda</span>
-        <span class="marquee__item">SEAT</span>
-        <span class="marquee__item">Renault</span>
-        <span class="marquee__item">Peugeot</span>
-        <span class="marquee__item">Toyota</span>
-        <span class="marquee__item">Volvo</span>
-        <span class="marquee__item">MINI</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ PROBLEM / SITUATIONEN ============================ -->
-<section class="section section--light" id="situationen" aria-labelledby="sit-title">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Typische Situationen</span>
-      <h2 id="sit-title">Wenn der Schlüssel streikt oder die Elektronik nicht mitspielt.</h2>
-      <p class="lead">Die meisten Anliegen lassen sich nach einer sauberen Diagnose fachgerecht lösen –
-      ohne unnötigen Austausch. Erkennen Sie Ihr Problem wieder?</p>
-    </div>
-
-    <div class="sit-grid">
-      <article class="sit reveal" data-d="1">
-        <span class="sit__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5"/><path d="m11.5 11.5 9 9M16 16l2 2M19 13l2 2"/></svg></span>
-        <h3>Schlüssel verloren</h3>
-        <p>Kein Ersatzschlüssel mehr greifbar – im schlimmsten Fall sind alle Schlüssel weg.</p>
-        <span class="sit__sol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Neuanfertigung &amp; Anlernen, auch bei Totalverlust</span>
-      </article>
-
-      <article class="sit reveal" data-d="2">
-        <span class="sit__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3"/></svg></span>
-        <h3>Schlüssel defekt</h3>
-        <p>Funk reagiert nicht, Tasten ausgeleiert, Gehäuse gebrochen oder Batteriekontakt korrodiert.</p>
-        <span class="sit__sol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Reparatur von Funk, Platine und Gehäuse</span>
-      </article>
-
-      <article class="sit reveal" data-d="3">
-        <span class="sit__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="12" rx="2"/><path d="M8 9V6a4 4 0 0 1 8 0v3M12 14v3"/></svg></span>
-        <h3>Zündschloss klemmt</h3>
-        <p>Der Schlüssel lässt sich schwer drehen, klemmt oder bleibt im Schloss stecken.</p>
-        <span class="sit__sol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Schloss prüfen, instand setzen oder ersetzen</span>
-      </article>
-
-      <article class="sit reveal" data-d="1">
-        <span class="sit__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 7.5 8 10 4.5-2.5 8-5 8-10V6l-8-4Z"/><path d="m9.5 12 2 2 3.5-4"/></svg></span>
-        <h3>Wegfahrsperre macht Probleme</h3>
-        <p>Motor springt nicht an, Schlüssel wird nicht erkannt oder die Wegfahrsperre blockiert.</p>
-        <span class="sit__sol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Diagnose und fachgerechte Neuprogrammierung</span>
-      </article>
-
-      <article class="sit reveal" data-d="2">
-        <span class="sit__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></span>
-        <h3>Steuergerät getauscht</h3>
-        <p>Ein gebrauchtes oder neues Steuergerät passt nicht ohne Anpassung zum Fahrzeug.</p>
-        <span class="sit__sol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Anpassung &amp; Programmierung auf das Fahrzeug</span>
-      </article>
-
-      <article class="sit reveal" data-d="3">
-        <span class="sit__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4M21 6H7a4 4 0 0 0-4 4M7 22l-4-4 4-4M3 18h14a4 4 0 0 0 4-4"/></svg></span>
-        <h3>Daten müssen übertragen werden</h3>
-        <p>Beim Wechsel eines Steuergeräts sollen vorhandene Daten erhalten bleiben.</p>
-        <span class="sit__sol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Datenübertragung zwischen Steuergeräten</span>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ LEISTUNGEN ============================ -->
-<section class="section section--dark" id="leistungen" aria-labelledby="svc-title">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Leistungen</span>
-      <h2 id="svc-title">Vom Zündschlüssel bis zum Getriebesteuergerät.</h2>
-      <p class="lead">Spezialisiert auf Schlüsseltechnik und Fahrzeug-Elektronik. Jede Leistung beginnt mit
-      einer Prüfung – damit Sie wissen, was sinnvoll ist, bevor etwas gemacht wird.</p>
-    </div>
-
-    <div class="svc-grid">
-      <!-- Feature 1: Schlüssel Anfertigung (with image) -->
-      <article class="svc svc--feature reveal" data-d="1">
-        <div class="svc__body">
-          <span class="svc__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8M16 4l3 3M14 6l2.5 2.5"/></svg></span>
-          <h3>Schlüssel Anfertigung &amp; Programmierung</h3>
-          <p>Wir fertigen passende Ersatz- und Zusatzschlüssel an und lernen sie modellabhängig
-          an Fahrzeug und Wegfahrsperre an – inklusive Funktionsprüfung.</p>
-          <a class="link-cta" href="#kontakt">Schlüssel anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        </div>
-        <div class="svc__img"><img src="assets/img/keys-programming.jpg" alt="Fahrzeug-Funkschlüssel auf der Werkbank, angeschlossen an Programmier- und Diagnosegeräte" loading="lazy" width="700" height="520" data-parallax data-parallax-speed="16" /></div>
-      </article>
-
-      <!-- Feature 2: ECU (with image) -->
-      <article class="svc svc--feature reveal" data-d="2">
-        <div class="svc__body">
-          <span class="svc__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></span>
-          <h3>Motorsteuergeräte Programmierung</h3>
-          <p>Diagnose, Reparatur und Programmierung von Motorsteuergeräten – ob nach Defekt,
-          Austausch oder Anpassung an das Fahrzeug. Sauber dokumentiert.</p>
-          <a class="link-cta" href="#kontakt">Steuergerät prüfen lassen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        </div>
-        <div class="svc__img"><img src="assets/img/ecu-wiring.jpg" alt="Geöffnetes Motorsteuergerät, über farbige Messleitungen mit einem Programmiergerät verbunden" loading="lazy" width="700" height="520" data-parallax data-parallax-speed="16" /></div>
-      </article>
-
-      <!-- Standard cards -->
-      <article class="svc reveal" data-d="1">
-        <span class="svc__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="12" rx="2"/><path d="M8 9V6a4 4 0 0 1 8 0v3M12 14v3"/></svg></span>
-        <h3>Zündschlüssel &amp; Schlösser Reparatur</h3>
-        <p>Klemmende Zündschlösser, defekte Schließzylinder und beschädigte Schlüssel –
-        wir prüfen, setzen instand und stellen die Funktion wieder her.</p>
-        <a class="link-cta" href="#kontakt">Problem prüfen lassen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      </article>
-
-      <article class="svc reveal" data-d="2">
-        <span class="svc__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8M16 4l3 3"/><path d="M21 9v3M18 11h3"/></svg></span>
-        <h3>Kompletter Schlüsselverlust</h3>
-        <p>Auch wenn kein einziger Schlüssel mehr vorhanden ist: Nach Prüfung des Eigentums­nachweises
-        fertigen wir neue Schlüssel an und lernen sie an.</p>
-        <a class="link-cta" href="#kontakt">Verlust melden <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      </article>
-
-      <article class="svc reveal" data-d="3">
-        <span class="svc__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 7.5 8 10 4.5-2.5 8-5 8-10V6l-8-4Z"/><path d="m9.5 12 2 2 3.5-4"/></svg></span>
-        <h3>Wegfahrsperre Programmierung</h3>
-        <p>Wird der Schlüssel nicht erkannt oder blockiert die Wegfahrsperre, programmieren wir
-        sie diagnosebasiert neu – damit das Fahrzeug wieder zuverlässig startet.</p>
-        <a class="link-cta" href="#kontakt">Wegfahrsperre anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      </article>
-
-      <!-- Feature 3: Getriebesteuergerät (wide, with image) -->
-      <article class="svc svc--feature svc--wide reveal" data-d="1">
-        <div class="svc__body">
-          <span class="svc__tag">Spezialisierung</span>
-          <span class="svc__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></span>
-          <h3>Getriebesteuergeräte Programmierung &amp; Datenübertragung</h3>
-          <p>Getriebesteuergeräte reagieren empfindlich auf Austausch. Wir programmieren sie passend
-          zum Fahrzeug und übertragen bei Bedarf vorhandene Daten zwischen Steuergeräten – damit
-          Adaptionswerte und Anpassungen erhalten bleiben.</p>
-          <a class="link-cta" href="#kontakt">Getriebe-Steuergerät anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        </div>
-        <div class="svc__img"><img src="assets/img/transmission-ecu.jpg" alt="Getriebesteuergerät mit Hydraulikblock unter dem Mikroskop, angeschlossen an ein Programmiergerät" loading="lazy" width="900" height="600" data-parallax data-parallax-speed="16" /></div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ STEUERGERÄT / EXPLOSIONSANSICHT ============================ -->
-<section class="ecu section--ink2" id="steuergeraet" aria-labelledby="ecu-title">
-  <div class="ecu__pin">
-    <div class="container ecu__inner">
-      <div class="ecu__intro">
-        <span class="eyebrow reveal">Ein Blick ins Steuergerät</span>
-        <h2 id="ecu-title" class="reveal" data-d="1">Wir wissen, was<br>da drin steckt.</h2>
-        <p class="lead reveal" data-d="2">Scrollen Sie weiter – das Steuergerät zerlegt sich in seine Schichten.
-        Genau auf dieser Ebene arbeiten wir: auslesen, reparieren, programmieren, Daten übertragen
-        und die Steuergeräte-Software mit Profi-Werkzeugen wie <strong>WinOLS</strong> bearbeiten.</p>
-        <p class="ecu__hint reveal" data-d="3" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
-          Scrollen zum Zerlegen
-        </p>
-      </div>
-
-      <div class="ecu__stage">
-        <video class="ecu__video" playsinline muted preload="auto" poster="assets/img/ecu-poster.jpg" aria-label="Explosionsansicht eines Steuerger&auml;ts: Geh&auml;usedeckel, Platine mit Prozessor, Steckverbinder und Geh&auml;useboden."><source src="assets/video/ecu-explode.mp4" type="video/mp4" /></video>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ KENNZAHLEN ============================ -->
-<section class="section section--ink2" aria-label="Kennzahlen">
-  <div class="container stats">
-    <div class="stat reveal">
-      <span class="stat__num" data-count="7">0</span>
-      <span class="stat__label">Leistungsfelder rund um Schlüssel, Wegfahrsperre und Steuergeräte</span>
-    </div>
-    <div class="stat reveal" data-d="1">
-      <span class="stat__num" data-count="4">0</span>
-      <span class="stat__label">Schritte von der Anfrage bis zur Übergabe mit Funktionsprüfung</span>
-    </div>
-    <div class="stat reveal" data-d="2">
-      <span class="stat__num" data-count="100" data-suffix="%">0</span>
-      <span class="stat__label">nur mit Eigentumsnachweis — ausnahmslos und nachvollziehbar</span>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ ABLAUF ============================ -->
-<section class="section section--light" id="ablauf" aria-labelledby="ablauf-title">
-  <div class="container">
-    <div class="section-head section-head--center reveal">
-      <span class="eyebrow">So läuft es ab</span>
-      <h2 id="ablauf-title">In vier klaren Schritten zum Ergebnis.</h2>
-      <p class="lead">Transparent von der Anfrage bis zur Übergabe. Sie wissen jederzeit, woran wir sind.</p>
-    </div>
-
-    <div class="steps">
-      <article class="step reveal" data-d="1">
-        <div class="step__n">1</div>
-        <h3>Anfrage mit Fahrzeugdaten</h3>
-        <p>Sie schildern Ihr Anliegen und senden Marke, Modell, Baujahr und – wenn möglich – die FIN.</p>
-      </article>
-      <article class="step reveal" data-d="2">
-        <div class="step__n">2</div>
-        <h3>Prüfung &amp; Diagnose</h3>
-        <p>Wir prüfen die Machbarkeit, klären den Eigentumsnachweis und geben eine klare Einschätzung.</p>
-      </article>
-      <article class="step reveal" data-d="3">
-        <div class="step__n">3</div>
-        <h3>Programmierung oder Reparatur</h3>
-        <p>Nach Ihrer Freigabe führen wir die Arbeit fachgerecht aus – modellabhängig und sauber.</p>
-      </article>
-      <article class="step reveal" data-d="4">
-        <div class="step__n">4</div>
-        <h3>Übergabe mit Funktionsprüfung</h3>
-        <p>Zum Abschluss testen wir die Funktion gemeinsam, damit alles zuverlässig läuft.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ VERTRAUEN ============================ -->
-<section class="section section--dark" id="vertrauen" aria-labelledby="trust-title">
-  <div class="container trust">
-    <figure class="trust__media reveal">
-      <img src="assets/img/workshop-wide.jpg" alt="Werkstattplatz von AIS Kfz Service mit Diagnose-Arbeitsplatz, Messgeräten und Schlüsselwand" loading="lazy" width="600" height="500" data-parallax data-parallax-speed="18" />
-      <figcaption class="trust__quote">„Erst verstehen, dann programmieren – das spart Zeit und schützt das Fahrzeug.“</figcaption>
-    </figure>
-
-    <div class="trust__copy">
-      <div class="section-head reveal">
-        <span class="eyebrow">Warum AIS Kfz Service</span>
-        <h2 id="trust-title">Seriös, nachvollziehbar und technisch sauber.</h2>
-        <p class="lead">Wir arbeiten ausschließlich für rechtmäßige Halter und legen Wert auf eine
-        ehrliche Einschätzung – auch dann, wenn ein Austausch sinnvoller ist als eine Reparatur.</p>
-      </div>
-
-      <div class="trust__list">
-        <div class="tpoint reveal" data-d="1">
-          <span class="tpoint__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></span>
-          <div><h3>Eigentumsnachweis erforderlich</h3><p>Wir werden nur für rechtmäßige Fahrzeughalter oder mit eindeutigem Eigentums­nachweis tätig.</p></div>
-        </div>
-        <div class="tpoint reveal" data-d="2">
-          <span class="tpoint__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
-          <div><h3>Diagnose vor Durchführung</h3><p>Jede Arbeit beginnt mit einer Prüfung. Sie erhalten vorab eine nachvollziehbare Einschätzung.</p></div>
-        </div>
-        <div class="tpoint reveal" data-d="3">
-          <span class="tpoint__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></span>
-          <div><h3>Erfahrung mit Fahrzeug-Elektronik</h3><p>Schlüsseltechnik, Wegfahrsperren und Steuergeräte – mit der passenden Mess- und Programmiertechnik.</p></div>
-        </div>
-        <div class="tpoint reveal" data-d="4">
-          <span class="tpoint__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg></span>
-          <div><h3>Für Privatkunden und Gewerbe</h3><p>Autobesitzer, Werkstätten, Autohäuser, Händler und Flottenbetreiber – mit klaren Abläufen.</p></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ WERKSTATT / GALLERY ============================ -->
-<section class="section section--ink2" id="werkstatt" aria-labelledby="werk-title">
-  <div class="container">
-    <div class="section-head section-head--center reveal">
-      <span class="eyebrow">Einblick in die Werkstatt</span>
-      <h2 id="werk-title">Echte Arbeitsplätze. Echte Technik.</h2>
-      <p class="lead">Keine Stockfotos: Diese Aufnahmen entstehen direkt an unserem Diagnose- und Programmier-Arbeitsplatz.</p>
-    </div>
-
-    <div class="gallery">
-      <figure class="reveal" data-d="1"><img src="assets/img/microscope-solder.jpg" alt="Lötarbeit an einer Platine unter dem Mikroskop" loading="lazy" width="400" height="400" /><figcaption>Mikroskop-Lötarbeit</figcaption></figure>
-      <figure class="reveal" data-d="2"><img src="assets/img/board-programming.jpg" alt="Steuergeräte-Platine angeschlossen an ein Bench-Programmiergerät" loading="lazy" width="400" height="400" /><figcaption>Bench-Programmierung</figcaption></figure>
-      <figure class="reveal" data-d="3"><img src="assets/img/diagnostics-scope.jpg" alt="WinOLS-Software zur Bearbeitung von Steuergeräte-Software am Monitor" loading="lazy" width="400" height="400" /><figcaption>WinOLS · Steuergeräte-Software</figcaption></figure>
-      <figure class="reveal" data-d="4"><img src="assets/img/bench-diagnose.jpg" alt="Diagnose-Arbeitsplatz mit Mikroskop, Steuergerät und Messtechnik" loading="lazy" width="400" height="400" /><figcaption>Diagnose-Arbeitsplatz</figcaption></figure>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ FAQ ============================ -->
-<section class="section section--light" id="faq" aria-labelledby="faq-title">
-  <div class="container">
-    <div class="section-head section-head--center reveal">
-      <span class="eyebrow">Häufige Fragen</span>
-      <h2 id="faq-title">Antworten, bevor Sie fragen.</h2>
-      <p class="lead">Das Wichtigste rund um Schlüssel, Wegfahrsperre und Steuergeräte – kurz und ehrlich.</p>
-    </div>
-
-    <div class="faq" id="faqList">
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">01</span>Was passiert, wenn alle Schlüssel verloren sind?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">Auch ohne vorhandenen Schlüssel ist in vielen Fällen eine Lösung möglich. Nach Prüfung des Eigentumsnachweises und der Fahrzeugdaten fertigen wir neue Schlüssel an und lernen sie modellabhängig an die Wegfahrsperre an. Was konkret machbar ist, klären wir vorab in der Diagnose.</div></div>
-      </div>
-
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">02</span>Welche Fahrzeugdaten werden benötigt?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">Hilfreich sind Marke, Modell und Baujahr sowie nach Möglichkeit die Fahrzeug-Identifizierungs­nummer (FIN). Damit lässt sich die Machbarkeit deutlich genauer einschätzen. Fehlen Angaben, klären wir den Rest gemeinsam bei der Anfrage.</div></div>
-      </div>
-
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">03</span>Brauche ich einen Eigentumsnachweis?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">Ja. Wir werden ausschließlich für rechtmäßige Fahrzeughalter oder mit eindeutigem Eigentumsnachweis tätig – etwa Fahrzeugschein, Zulassungsbescheinigung oder ein gleichwertiger Nachweis. Das schützt Sie und Ihr Fahrzeug und ist für uns Voraussetzung.</div></div>
-      </div>
-
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">04</span>Können Daten zwischen Steuergeräten übertragen werden?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">In vielen Fällen ja. Beim Austausch eines Steuergeräts lassen sich vorhandene Daten häufig übertragen, sodass Anpassungen und Adaptionswerte erhalten bleiben. Ob das bei Ihrem Fahrzeug möglich ist, hängt vom Modell und vom Steuergerät ab und wird vorab geprüft.</div></div>
-      </div>
-
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">05</span>Ist eine Reparatur günstiger als ein Austausch?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">Oft, aber nicht immer. Eine Reparatur kann Aufwand und Kosten sparen und Originaldaten erhalten. Manchmal ist ein Austausch jedoch die zuverlässigere Lösung. Wir sagen Ihnen nach der Diagnose ehrlich, welcher Weg für Ihr Fahrzeug sinnvoller ist.</div></div>
-      </div>
-
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">06</span>Wie läuft die Wegfahrsperren-Programmierung ab?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">Zuerst lesen wir den Ist-Zustand aus und prüfen, warum der Schlüssel nicht erkannt wird oder die Wegfahrsperre blockiert. Anschließend programmieren wir sie modellabhängig neu und gleichen Schlüssel und Steuergerät wieder ab. Zum Schluss prüfen wir die Funktion gemeinsam. Technische Details zur Umgehung von Sicherheitssystemen geben wir grundsätzlich nicht weiter.</div></div>
-      </div>
-
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">07</span>Arbeiten Sie auch für Werkstätten und Händler?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">Ja. Wir unterstützen Privatkunden ebenso wie Werkstätten, Autohäuser, Gebrauchtwagen­händler und Flottenbetreiber – als verlässlicher Partner für Schlüsseltechnik und Steuergeräte. Für wiederkehrende Aufträge stimmen wir gern einen festen Ablauf ab.</div></div>
-      </div>
-
-      <div class="qa reveal">
-        <button class="qa__q" aria-expanded="false"><span class="qa__num">08</span>Wie schnell bekomme ich eine Rückmeldung?
-          <span class="qa__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
-        <div class="qa__a"><div class="qa__a-inner">Senden Sie uns Ihre Fahrzeugdaten und eine kurze Beschreibung. Wir melden uns mit einer ersten Einschätzung und den nächsten Schritten zurück. Je vollständiger Ihre Angaben sind, desto präziser fällt unsere Rückmeldung aus.</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================ KONTAKT ============================ -->
-<section class="section section--dark" id="kontakt" aria-labelledby="kontakt-title">
-  <div class="container contact">
-    <aside class="contact__aside">
-      <div class="section-head reveal">
-        <span class="eyebrow">Kontakt</span>
-        <h2 id="kontakt-title">Fahrzeugdaten senden – wir prüfen Ihr Anliegen.</h2>
-        <p class="lead">Beschreiben Sie kurz Ihr Problem und Ihr Fahrzeug. Sie erhalten eine ehrliche
-        Einschätzung und die nächsten Schritte – ohne Verpflichtung.</p>
-      </div>
-
-      <div class="contact__facts reveal" data-d="1">
-        <div class="cfact">
-          <span class="cfact__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg></span>
-          <div><b>Telefon &amp; Rückruf</b><span><a href="tel:+491637963915">+49 163 7963915</a> · Mo–Sa nach Vereinbarung</span></div>
-        </div>
-        <div class="cfact">
-          <span class="cfact__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></span>
-          <div><b>E-Mail</b><span><a href="mailto:info@ais-kfz.de">info@ais-kfz.de</a></span></div>
-        </div>
-        <div class="cfact">
-          <span class="cfact__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
-          <div><b>Standort</b><span><a href="https://maps.google.com/?q=Oberurseler+Stra%C3%9Fe+81,+61440+Oberursel" target="_blank" rel="noopener">Oberurseler Straße 81, 61440 Oberursel (Taunus)</a> · Termine nach Vereinbarung</span></div>
-        </div>
-      </div>
-
-      <div class="note reveal" data-d="2">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
-        <span>Wir arbeiten ausschließlich für rechtmäßige Fahrzeughalter. Halten Sie bitte einen
-        Eigentumsnachweis (z. B. Fahrzeugschein) bereit.</span>
-      </div>
-    </aside>
-
-    <form class="form reveal" id="contactForm" novalidate>
-      <div class="form__grid">
-        <div class="field">
-          <label for="name">Name <span class="req">*</span></label>
-          <input id="name" name="name" type="text" autocomplete="name" placeholder="Vor- und Nachname" required />
-          <span class="field__err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Bitte geben Sie Ihren Namen an.</span>
-        </div>
-        <div class="field">
-          <label for="phone">Telefonnummer <span class="req">*</span></label>
-          <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="Für den Rückruf" required />
-          <span class="field__err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Bitte geben Sie eine Telefonnummer an.</span>
-        </div>
-
-        <div class="field">
-          <label for="marke">Fahrzeugmarke</label>
-          <input id="marke" name="marke" type="text" placeholder="z. B. BMW, VW, Mercedes" />
-        </div>
-        <div class="field">
-          <label for="modell">Modell</label>
-          <input id="modell" name="modell" type="text" placeholder="z. B. 3er, Golf, C-Klasse" />
-        </div>
-
-        <div class="field">
-          <label for="baujahr">Baujahr</label>
-          <input id="baujahr" name="baujahr" type="text" inputmode="numeric" placeholder="z. B. 2017" />
-        </div>
-        <div class="field">
-          <label for="thema">Anliegen</label>
-          <select id="thema" name="thema">
-            <option value="">Bitte wählen</option>
-            <option>Schlüssel verloren</option>
-            <option>Schlüssel defekt / Reparatur</option>
-            <option>Schlüssel Anfertigung &amp; Programmierung</option>
-            <option>Zündschloss / Schloss</option>
-            <option>Wegfahrsperre</option>
-            <option>Motorsteuergerät</option>
-            <option>Getriebesteuergerät</option>
-            <option>Datenübertragung Steuergeräte</option>
-            <option>Sonstiges</option>
-          </select>
-        </div>
-
-        <div class="field field--full">
-          <label for="nachricht">Problem / Anliegen <span class="req">*</span></label>
-          <textarea id="nachricht" name="nachricht" placeholder="Beschreiben Sie kurz, was am Fahrzeug passiert ist und was Sie benötigen." required></textarea>
-          <span class="field__hint">Je genauer Ihre Beschreibung, desto präziser unsere Einschätzung.</span>
-          <span class="field__err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Bitte beschreiben Sie kurz Ihr Anliegen.</span>
-        </div>
-
-        <div class="field field--full">
-          <label>Nachweis (optional)</label>
-          <label class="upload" for="datei">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-            <span><b>Fahrzeugschein oder Nachweis anhängen</b><span id="fileName">Optional · Foto oder PDF, später per E-Mail möglich</span></span>
-            <input id="datei" name="datei" type="file" accept="image/*,application/pdf" />
-          </label>
-        </div>
-      </div>
-
-      <label class="form__consent">
-        <input type="checkbox" id="consent" required />
-        <span>Ich bestätige, rechtmäßiger Halter zu sein bzw. einen Eigentumsnachweis vorlegen zu können,
-        und stimme der Verarbeitung meiner Angaben zur Bearbeitung der Anfrage zu.
-        <a href="datenschutz.html">Datenschutz</a>.</span>
-      </label>
-
-      <button type="submit" class="btn btn--primary btn--block btn--lg form__submit" id="submitBtn">
-        <span>Service anfragen</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </button>
-
-      <div class="form__ok" id="formOk" role="status" aria-live="polite">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-10 10.01L9 11"/></svg>
-        <div><b>Anfrage gesendet – danke!</b><span> Wir prüfen Ihr Anliegen und melden uns zeitnah bei Ihnen zurück.</span></div>
-      </div>
-    </form>
-  </div>
-</section>
-
-</main>
-
-<!-- ============================ FOOTER ============================ -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer__top">
-      <div class="footer__brand">
-        <a href="#top" class="brand">
-          <img src="assets/logo.jpg" alt="AIS Kfz Service Logo" class="brand__logo" width="42" height="42" />
-          <span class="brand__name">AIS Kfz Service<span>Fahrzeug-Elektronik</span></span>
-        </a>
-        <p>Fachgerechter Service rund um Autoschlüssel, Wegfahrsperre und Fahrzeug-Steuergeräte –
-        diagnosebasiert, transparent und nur für rechtmäßige Halter.</p>
-      </div>
-      <div class="footer__col">
-        <h4>Leistungen</h4>
-        <a href="#leistungen">Schlüssel-Reparatur</a>
-        <a href="#leistungen">Schlüssel anfertigen</a>
-        <a href="#leistungen">Wegfahrsperre</a>
-        <a href="#leistungen">Motorsteuergerät</a>
-        <a href="#leistungen">Getriebesteuergerät</a>
-      </div>
-      <div class="footer__col">
-        <h4>Service</h4>
-        <a href="#ablauf">Ablauf</a>
-        <a href="#vertrauen">Warum AIS</a>
-        <a href="#werkstatt">Werkstatt</a>
-        <a href="#faq">FAQ</a>
-        <a href="#kontakt">Kontakt</a>
-      </div>
-      <div class="footer__col">
-        <h4>Kontakt</h4>
-        <a href="tel:+491637963915">+49 163 7963915</a>
+      <p class="kontakt-label">Kontakt</p>
+      <address>
+        Ivan Antonenko<br />
+        <span class="muted">Oberurseler Straße 81, 61440 Oberursel (Taunus)</span><br />
+        <a href="tel:+491637963915">+49 163 7963915</a><br />
         <a href="mailto:info@ais-kfz.de">info@ais-kfz.de</a>
-        <li>Oberurseler Straße 81</li>
-        <li>61440 Oberursel (Taunus)</li>
+      </address>
+
+      <div class="contact-actions">
+        <a class="btn btn--gold" href="tel:+491637963915">Anrufen</a>
+        <a class="btn btn--ghost" href="mailto:info@ais-kfz.de">E-Mail schreiben</a>
       </div>
     </div>
+  </main>
 
-    <div class="footer__legal">
-      <p>© <span id="year">2026</span> AIS Kfz · Ivan Antonenko · Oberursel (Taunus). Alle Rechte vorbehalten.</p>
-      <nav aria-label="Rechtliches">
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
-      </nav>
-    </div>
-    <p class="footer__disc">
-      Hinweis: AIS Kfz Service erbringt Leistungen ausschließlich für rechtmäßige Fahrzeughalter oder
-      gegen eindeutigen Eigentumsnachweis. Wir führen keine illegalen Manipulationen durch und geben
-      keine Anleitungen zur Umgehung von Sicherheitssystemen weiter. Machbarkeit und Ergebnis sind
-      modellabhängig und werden vor jeder Durchführung geprüft.
-    </p>
-  </div>
-</footer>
+  <footer>
+    <p>© <span id="year">2026</span> AIS Kfz · Oberursel (Taunus)</p>
+    <nav aria-label="Rechtliches">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+    </nav>
+  </footer>
 
-<!-- ============================ MOBILE STICKY CTA ============================ -->
-<div class="mobile-cta" id="mobileCta">
-  <a class="btn btn--ghost" href="tel:+491637963915">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
-    Anrufen
-  </a>
-  <a class="btn btn--primary" href="#kontakt"><span>Anfrage stellen</span></a>
-</div>
-
-<script src="assets/vendor/lenis/lenis.min.js"></script>
-<script src="assets/vendor/gsap/gsap.min.js"></script>
-<script src="assets/vendor/gsap/ScrollTrigger.min.js"></script>
-<script src="assets/vendor/gsap/SplitText.min.js"></script>
-<script src="main.js"></script>
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 </body>
 </html>
